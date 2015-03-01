@@ -4,7 +4,9 @@
     <meta charset="utf-8">
     <title>Mapa de Metrobus Panama - Panatrans</title>
     <meta name="description" content="">
-    <meta name="viewport" content="width=device-width">
+    <!--  <meta name="viewport" content="width=device-width">-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     <!-- build:css(.) styles/vendor.css -->
     <!-- bower:css -->
@@ -12,6 +14,8 @@
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
     <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    
     <!-- endbuild -->
   </head>
   <body ng-app="panatransWebApp">
@@ -44,14 +48,15 @@
         </div>
       </div>
     </div>
-      <div ng-view=""></div>
-<!--  
+   
+      <div class="fill" ng-view=""></div>
+  
     <div class="footer">
       <div class="container">
-        <p>Hecho con <span class="glyphicon glyphicon-heart" style="color:red"></span> desde Panamá | <a ng-href="#/api">API for developers</a></strong></p>
+        <p>Hecho con <span class="glyphicon glyphicon-heart" style="color:red"></span> desde Panamá | <a ng-href="#/api">API para desarrolladores</a> | <a href="http://github.com/panatrans/panatrans-web/">Ver en Github</a></strong></p>
       </div>
     </div>
--->
+
 
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
      <script>
@@ -63,7 +68,6 @@
        ga('create', 'UA-XXXXX-X');
        ga('send', 'pageview');
     </script>
-
     <!-- build:js(.) scripts/vendor.js -->
     <!-- bower:js -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
@@ -75,9 +79,10 @@
     <script src="bower_components/angular-resource/angular-resource.js"></script>
     <script src="bower_components/angular-route/angular-route.js"></script>
     <script src="bower_components/angular-touch/angular-touch.js"></script>
+    
     <!-- endbower -->
     <!-- endbuild -->
-
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
         <!-- build:js({.tmp,app}) scripts/scripts.js -->
         <script src="scripts/app.js"></script>
         <script src="scripts/controllers/main.js"></script>
