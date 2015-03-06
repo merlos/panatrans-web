@@ -15,7 +15,8 @@ angular
     'ngMessages',
     'ngResource',
     'ngRoute',
-    'ngTouch'
+    'ngTouch',
+    'ui.bootstrap'
   ])
   .config(function ($routeProvider) {
     $routeProvider
@@ -27,13 +28,10 @@ angular
         templateUrl: 'views/about.html',
         controller: 'AboutCtrl'
       })
-      
       .when('/api', {
         templateUrl: 'views/api.html',
         controller: 'ApiCtrl'
       })
-      
-      
       .otherwise({
         redirectTo: '/'
       });

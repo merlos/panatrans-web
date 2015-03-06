@@ -2,16 +2,12 @@
 
 /**
  * @ngdoc function
- * @name panatransWebApp.controller:AboutCtrl
+ * @name panatransWebApp.controller:ApiCtrl
  * @description
- * # AboutCtrl
- * Controller of the panatransWebApp
+ * # ApiCtrl
+ * Controller of the panatransWebApp to display API docs
  */
 angular.module('panatransWebApp')
   .controller('ApiCtrl', function ($scope) {
-    $scope.awesomeThings = [
-      'HTML5 Boilerplate',
-      'AngularJS',
-      'Karma'
-    ];
+    $scope.api = 'API Metrobus Panamá'  ;
   });

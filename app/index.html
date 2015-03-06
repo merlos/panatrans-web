@@ -14,9 +14,9 @@
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
     <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
-    
     <!-- endbuild -->
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
   </head>
   <body ng-app="panatransWebApp">
     <!--[if lt IE 7]>
@@ -36,7 +36,7 @@
               <span class="icon-bar"></span>
             </button>
 
-            <a class="navbar-brand" href="#/">Metrobus Panama</a>
+            <a class="navbar-brand" href="#/">Mapa Metrobus Panamá <sup style="color: orange">beta</sup></a>
           </div>
 
           <div class="collapse navbar-collapse" id="js-navbar-collapse">
@@ -51,11 +51,11 @@
    
       <div class="fill" ng-view=""></div>
   
-    <div class="footer">
-      <div class="container">
+    <footer>
+      
         <p>Hecho con <span class="glyphicon glyphicon-heart" style="color:red"></span> desde Panamá | <a ng-href="#/api">API para desarrolladores</a> | <a href="http://github.com/panatrans/panatrans-web/">Ver en Github</a></strong></p>
-      </div>
-    </div>
+     
+    </footer>
 
 
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
@@ -67,7 +67,9 @@
 
        ga('create', 'UA-XXXXX-X');
        ga('send', 'pageview');
-    </script>
+    </script>   
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+       
     <!-- build:js(.) scripts/vendor.js -->
     <!-- bower:js -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
@@ -79,10 +81,9 @@
     <script src="bower_components/angular-resource/angular-resource.js"></script>
     <script src="bower_components/angular-route/angular-route.js"></script>
     <script src="bower_components/angular-touch/angular-touch.js"></script>
-    
+    <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
-    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
         <!-- build:js({.tmp,app}) scripts/scripts.js -->
         <script src="scripts/app.js"></script>
         <script src="scripts/controllers/main.js"></script>
