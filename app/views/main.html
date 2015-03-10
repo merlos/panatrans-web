@@ -125,8 +125,8 @@
           </p>
           <ul class="as-sortable-unselectable fa-ul" 
           data-as-sortable="dragControlListeners[trip.id]['unknown']" 
-          data-ng-model="trip.stop_sequence">
-           <li  data-ng-repeat="stop_sequence in trip.stop_sequence | filter : orderBy : stop_sequence.sequence" ng-if="stop_sequence.sequence === null" class="sortable-li" data-as-sortable-item>
+          data-ng-model="unknownStopSequences[trip.id]">
+           <li  data-ng-repeat="stop_sequence in unknownStopSequences[trip.id]| filter : orderBy : stop_sequence.sequence" ng-if="stop_sequence.sequence === null" class="sortable-li" data-as-sortable-item>
                       
                   <i class="fa-li fa fa-exclamation-triangle" style="line-height: 18px;padding:5px"></i><div data-as-sortable-item-handle title="Arrastra la parada al orden adecuado (secuencia: {{stop_sequence.sequence}})">{{stop_sequence.sequence}} -  {{stop_sequence.stop.name}}
                 <!-- <i ng-if="stop_sequence.sequence === null" class="fa fa-exclamation-triangle" style="color:orange" title="Está en la ruta, pero no sabemos en qué lugar"></i> -->
@@ -137,8 +137,8 @@
           <hr>
           <ol class="as-sortable-unselectable" 
           data-as-sortable="dragControlListeners[trip.id]['sorted']" 
-          data-ng-model="trip.stop_sequence" >
-            <li  data-ng-repeat="stop_sequence in trip.stop_sequence | filter : orderBy : stop_sequence.sequence" ng-if="stop_sequence.sequence !== null" class="sortable-li" data-as-sortable-item>
+          data-ng-model="sortedStopSequences[trip.id]" >
+            <li  data-ng-repeat="stop_sequence in sortedStopSequences[trip.id] | filter : orderBy : stop_sequence.sequence" ng-if="stop_sequence.sequence !== null" class="sortable-li" data-as-sortable-item>
               <div data-as-sortable-item-handle title="Arrastra la parada al orden adecuado (secuencia: {{stop_sequence.sequence}})"> {{stop_sequence.sequence}} {{stop_sequence.stop.name}} 
                   <a href=""  ng-click="deleteStopSequence(stop_sequence)" title="Borrar {{stop_sequence.stop.name}} de esta ruta" class="pull-right"><i class="fa fa-trash-o"></i></a>
               

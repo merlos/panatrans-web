@@ -257,15 +257,29 @@ angular.module('panatransWebApp')
   angular.module('panatransWebApp')
   .controller('EditRouteStopModalInstanceCtrl', function ($scope, $http, $modalInstance, route, stopsArr) {
     
-    $scope.routeTrips = {};
+    $scope.sortedStopSequences = {};
+    $scope.unknownStopSequences = {};
     // updates the route model by getting a fresh version from the server
     var updateRoute = function() { 
       $http.get(SERVER_URL + '/v1/routes/' + $scope.route.id)
       .success(function(response) {
-        console.log('success getting route detail');
+        //console.log('success getting route detail');
         $scope.route = response.data;
         $scope.loading = false;
-        console.log($scope.route);
+        //console.log($scope.route);
+        //for each trip create an array with all sorted sequences (stop_sequence.sequence != null)
+        $.each($scope.route.trips, function(index, trip){
+          $scope.sortedStopSequences[trip.id] = new Array(); 
+          $scope.unknownStopSequences[trip.id] = new Array(); 
+          $.each(trip.stop_sequence, function(index, stopSequence){
+            if (stopSequence.sequence !== null) {
+              $scope.sortedStopSequences[trip.id].push(stopSequence);
+              //console.log($scope.sortedStopSequences[trip.id]);
+            } else {
+              $scope.unknownStopSequences[trip.id].push(stopSequence);
+            }
+          });
+        });
       })
       .error(function(response){
         console.log('WTF! Something wrong with the route!');
@@ -326,7 +340,7 @@ angular.module('panatransWebApp')
             console.log('source trip.id' + trip.id); //source trip
             console.log('itemMoved');
             console.log(event);
-             console.log('nueva posición: ' + (event.dest.index + 1));
+            console.log('nueva posición: ' + (event.dest.index));
             console.log('dest trip:' + event.dest.sortableScope.$parent.trip.id);
             console.log('src seq:' + event.source.itemScope.modelValue.sequence);
             console.log('dest sortStatus' + event.dest.sortableScope.options.containment.indexOf('unknown'));
@@ -339,10 +353,10 @@ angular.module('panatransWebApp')
             //change trip?
             if (destTrip.id === trip.id) { //same trip
               if (stopSequence.sequence === null) { //moved to a sorted position
-                stopSequence.sequence = event.dest.index + 1;
+                stopSequence.sequence = event.dest.index;
                 putData = {
                   'stop_sequence': {
-                    'sequence': event.dest.index + 1
+                    'sequence': event.dest.index
                   }
                 };
               } else { //was moved to a unknown position
@@ -364,10 +378,10 @@ angular.module('panatransWebApp')
                 };
               } else {
                 stopSequence.trip = destTrip;
-                stopSequence.sequence = event.dest.index + 1;
+                stopSequence.sequence = event.dest.index;
                 putData = {
                   'stop_sequence': {
-                    'sequence': event.dest.index + 1,
+                    'sequence': event.dest.index,
                     'trip_id' : destTrip.id
                   }
               }; 
@@ -380,22 +394,22 @@ angular.module('panatransWebApp')
             $http.put(SERVER_URL + '/v1/stop_sequences/' + stopSequence.id, putData)
             //download route with the updated data
             .success( function() {
-            console.log('updated stop sequence!');
+              //console.log('updated stop sequence!');
             updateRoute();
             });
             
           },
           orderChanged: function(event) {
             console.log('orderChanged ');
-             console.log('nueva posición: ' + (event.dest.index + 1));
+            console.log('nueva posición: ' + (event.dest.index));
             console.log(event);
             //if we changed the order on the list of uordered items do nothing on the server
             if (event.dest.sortableScope.options.containment.indexOf('unknown') === 0) { 
               return;
             }
-            var newSequence = event.dest.index + 1 ;
+            var newSequence = event.dest.index;
             var stopSequence = event.source.itemScope.modelValue;
-            console.log('nueva posición: ' + (event.dest.index + 1));
+            console.log('nueva posición: ' + (event.dest.index));
             //Update Sequence
             var putData = {'stop_sequence': {sequence: newSequence} };
             $http.put(SERVER_URL + '/v1/stop_sequences/' + stopSequence.id, putData)
