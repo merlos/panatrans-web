@@ -1,61 +1,68 @@
 'use strict';
 
 /**
- * @ngdoc function
- * @name panatransWebApp.controller:MainCtrl
- * @description
- * # MainCtrl
- * Controller of the panatransWebApp. This controller handles the mapa stuff
- */
-
-var UNKNOWN_SEQUENCE = -1; //unkown sequence of a stop in a trip.
+* @ngdoc function
+* @name panatransWebApp.controller:MainCtrl
+* @description
+* # MainCtrl
+* Controller of the panatransWebApp. This controller handles the mapa stuff
+*/
 
 var SERVER_URL = 'http://localhost:3000';
 
+var UNKNOWN_STOP_SEQUENCE = -1;
+//var LAST_STOP_SEQUENCE = null;
+//var FIRST_STOP_SEQUENCE = 0;
+
+
 angular.module('panatransWebApp')
-  .controller('MainCtrl', [ '$scope', '$http', '$modal', function ($scope, $http, $modal) {
-    $scope.routes = {};
-    $scope.stops = {};
-    $scope.showStopDetail = false;  
-    $scope.stopDetail = {};
+.controller('MainCtrl', [ '$scope', '$http', '$modal', function ($scope, $http, $modal) {
+  $scope.routes = {};
+  $scope.stops = {};
+  $scope.stopsArr = {};
+  $scope.showStopDetail = false;  
+  $scope.stopDetail = {};
     
-    $scope.tileLayer = 'http://{s}.tiles.mapbox.com/v3/merlos.k99amj6l/{z}/{x}/{y}.png';
+  $scope.tileLayer = 'http://{s}.tiles.mapbox.com/v3/merlos.k99amj6l/{z}/{x}/{y}.png';
   
-    if (! $scope.map) { 
+  if (! $scope.map) { 
     //Configure map
-      $scope.map = L.map('map', {
-        center: [8.9740946, -79.5508536],
-        zoom: 13,
-        zoomControl: false
-      });
-    }
-    
-    L.tileLayer('http://{s}.tiles.mapbox.com/v3/merlos.k99amj6l/{z}/{x}/{y}.png', {
-        attribution: '&copy;<a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>,© <a href="http://mapbox.com">Mapbox</a>',
-        maxZoom: 18
-    }).addTo($scope.map);
-    $http.get(SERVER_URL + '/v1/routes/with_trips')
-      .success(function(response) {
-        $scope.routesArray = response.data;
-        $.each(response.data, function(index, route) {
-          $scope.routes[route.id] = route;
-        });
+    $scope.map = L.map('map', {
+      center: [8.9740946, -79.5508536],
+      zoom: 13,
+      zoomControl: false
     });
-    $http.get(SERVER_URL + '/v1/stops/')
-        .success(function(response) {
-          console.log('Success getting stops!!!');
-          console.log(response.data);
-          $.each(response.data,function(index, stop) {
-              var marker = L.marker([stop.lat, stop.lon], 
-                {
-                  draggable: true,
-                  title: stop.name
-                }
-              );
-              marker.addTo($scope.map).bindPopup( stop.name);
-              //set an id (https://github.com/Leaflet/Leaflet/issues/1031)
-              marker._stopId = stop.id; 
-          });
+  }
+    
+  L.tileLayer('http://{s}.tiles.mapbox.com/v3/merlos.k99amj6l/{z}/{x}/{y}.png', {
+    attribution: '&copy;<a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>,© <a href="http://mapbox.com">Mapbox</a>',
+    maxZoom: 18
+  }).addTo($scope.map);
+  $http.get(SERVER_URL + '/v1/routes/with_trips')
+  .success(function(response) {
+    $scope.routesArray = response.data;
+    $.each(response.data, function(index, route) {
+      $scope.routes[route.id] = route;
+    });
+  });
+  //get stops
+  $http.get(SERVER_URL + '/v1/stops/')
+  .success(function(response) {
+    console.log('Success getting stops!!!');
+    //console.log(response.data);
+    $scope.stopsArr = response.data;
+    $.each(response.data,function(index, stop) {
+
+      var marker = L.marker([stop.lat, stop.lon], 
+        {
+          draggable: true,
+          title: stop.name
+        }
+      );
+      marker.addTo($scope.map).bindPopup( stop.name);
+      //set an id (https://github.com/Leaflet/Leaflet/issues/1031)
+        marker._stopId = stop.id; 
+      });
     }); //end $http
     
     //When a stop in the map is clicked
@@ -67,18 +74,18 @@ angular.module('panatransWebApp')
       var stopId = e.popup._source._stopId;
       if ($scope.stops[stopId]) { //check if already got the stop
         $scope.$apply(function() { //http://stackoverflow.com/questions/20954401/angularjs-not-updating-template-variable-when-scope-changes
-              $scope.stopDetail = $scope.stops[stopId]; 
+          $scope.stopDetail = $scope.stops[stopId]; 
         });        
       } else { //get the stop data
         $http.get(SERVER_URL + '/v1/stops/' + stopId)
-          .success(function(response) {
-            $scope.loadingStop = false;
+        .success(function(response) {
+          $scope.loadingStop = false;
             
-            console.log('Success getting stop info');
-            console.log(response.data);
-            $scope.stopDetail= response.data; 
-            $scope.stops[$scope.stopDetail.id] = response.data;
-          }); //success
+          console.log('Success getting stop info');
+          console.log(response.data);
+          $scope.stopDetail= response.data; 
+          $scope.stops[$scope.stopDetail.id] = response.data;
+        }); //success
       }
     }; // on(popupopen)
     
@@ -88,41 +95,45 @@ angular.module('panatransWebApp')
     
     $scope.openEditStopRoutesModal= function(stopId){
       var modalInstance = $modal.open({
-            templateUrl: 'EditStopRoutesModal.html',
+        templateUrl: 'EditStopRoutesModal.html',
         size: 'lg',
-            controller: 'EditStopRoutesModalInstanceCtrl',
-            backdrop: 'static',
-            stopId: stopId,
-            resolve: { //variables passed to modal scope
-              routes: function() {
-                return $scope.routesArray;
-              },
-               stop: function () {
-                 return $scope.stopDetail;
-               }
-            }
-        });
-        modalInstance.result.then(function () {
-        }, function () {
-        });
+        controller: 'EditStopRoutesModalInstanceCtrl',
+        backdrop: 'static',
+        stopId: stopId,
+        resolve: { //variables passed to modal scope
+          routes: function() {
+            return $scope.routesArray;
+          },
+          stop: function () {
+            return $scope.stopDetail;
+          }
+        }
+      });
+      modalInstance.result.then(function () {
+      }, function () {
+      });
     };
     
     $scope.openEditRouteStopsModal= function(routeId){
       var modalConfig = {
-            templateUrl: 'EditRouteStopsModal.html',
-            size: 'lg',
-            controller: 'EditRouteStopModalInstanceCtrl',
-            backdrop: 'static',
-            routeId: routeId,
-            resolve: { //variables passed to modal scope
-              route: function() {
-                return $scope.routes[routeId];
-              },
-            }
-        };
+        templateUrl: 'EditRouteStopsModal.html',
+        size: 'lg',
+        controller: 'EditRouteStopModalInstanceCtrl',
+        backdrop: 'static',
+        routeId: routeId,
+        resolve: { //variables passed to modal scope
+          route: function() {
+            return $scope.routes[routeId];
+          },
+          stopsArr: function() {
+            return $scope.stopsArr;
+          }
+        }
+      };
       $modal.open(modalConfig);  
     };
-  }]); // main controller
+  }]
+); // main controller
 
 
 
@@ -138,42 +149,43 @@ angular.module('panatransWebApp')
 
 
 
-//
-// Edit Routes of a Stop Modal Controller
-//
-angular.module('panatransWebApp').controller('EditStopRoutesModalInstanceCtrl', function ($scope, $http, $modalInstance, routes, stop) {
-  $scope.stop = stop;
-  $scope.routes = routes;
-  console.log(routes);
+  //
+  // Edit Routes of a Stop Modal Controller
+  //
+  angular.module('panatransWebApp')
+  .controller('EditStopRoutesModalInstanceCtrl', function ($scope, $http, $modalInstance, routes, stop) {
+    $scope.stop = stop;
+    $scope.routes = routes;
+    console.log(routes);
   
-  $scope.tripNotAlready = function(obj) {
-    var ret = true;
-     $.each($scope.stop.routes, function(index, route) {
-       $.each(route.trips, function(index, trip) {
-         //console.log('obj: ' + obj.id + ' trip: ' + trip.id + "r:" + (trip.id == obj.id));
-         if (trip.id === obj.id) {
-           ret = false;
-         }
-       }); //route.trips
-     }); //stop.routes
-     return ret;
-  };
+    $scope.tripNotAlready = function(obj) {
+      var ret = true;
+      $.each($scope.stop.routes, function(index, route) {
+        $.each(route.trips, function(index, trip) {
+          //console.log('obj: ' + obj.id + ' trip: ' + trip.id + "r:" + (trip.id == obj.id));
+          if (trip.id === obj.id) {
+            ret = false;
+          }
+        }); //route.trips
+      }); //stop.routes
+      return ret;
+    };
   
-  $scope.searchFilter = function (obj) {
+    $scope.searchFilter = function (obj) {
       var re = new RegExp($scope.searchText, 'i');
       //console.log('searchFilter: ' + obj.name + ' result: ' + (!$scope.searchText || re.test(obj.name)));
       return !$scope.searchText || re.test(obj.name);
-  };
+    };
   
-  $scope.addTrip = function (tripId) {
-    //update ui
-    console.log('addTrip: ' + tripId);
-    //update server stop_sequence for this trip and stop
-    $http.post(SERVER_URL + '/v1/stop_sequences/', 
+    $scope.addTrip = function (tripId) {
+      //update ui
+      console.log('addTrip: ' + tripId);
+      //update server stop_sequence for this trip and stop
+      $http.post(SERVER_URL + '/v1/stop_sequences/', 
       {'stop_sequence': {
-          'sequence': UNKNOWN_SEQUENCE, 
-          'stop_id': $scope.stop.id, 
-          'trip_id': tripId
+        'unknown_sequence': true, 
+        'stop_id': $scope.stop.id, 
+        'trip_id': tripId
       }})
       .success(function(response) {
         console.log('added trip to stop');
@@ -204,30 +216,31 @@ angular.module('panatransWebApp').controller('EditStopRoutesModalInstanceCtrl', 
         console.log('error adding trip to stop');
         console.log(response);
       });
-    //update local model
-  };
-  $scope.deleteTrip = function(tripId) {
-  $http.delete(SERVER_URL + '/v1/stop_sequences/trip/' + tripId + '/stop/' + $scope.stop.id)
-    .success(function(response) {
-      console.log(response);
-      console.log('awesome! Trip and stop unlinked');
-      $.each($scope.stop.routes, function(indexRoute, route){
-        $.each(route.trips, function(indexTrip, trip){
-        if (trip.id === tripId) { //remove trip
-          $scope.stop.routes[indexRoute].trips.splice(indexTrip,1);
-        }
-      }); //each trips
-    }); //each routes
-    })
-    .error(function(response) {
-      console.log('error removing trip from stop');
-      console.log(response);
-    });
-  };
+      //update local model
+    };
+    $scope.deleteTrip = function(tripId) {
+      $http.delete(SERVER_URL + '/v1/stop_sequences/trip/' + tripId + '/stop/' + $scope.stop.id)
+      .success(function(response) {
+        console.log(response);
+        console.log('awesome! Trip and stop unlinked');
+        $.each($scope.stop.routes, function(indexRoute, route){
+          $.each(route.trips, function(indexTrip, trip){
+            if (trip.id === tripId) { //remove trip
+              $scope.stop.routes[indexRoute].trips.splice(indexTrip,1);
+            }
+          }); //each trips
+        }); //each routes
+      })
+      .error(function(response) {
+        console.log('error removing trip from stop');
+        console.log(response);
+      });
+    };
     $scope.close = function () {
       $modalInstance.close();
     };
-  });  
+  }
+);  
   
   
   
@@ -241,31 +254,216 @@ angular.module('panatransWebApp').controller('EditStopRoutesModalInstanceCtrl', 
   //
   // Edit Routes of a Stop Modal Controller
   //
-  angular.module('panatransWebApp').controller('EditRouteStopModalInstanceCtrl', function ($scope, $http, $modalInstance, route) {
-    $scope.loading = true;
-      $scope.route = route;
-      //do we have the list of stops?
-    if (route.trips[0].stops) {
-      $scope.loading = false;
-    } else {
-      $http.get(SERVER_URL + '/v1/routes/' + route.id)
+  angular.module('panatransWebApp')
+  .controller('EditRouteStopModalInstanceCtrl', function ($scope, $http, $modalInstance, route, stopsArr) {
+    
+    $scope.routeTrips = {};
+    // updates the route model by getting a fresh version from the server
+    var updateRoute = function() { 
+      $http.get(SERVER_URL + '/v1/routes/' + $scope.route.id)
       .success(function(response) {
         console.log('success getting route detail');
         $scope.route = response.data;
         $scope.loading = false;
         console.log($scope.route);
-        
       })
       .error(function(response){
         console.log('WTF! Something wrong with the route!');
         console.log(response);
       });
+    };
+    
+        
+    $scope.loading = true;
+    $scope.route = route;
+    $scope.stopsArr = stopsArr; //all the stops
+    $scope.newStopSequence = {};
+    $scope.dragControlListeners = {};
+    
+    
+    $.each(route.trips, function(index, trip){
+      
+    // initialize newStopSequence for each trip
+    // note: we are not creating a stop, we are creating a stop sequence, the link 
+    // between a trip and a stop 
+      $scope.newStopSequence[trip.id] = {
+        stop: null,
+        trip: trip,
+        sequence: UNKNOWN_STOP_SEQUENCE
+      }; 
+      
+      //create dragControlListeners for ng-sortable
+      //  - We have a set of trips 
+      //  - On each trip we have sorted and unsorted sequences
+      
+      $scope.dragControlListeners[trip.id] = {};
+      $.each(['sorted', 'unknown'] , function(index, sortStatus) {
+        console.log(sortStatus + ' -------'  + trip.id);
+        
+        $scope.dragControlListeners[trip.id][sortStatus] = {
+          accept: function (sourceItemHandleScope, destSortableScope, destItemScope) {
+            //override to determine drag is allowed or not. default is true.
+            /*console.log('sourceItem: ');
+            console.log(sourceItemHandleScope);
+            console.log('destSortable');
+            console.log(destSortableScope);*/
+            //return sourceItemHandleScope.itemScope.sortableScope.$id === destSortableScope.$id; 
+            return true;         
+          },
+          /*
+          dragStart: function (event) {
+            console.log('drag start');
+            console.log(event);
+          },
+          dragEnd: function (event) {
+            console.log('drag end');
+            console.log(event);
+          },
+          */
+          itemMoved: function (event) {
+            //Do what you want
+            console.log('source sort' + sortStatus); //source status
+            console.log('source trip.id' + trip.id); //source trip
+            console.log('itemMoved');
+            console.log(event);
+             console.log('nueva posición: ' + (event.dest.index + 1));
+            console.log('dest trip:' + event.dest.sortableScope.$parent.trip.id);
+            console.log('src seq:' + event.source.itemScope.modelValue.sequence);
+            console.log('dest sortStatus' + event.dest.sortableScope.options.containment.indexOf('unknown'));
+            
+            
+            var destTrip = event.dest.sortableScope.$parent.trip; //destination Trip
+            var stopSequence = event.source.itemScope.modelValue;
+            
+            var putData;
+            //change trip?
+            if (destTrip.id === trip.id) { //same trip
+              if (stopSequence.sequence === null) { //moved to a sorted position
+                stopSequence.sequence = event.dest.index + 1;
+                putData = {
+                  'stop_sequence': {
+                    'sequence': event.dest.index + 1
+                  }
+                };
+              } else { //was moved to a unknown position
+                stopSequence.sequence = null;
+                 putData = { 
+                   'stop_sequence': {
+                    'unknown_sequence' : true
+                   }
+                 };
+              }
+            } else { // != trip => we move it to the other trip but in unknown position
+              if (event.dest.sortableScope.options.containment.indexOf('unknown') === 0) { 
+                stopSequence.sequence = null;
+                putData = {
+                  'stop_sequence': {
+                    'unknown_sequence' : true,
+                    'trip_id' : destTrip.id
+                  }
+                };
+              } else {
+                stopSequence.trip = destTrip;
+                stopSequence.sequence = event.dest.index + 1;
+                putData = {
+                  'stop_sequence': {
+                    'sequence': event.dest.index + 1,
+                    'trip_id' : destTrip.id
+                  }
+              }; 
+            }
+          }
+            //put data
+            console.log('putData');
+            console.log(putData.stop_sequence);
+            console.log(stopSequence);
+            $http.put(SERVER_URL + '/v1/stop_sequences/' + stopSequence.id, putData)
+            //download route with the updated data
+            .success( function() {
+            console.log('updated stop sequence!');
+            updateRoute();
+            });
+            
+          },
+          orderChanged: function(event) {
+            console.log('orderChanged ');
+             console.log('nueva posición: ' + (event.dest.index + 1));
+            console.log(event);
+            //if we changed the order on the list of uordered items do nothing on the server
+            if (event.dest.sortableScope.options.containment.indexOf('unknown') === 0) { 
+              return;
+            }
+            var newSequence = event.dest.index + 1 ;
+            var stopSequence = event.source.itemScope.modelValue;
+            console.log('nueva posición: ' + (event.dest.index + 1));
+            //Update Sequence
+            var putData = {'stop_sequence': {sequence: newSequence} };
+            $http.put(SERVER_URL + '/v1/stop_sequences/' + stopSequence.id, putData)
+            //download route with the updated data
+            .success( function() {
+            console.log('updated stop sequence!');
+            updateRoute();
+            });
+          },
+          //containment is used
+          containment: sortStatus + '_' + trip.id
+        };
+      }); //sorted
+    });
+    //console.log($scope.newStopSequence);
+    console.log($scope.dragControlListeners);
+              
+    if (route.trips[0].stops) {
+      $scope.loading = false;
+    } else {
+      updateRoute();
     }
     
     
-    $scope.close = function () {
-        $modalInstance.close();
+    
+    
+    
+    $scope.deleteStopSequence = function (stopSequence) {
+      $http.delete(SERVER_URL + '/v1/stop_sequences/' + stopSequence.id)
+      .success( function(response) {
+        console.log('removed stop sequence success!');
+        updateRoute();
+      });
     };
-    });  
+    
+    
+    // Add stop to a trip 
+    // Position: -1 unk, 0 => beginning, > 1 000 000 => end
+    $scope.addStopToTrip = function (tripId) {
+      var unknownSequence = false;
+      console.log('stopSequence:' + $scope.newStopSequence[tripId].sequence);
+      
+      if ($scope.newStopSequence[tripId].sequence === UNKNOWN_STOP_SEQUENCE) {
+        unknownSequence = true;
+      }
+      
+      var postData =  {
+        'stop_sequence': {
+          'sequence': $scope.newStopSequence[tripId].sequence, 
+          'unknown_sequence': unknownSequence,
+          'stop_id': $scope.newStopSequence[tripId].stop.id,
+          'trip_id': tripId
+        }
+      };
+      
+      console.log('addStopToTrip postData:');
+      console.log(postData);
+      
+      $http.post(SERVER_URL + '/v1/stop_sequences/', postData)
+        .success(function(response) {
+          updateRoute();
+        });
+    };
+        
+    $scope.close = function () {
+      $modalInstance.close();
+    };
+  }
+);  
   
   

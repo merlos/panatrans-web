@@ -1,117 +1,156 @@
 <div id="map"></div>  
   
 <div ng-controller="MainCtrl">
-    <div ng-show="showStopDetail" id="stop_detail">
-    <h1>{{stopDetail.name}}
-    <br><button class="btn btn-default btn-xs" ng-click="openEditStopRoutesModal(stopDetail.id)"><i class="fa fa-pencil"></i> Editar rutas</button>
+  <div ng-show="showStopDetail" id="stop_detail">
+    <h1><i class="fa fa-bus"></i> {{stopDetail.name}}
     </h1>
-    <ul>
-    <li ng-show="!stopDetail.routes.length">
-      <p>No sabemos qué rutas pasan por esta parada</p>
-      <p>¡Ayúdanos!</p>
+    <ul class="fa-ul">
+      <li ng-show="!stopDetail.routes.length">
+        <p>No sabemos qué rutas pasan por esta parada</p>
+        <p>¡Ayúdanos!</p>
         <button class="btn btn-default btn-xs" ng-click="openEditRoutesModal(stopDetail.id)">Editar rutas</a>
       
-    </li>
-    <li ng-repeat="route in stopDetail.routes track by route.id"  ng-if="route.trips.length > 0">
-    {{route.name}} <button class="btn btn-default btn-xs" ng-click="openEditRouteStopsModal(route.id)"><i class="fa fa-pencil"></i></button>
-      <small ng-repeat="trip in route.trips track by trip.id">
-        <br>{{trip.headsign}}
-      </small>
-    </li>
-    </ul>
-  </div>
-</div> <!-- main controller -->
-
-
-
-
-
-
-
-
-<script type="text/ng-template" id="EditStopRoutesModal.html">
-  <div class="modal-header">
-    <button class="btn btn-warning pull-right" ng-click="close()">Cerrar</button>
-    <h3 class="modal-title">Editar rutas de {{stop.name}}</h3>
-  </div>
-  <div class="modal-body modal-view-size">
-    <div class="row">            
-      <div class="col-sm-6" style="background: #F0F0F0">
-        <h4>Añadir ruta</h4>
-        <i class="fa fa-search"></i> <input type="text" ng-model="searchText" placeholder="Ej: Albrook-Amador">
-        <ul>
-          <li ng-repeat="route in routes | filter : searchFilter">
-            {{route.name}}
-            <ul>
-              <li ng-repeat="trip in route.trips | filter: tripNotAlready"> 
-                <i class="fa fa-plus-circle"></i> <a href="" ng-click="addTrip(trip.id)"> ({{trip.headsign}}) </a>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-      <div class="col-sm-6" >
-        <h4>Rutas que pasan por {{stop.name}}</h4>
-        <ul>
-          <li ng-show="stop.routes.length == 0">
-            <h3>No hay rutas.</h3>
-                  
-            <p> Para añadir una:</p> 
-            <ol>
-              <li> <i class="fa fa-search"></i> Busca la ruta </li>
-              <li> Dale a <i class="fa fa-plus-circle"></i> añadir</li>
-            </ol>   
-                  
-          </li>
-          <li ng-repeat="route in stop.routes" ng-if="route.trips.length > 0">
-            {{route.name}}
-            <ul>
-              <li ng-repeat="trip in route.trips track by trip.id">
-                <small>{{trip.headsign}}
-                  <a href="" ng-click="deleteTrip(trip.id)"><i class="fa fa-trash-o"></i>
-                  </a>
-                </small>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </div>      
-    </div><!-- row -->
-  </div> <!-- modal-body-->
-</script>
-      
-      
-      
-      
-
-
-
-
-
-
-      
-<script type="text/ng-template" id="EditRouteStopsModal.html">
-  <div class="modal-header">
-    <button class="btn btn-warning pull-right" ng-click="close()">Cerrar</button>
-    <h3 class="modal-title">Editar paradas de {{route.name}}</h3>
-  </div>
-  <div class="modal-body modal-view-size">
-    <div class="row" ng-show="loading">
-      hola
-      <i class="fa fa-circle-o-notch fa-spin"></i> Obteniendo datos
-    </div>
-    <div class="row" ng-hide="loading">
-      <div class="col-sm-6" ng-repeat="trip in route.trips">
-      <h4>{{trip.headsign}}</h4>
-      <ul>
-        <li ng-repeat="stop in trip.stops">
-          {{stop.sequence}} - {{stop.name}}
+        </li>
+        <li ng-repeat="route in stopDetail.routes track by route.id"  ng-if="route.trips.length > 0">
+    
+          <i class="fa-li fa fa-road"></i> <strong>{{route.name}}</strong> <button class="btn btn-default btn-xs" ng-click="openEditRouteStopsModal(route.id)"><i class="fa fa-pencil"></i></button>
+          <small ng-repeat="trip in route.trips">
+            <br>{{trip.headsign}}
+          </small>
         </li>
       </ul>
+      <br><button class="btn btn-default btn-xs" ng-click="openEditStopRoutesModal(stopDetail.id)"><i class="fa fa-pencil"></i> Editar rutas</button>
+    </div>
+  </div> <!-- main controller -->
+
+
+
+
+
+
+
+
+  <script type="text/ng-template" id="EditStopRoutesModal.html">
+    <div class="modal-header">
+      <button class="btn btn-warning pull-right" ng-click="close()">Cerrar</button>
+      <h3 class="modal-title">Editar rutas de {{stop.name}}</h3>
+    </div>
+    <div class="modal-body modal-view-size">
+      <div class="row">            
+        <div class="col-sm-6" style="background: #F0F0F0">
+          <h4>Añadir ruta</h4>
+          <i class="fa fa-search"></i> <input type="text" ng-model="searchText" placeholder="Ej: Albrook-Amador">
+          <ul>
+            <li ng-repeat="route in routes | filter : searchFilter">
+              {{route.name}}
+              <ul>
+                <li ng-repeat="trip in route.trips | filter: tripNotAlready"> 
+                  <i class="fa fa-plus-circle"></i> <a href="" ng-click="addTrip(trip.id)"> ({{trip.headsign}}) </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <div class="col-sm-6" >
+          <h4>Rutas que pasan por {{stop.name}}</h4>
+          <ul>
+            <li ng-show="stop.routes.length == 0">
+              <h3>No hay rutas.</h3>
+                  
+              <p> Para añadir una:</p> 
+              <ol>
+                <li> <i class="fa fa-search"></i> Busca la ruta </li>
+                <li> Dale a <i class="fa fa-plus-circle"></i> añadir</li>
+              </ol>   
+                  
+            </li>
+            <li ng-repeat="route in stop.routes" ng-if="route.trips.length > 0">
+              {{route.name}}
+              <ul>
+                <li ng-repeat="trip in route.trips track by trip.id">
+                  <small>{{trip.headsign}}
+                    <a href="" ng-click="deleteTrip(trip.id)"><i class="fa fa-trash-o"></i>
+                    </a>
+                  </small>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>      
+      </div><!-- row -->
+    </div> <!-- modal-body-->
+  </script>
+      
+      
+      
+      
+
+
+
+
+  <script type="text/ng-template" id="EditRouteStopsModal.html">
+    <div class="modal-header">
+      <button class="btn btn-warning pull-right" ng-click="close()">Cerrar</button>
+      <h3 class="modal-title">Editar paradas de {{route.name}}</h3>
+    </div>
+    <div class="modal-body modal-view-size">
+      <div class="row" ng-show="loading">
+        <i class="fa fa-circle-o-notch fa-spin"></i> Obteniendo datos
       </div>
-    </div><!-- row -->
-  </div> <!-- modal-body-->
-</script>
+      <div class="row" ng-hide="loading">
+        <div class="col-sm-6" ng-repeat="trip in route.trips">
+          <h4>{{trip.headsign}}</h4>
+          <p>Parada: <input type="text" ng-model="newStopSequence[trip.id].stop" typeahead-focus-first="true" typeahead-editable="false" typeahead="stop as stop.name for stop in stopsArr | limitTo:8 | filter:{name:$viewValue}" placeholder="Ej: Albrook">
+
+            <div class="btn-group">
+             
+              <label class="btn btn-default btn-xs" 
+              ng-model="newStopSequence[trip.id].sequence" 
+              btn-radio="-1"><i class="fa fa-exclamation-triangle" 
+              title="Añadir parada en posición desconocida."></i></label>
+             
+              <label class="btn btn-default btn-xs" 
+              ng-model="newStopSequence[trip.id].sequence" 
+              btn-radio="0" 
+              title="Añadir parada al inicio de la ruta">Primera</label>
+             
+              <label class="btn btn-default btn-xs" 
+              ng-model="newStopSequence[trip.id].sequence" 
+              btn-radio="null" 
+              tutle="Añadir al final de la ruta">Fin</label> 
+             
+            </div>
+            <button ng-click="addStopToTrip(trip.id)" class="btn btn-primary">Añadir</button>
+       
+          </p>
+          <ul class="as-sortable-unselectable fa-ul" 
+          data-as-sortable="dragControlListeners[trip.id]['unknown']" 
+          data-ng-model="trip.stop_sequence">
+           <li  data-ng-repeat="stop_sequence in trip.stop_sequence | filter : orderBy : stop_sequence.sequence" ng-if="stop_sequence.sequence === null" class="sortable-li" data-as-sortable-item>
+                      
+                  <i class="fa-li fa fa-exclamation-triangle" style="line-height: 18px;padding:5px"></i><div data-as-sortable-item-handle title="Arrastra la parada al orden adecuado (secuencia: {{stop_sequence.sequence}})">{{stop_sequence.sequence}} -  {{stop_sequence.stop.name}}
+                <!-- <i ng-if="stop_sequence.sequence === null" class="fa fa-exclamation-triangle" style="color:orange" title="Está en la ruta, pero no sabemos en qué lugar"></i> -->
+                <a href="" ng-click="deleteStopSequence(stop_sequence)" title="Borrar {{stop_sequence.stop.name}} de esta ruta" class="pull-right"><i class="fa fa-trash-o"></i></a>
+              </div>
+            </li>
+          </ul>
+          <hr>
+          <ol class="as-sortable-unselectable" 
+          data-as-sortable="dragControlListeners[trip.id]['sorted']" 
+          data-ng-model="trip.stop_sequence" >
+            <li  data-ng-repeat="stop_sequence in trip.stop_sequence | filter : orderBy : stop_sequence.sequence" ng-if="stop_sequence.sequence !== null" class="sortable-li" data-as-sortable-item>
+              <div data-as-sortable-item-handle title="Arrastra la parada al orden adecuado (secuencia: {{stop_sequence.sequence}})"> {{stop_sequence.sequence}} {{stop_sequence.stop.name}} 
+                  <a href=""  ng-click="deleteStopSequence(stop_sequence)" title="Borrar {{stop_sequence.stop.name}} de esta ruta" class="pull-right"><i class="fa fa-trash-o"></i></a>
+              
+            </div>
+            </li>
+          </ol>
+          
+          
+        </div>
+      </div><!-- row -->
+    </div> <!-- modal-body-->
+  </script>
       
       
       
