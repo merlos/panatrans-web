@@ -9,6 +9,11 @@
 */
 
 var SERVER_URL = 'http://localhost:3000';
+//var SERVER_URL = 'http://test-panatrans.herokuapp.com';
+
+// To test delays
+var DELAY = '';
+//var DELAY = '&with_delay=true';
 
 var UNKNOWN_STOP_SEQUENCE = -1;
 //var LAST_STOP_SEQUENCE = null;
@@ -20,9 +25,41 @@ angular.module('panatransWebApp')
   $scope.routes = {};
   $scope.stops = {};
   $scope.stopsArr = {};
-  $scope.showStopDetail = false;  
+  $scope.showStopDetail = false; 
+  $scope.loadingStopDetail = false;
   $scope.stopDetail = {};
-    
+  
+  var markers = {};
+  var markerIcon = {
+      default: L.AwesomeMarkers.icon({
+        icon: 'bus',
+        prefix: 'fa',
+        markerColor: 'blue'
+      }), 
+      orange: L.AwesomeMarkers.icon({
+        icon: 'bus',
+        prefix: 'fa',
+        markerColor: 'orange'
+      }),
+      orangeSpin: L.AwesomeMarkers.icon({
+        icon: 'bus',
+        prefix: 'fa',
+        markerColor: 'orange',
+        spin: true
+      }),
+       
+      grey: L.AwesomeMarkers.icon({
+        icon: 'bus',
+        prefix: 'fa',
+        markerColor: 'red'
+      }), 
+      red: L.AwesomeMarkers.icon({
+        icon: 'bus',
+        prefix: 'fa',
+        markerColor: 'red'
+      })
+    };
+  
   $scope.tileLayer = 'http://{s}.tiles.mapbox.com/v3/merlos.k99amj6l/{z}/{x}/{y}.png';
   
   if (! $scope.map) { 
@@ -53,44 +90,112 @@ angular.module('panatransWebApp')
     $scope.stopsArr = response.data;
     $.each(response.data,function(index, stop) {
 
-      var marker = L.marker([stop.lat, stop.lon], 
+    var marker = L.marker([stop.lat, stop.lon], 
         {
+          icon: markerIcon.default,
           draggable: true,
           title: stop.name
         }
       );
       marker.addTo($scope.map).bindPopup( stop.name);
       //set an id (https://github.com/Leaflet/Leaflet/issues/1031)
-        marker._stopId = stop.id; 
+      marker._stopId = stop.id; 
+      markers[stop.id] = marker; //add the marker to the list of markers
       });
     }); //end $http
     
     //When a stop in the map is clicked
-    $scope.stopIconClicked = function(e) {
+    $scope.stopIconClicked = function(e) {    
       //display lateral div & loading
       console.log('stopIconClicked');
+      
       $scope.showStopDetail = true;  
+    
       console.log(e);
       var stopId = e.popup._source._stopId;
+      markers[stopId].setIcon(markerIcon.orangeSpin);
       if ($scope.stops[stopId]) { //check if already got the stop
         $scope.$apply(function() { //http://stackoverflow.com/questions/20954401/angularjs-not-updating-template-variable-when-scope-changes
           $scope.stopDetail = $scope.stops[stopId]; 
+          updateMarkersForSelectedStop(stopId);
         });        
       } else { //get the stop data
-        $http.get(SERVER_URL + '/v1/stops/' + stopId)
+        $scope.loadingStopDetail = true;
+        $http.get(SERVER_URL + '/v1/stops/' + stopId + '?with_stop_sequences=true' + DELAY)
         .success(function(response) {
-          $scope.loadingStop = false;
-            
+          $scope.loadingStopDetail = false;
           console.log('Success getting stop info');
           console.log(response.data);
           $scope.stopDetail= response.data; 
           $scope.stops[$scope.stopDetail.id] = response.data;
-        }); //success
-      }
+          updateMarkersForSelectedStop(stopId);
+        });
+      } //else
     }; // on(popupopen)
+    
+    
+    var setIconForStopSequencesOnRoute = function(route, icon) {
+      /*jshint camelcase: false */
+      $.each(route.trips, function(index, trip) {
+        $.each(trip.stop_sequences, function(index, stopSequence) { 
+          markers[stopSequence.stop_id].setIcon(icon);
+        }); //stopSequence
+      }); // trip
+    };
+    
+    var updateMarkersForSelectedStop = function(stopId) {
+        
+      //clear markers color
+      $.each(markers, function(index, marker) {
+        marker.setIcon(markerIcon.default);
+      }); 
+      //search for all stops that are linked with this stop through trips that include this stop
+      $.each($scope.stopDetail.routes, function(index, route) {
+        setIconForStopSequencesOnRoute(route, markerIcon.orange);
+      }); //route
+      
+      markers[stopId].setIcon(markerIcon.red); 
+    };
     
     //listen for popup event on each stop marker
     $scope.map.on('popupopen', $scope.stopIconClicked);
+    //clear (set grey all stop markers)
+    
+    // searches for stop_sequences on the route and sets the orange icon
+    //route: has trips and trips have stop_sequences
+    $scope.highlightRoute = function(route) {
+      console.log('highlight route '  + route.name);
+      
+     /* $.each($scope.stopDetail.routes, function(index, route) {
+        setIconForStopSequencesOnRoute(route, markerIcon.grey);
+      }); //route
+      */
+      
+      setIconForStopSequencesOnRoute(route, markerIcon.red); 
+    };
+    
+  
+    // searches for stop_sequences on the route and sets the grey icon
+    //route: has trips and trips have stop_sequences
+    $scope.lowlightRoute = function(route) {
+      console.log('lowlight route ' + route.name);
+      /*$.each($scope.stopDetail.routes, function(index, route) {
+        setIconForStopSequencesOnRoute(route, markerIcon.orange);
+      });
+      */
+      setIconForStopSequencesOnRoute(route, markerIcon.orange); 
+      //hightlight again stopDetail
+      markers[$scope.stopDetail.id].setIcon(markerIcon.red);   
+    };
+    
+    // Display/hide edit on mouse over
+    $scope.hoverIn = function(){
+            this.hoverEdit = true;
+        };
+
+        $scope.hoverOut = function(){
+            this.hoverEdit = false;
+        };
     
     
     $scope.openEditStopRoutesModal= function(stopId){
@@ -261,7 +366,7 @@ angular.module('panatransWebApp')
     $scope.unknownStopSequences = {};
     // updates the route model by getting a fresh version from the server
     var updateRoute = function() { 
-      $http.get(SERVER_URL + '/v1/routes/' + $scope.route.id)
+      $http.get(SERVER_URL + '/v1/routes/' + $scope.route.id + '?' + DELAY)
       .success(function(response) {
         //console.log('success getting route detail');
         $scope.route = response.data;
@@ -269,9 +374,10 @@ angular.module('panatransWebApp')
         //console.log($scope.route);
         //for each trip create an array with all sorted sequences (stop_sequence.sequence != null)
         $.each($scope.route.trips, function(index, trip){
-          $scope.sortedStopSequences[trip.id] = new Array(); 
-          $scope.unknownStopSequences[trip.id] = new Array(); 
-          $.each(trip.stop_sequence, function(index, stopSequence){
+          $scope.sortedStopSequences[trip.id] = []; 
+          $scope.unknownStopSequences[trip.id] = []; 
+          /*jshint camelcase: false */
+          $.each(trip.stop_sequences, function(index, stopSequence){
             if (stopSequence.sequence !== null) {
               $scope.sortedStopSequences[trip.id].push(stopSequence);
               //console.log($scope.sortedStopSequences[trip.id]);
@@ -389,7 +495,7 @@ angular.module('panatransWebApp')
           }
             //put data
             console.log('putData');
-            console.log(putData.stop_sequence);
+            //console.log(putData.stop_sequence);
             console.log(stopSequence);
             $http.put(SERVER_URL + '/v1/stop_sequences/' + stopSequence.id, putData)
             //download route with the updated data

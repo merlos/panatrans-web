@@ -30,9 +30,9 @@ angular
         templateUrl: 'views/about.html',
         controller: 'AboutCtrl'
       })
-      .when('/api', {
-        templateUrl: 'views/api.html',
-        controller: 'ApiCtrl'
+      .when('/licenses', {
+        templateUrl: 'views/licenses.html',
+        controller: 'LicensesCtrl'
       })
       .otherwise({
         redirectTo: '/'

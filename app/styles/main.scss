@@ -3,14 +3,16 @@ $icon-font-path: "../bower_components/bootstrap-sass-official/assets/fonts/boots
 @import "bootstrap-sass-official/assets/stylesheets/_bootstrap.scss";
 // endbower
 
+$main-color: #F05A28;
+
 html, body {
   height: 98%;
   overflow: hidden;
 }
 
 .fill {
-  height: 95%;
-  min-height: 95%;
+  height: 98%;
+  min-height: 98%;
 }
 
 #map {
@@ -28,12 +30,19 @@ footer {
   left: 0;
   width: 100%;
   background: white;
-  font-size: 80%;
+  font-size: .9em;
   color: #999;
-  padding-left: 5px;
-  padding-right: 5px;
+
   p {    
+    padding: 0px;
+    padding-bottom: 5px;
+    margin: 0px;
   }
+}
+
+
+.with-navbar-margin {
+  padding-top: 50px;
 }
 
 // Fix ng-sortable bug
@@ -62,26 +71,77 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
 
 @media screen and (min-width: 768px) {
   
+  .navbar-default {
+    border-bottom: 1px solid $main-color;
+  }
+  
   .modal-view-size {
     height: 400px;
     overflow-y: scroll;
   }
   
-  #stop_detail {
+  #stop-detail {
+    position: fixed;
+    background: #f0f0f0;
+    width: 300px;
+    top: 50px;
+    left: 0px;
+    height: 100%;
+    min-height: 400px;
+    overflow-y: scroll;
+   
+    #stop-detail-container {
+      opacity: 1.0;
+    }
+   
     h1,h2,h3 {
+      opacity: 1.0;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    padding: 20px;
-    position: fixed;
-    background: #f0f0f0;
-    width: 300px;
-    top: 60px;
-    left: 0px;
-    height: 85%;
-    min-height: 400px;
-    overflow-y: scroll;
     
-  }
+    .routes-title {
+      text-transform: uppercase;
+     background-color: #DDDDDD;
+     color: #5C5C5C;
+     font-size: 10px; 
+     padding: 5px;
+     margin: 0px;
+    }
+    .route-list {
+      margin: 0px;
+      list-style-type: none;
+      padding: 0px;
+      
+    }
+    .route-list-item {
+     /* min-height: 60px;
+      line-height: 60px;*/
+      padding-left: 5px;
+      padding-right: 5px;
+      margin:0px;
+      border-bottom: 1px solid grey;
+      
+      h4 {
+        
+      }
+      
+    }
+    .route-list-item:hover {
+      color: red;
+      cursor: pointer;
+      background-color: white;
+    };
+    
+    h3 {
+      color: $main-color;
+      padding: 5px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      margin-top: 0px;
+      margin-bottom: 0px;
+    }
+     
+  } //stop-detail
 }
