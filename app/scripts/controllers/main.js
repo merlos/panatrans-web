@@ -160,17 +160,37 @@ angular.module('panatransWebApp')
     //listen for popup event on each stop marker
     $scope.map.on('popupopen', $scope.stopIconClicked);
     //clear (set grey all stop markers)
-    
+  
+    $scope.isFirstStopInTrip = function(stop, trip) {
+      var isFirst = false;
+      $.each(trip.stop_sequences, function(index, stopSequence){
+        if ((stopSequence.sequence === 0) && (stopSequence.stop_id === stop.id)) {
+          isFirst = true;
+        }
+      });
+      return isFirst;
+    };
+  
+    $scope.isLastStopInTrip = function(stop, trip) {
+      var largestSequence = -1;
+      var stopIdWithLargestSequence = -1;
+      
+      $.each(trip.stop_sequences, function(index, stopSequence){
+        if (stopSequence.sequence > largestSequence) {
+          largestSequence = stopSequence.sequence;
+          stopIdWithLargestSequence = stopSequence.stop_id;
+        }
+      });
+      if (stopIdWithLargestSequence === stop.id) {
+        return true;
+      }
+      return false;
+    };
+   
     // searches for stop_sequences on the route and sets the orange icon
     //route: has trips and trips have stop_sequences
     $scope.highlightRoute = function(route) {
       console.log('highlight route '  + route.name);
-      
-     /* $.each($scope.stopDetail.routes, function(index, route) {
-        setIconForStopSequencesOnRoute(route, markerIcon.grey);
-      }); //route
-      */
-      
       setIconForStopSequencesOnRoute(route, markerIcon.red); 
     };
     
@@ -178,26 +198,22 @@ angular.module('panatransWebApp')
     // searches for stop_sequences on the route and sets the grey icon
     //route: has trips and trips have stop_sequences
     $scope.lowlightRoute = function(route) {
-      console.log('lowlight route ' + route.name);
-      /*$.each($scope.stopDetail.routes, function(index, route) {
-        setIconForStopSequencesOnRoute(route, markerIcon.orange);
-      });
-      */
       setIconForStopSequencesOnRoute(route, markerIcon.orange); 
-      //hightlight again stopDetail
       markers[$scope.stopDetail.id].setIcon(markerIcon.red);   
     };
+ 
     
     // Display/hide edit on mouse over
     $scope.hoverIn = function(){
-            this.hoverEdit = true;
-        };
+      this.hoverEdit = true;
+    };
 
-        $scope.hoverOut = function(){
-            this.hoverEdit = false;
-        };
+
+    $scope.hoverOut = function(){
+      this.hoverEdit = false;
+    };
     
-    
+
     $scope.openEditStopRoutesModal= function(stopId){
       var modalInstance = $modal.open({
         templateUrl: 'EditStopRoutesModal.html',

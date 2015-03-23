@@ -28,7 +28,10 @@
           ng-mouseleave="lowlightRoute(route);hoverOut()">
           <h4>{{route.name}}</h4> 
           <small ng-repeat="trip in route.trips">
-            {{trip.headsign}}<br>
+            trayecto {{trip.headsign}} 
+              <span ng-if="isFirstStopInTrip(stopDetail, trip)" class="label label-info" title="Primera parada de este trayecto">1ª</span>
+              <span ng-if="isLastStopInTrip(stopDetail, trip)" class="label label-default" title="Última parada de este trayecto"><i class="fa fa-flag-checkered"></i></span>
+              <br>
           </small>
           <a href="" ng-show="hoverEdit" class="pull-right" ng-click="openEditRouteStopsModal(route.id)" title="Editar las paradas de esta ruta"><i class="fa fa-pencil"></i></a>
         </li>
