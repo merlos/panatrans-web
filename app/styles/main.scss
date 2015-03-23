@@ -19,8 +19,8 @@ html, body {
   display: block;
   margin-top: 50px;
   width: 100%;
-  height: 95%;
-  min-height: 95%; 
+  height: 98%;
+  min-height: 98%; 
 }
 
 footer {
@@ -111,25 +111,48 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
     }
     ul.route-list {
       margin: 0px;
-      list-style-type: none;
       padding: 0px;
+      list-style-type: none;
+      
       
     }
     li.route-list-item {
      /* min-height: 60px;
       line-height: 60px;*/
+      padding: 0px;
       padding-left: 5px;
       padding-right: 5px;
       margin: 0px;
+
       border-bottom: 1px solid grey;
       
-      h4 {
-        
+      h4 {  
+      }    
+    }
+    
+    ul.trip-stops-list {
+      margin:0px; 
+      padding:0px; 
+      list-style-type: none;
+      
+      li {
+         margin:0px; 
+         padding: 0px; 
+         padding-top: 3px; 
+         padding-bottom: 3px; 
+         font-size: 10px;
+         &:hover {
+           font-weight: bold;
+           color: pink;
+         };
       }
       
     }
+    
     .route-list-item:hover {
-      color: red;
+      h4 { 
+        color: red;
+      }
       cursor: pointer;
       background-color: white;
     };
