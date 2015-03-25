@@ -68,10 +68,9 @@ angular.module('panatransWebApp')
     zoom: 13,
     zoomControl: false
   });
-    //merlos.li3k1pmo (w/colors)
-    //merlos.k99amj6l (b/w)
-  L.tileLayer('http://{s}.tiles.mapbox.com/v3/merlos.li3k1pmo/{z}/{x}/{y}.png', {
-    attribution: '&copy;<a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>,© <a href="http://mapbox.com">Mapbox</a>',
+
+  L.tileLayer( TILELAYER_URL, {
+    attribution: TILELAYER_ATTRIBUTION,
     maxZoom: 18
   }).addTo($scope.map);
   $http.get(SERVER_URL + '/v1/routes?with_trips=true')
