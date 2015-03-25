@@ -1,3 +1,4 @@
+'use strict';
 /**
  * Copyright (C) 2013 Maxime Hadjinlian <maxime.hadjinlian@gmail.com>
  * All Rights Reserved.
@@ -26,7 +27,8 @@
  */
 
 (function () {
-
+   /*jshint camelcase: false */
+  
   // Retain the value of the original onAdd function
   var originalOnAdd = L.Marker.prototype.onAdd;
 
@@ -75,13 +77,8 @@
         duration: duration || 1000, // 1 sec by default
         delta: delta,
         step: function (delta) {
-          self._drop_point.y = 
-            start_y 
-            + (distance * delta) 
-            - (self._map.project(self._map.getCenter()).y - self._orig_map_center.y);
-          self._drop_point.x = 
-            start_x 
-            - (self._map.project(self._map.getCenter()).x - self._orig_map_center.x); 
+          self._drop_point.y = start_y + (distance * delta) - (self._map.project(self._map.getCenter()).y - self._orig_map_center.y);
+          self._drop_point.x = start_x - (self._map.project(self._map.getCenter()).x - self._orig_map_center.x); 
           self.setLatLng(self._toLatLng(self._drop_point));
         },
         end: function () {

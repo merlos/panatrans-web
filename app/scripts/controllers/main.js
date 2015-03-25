@@ -74,7 +74,7 @@ angular.module('panatransWebApp')
     attribution: '&copy;<a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>,© <a href="http://mapbox.com">Mapbox</a>',
     maxZoom: 18
   }).addTo($scope.map);
-  $http.get(SERVER_URL + '/v1/routes/with_trips')
+  $http.get(SERVER_URL + '/v1/routes?with_trips=true')
   .success(function(response) {
     $scope.routesArray = response.data;
     $.each(response.data, function(index, route) {

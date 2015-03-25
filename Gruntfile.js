@@ -388,6 +388,11 @@ module.exports = function (grunt) {
           cwd: '.',
           src: 'bower_components/bootstrap-sass-official/assets/fonts/bootstrap/*',
           dest: '<%= yeoman.dist %>'
+        }, {    //for images referenced in css Leaflet.awesome-marker       
+          expand : true,
+          cwd : './bower_components/Leaflet.awesome-markers/dist',
+          src : '**/*.{png,jpg,jpeg,gif}',
+          dest : '<%= yeoman.dist %>/styles'
         }]
       },
       styles: {
