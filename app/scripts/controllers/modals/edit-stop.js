@@ -31,7 +31,7 @@ angular.module('panatransWebApp')
     //update ui
     console.log('addTrip: ' + tripId);
     //update server stop_sequence for this trip and stop
-    $http.post(SERVER_URL + '/v1/stop_sequences/', 
+    $http.post(_CONFIG.serverUrl + '/v1/stop_sequences/', 
     {'stop_sequence': {
       'unknown_sequence': true, 
       'stop_id': $scope.stop.id, 
@@ -72,7 +72,7 @@ angular.module('panatransWebApp')
   $scope.updateStopName = function() {
     console.log("updateStop");
     console.log($scope.stop);
-    $http.put(SERVER_URL + '/v1/stops/' + $scope.stop.id, {stop: { name: $scope.stop.name}})
+    $http.put(_CONFIG.serverUrl + '/v1/stops/' + $scope.stop.id, {stop: { name: $scope.stop.name}})
     .success(function(response){
       console.log("Stop successfully updated");
       //TODO feedback
@@ -90,7 +90,7 @@ angular.module('panatransWebApp')
       alert('No se puede borrar. Tienes que quitar todas las rutas que pasan por la parada antes de eliminarla.')
       return;
     }
-    $http.delete(SERVER_URL + '/v1/stops/'+ $scope.stop.id)
+    $http.delete(_CONFIG.serverUrl + '/v1/stops/'+ $scope.stop.id)
     .success( function() {
       console.log('parada borrada del servidor con éxito');
       $modalInstance.dismiss('stopDeleted');
@@ -109,7 +109,7 @@ angular.module('panatransWebApp')
   }
   
   $scope.deleteTrip = function(tripId) {
-    $http.delete(SERVER_URL + '/v1/stop_sequences/trip/' + tripId + '/stop/' + $scope.stop.id)
+    $http.delete(_CONFIG.serverUrl + '/v1/stop_sequences/trip/' + tripId + '/stop/' + $scope.stop.id)
     .success(function(response) {
       console.log(response);
       console.log('awesome! Trip and stop unlinked');

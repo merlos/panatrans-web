@@ -78,11 +78,11 @@ angular.module('panatransWebApp')
     zoomControl: false
   });
 
-  L.tileLayer( TILELAYER_URL, {
-    attribution: TILELAYER_ATTRIBUTION,
+  L.tileLayer( _CONFIG.tilelayerUrl, {
+    attribution: _CONFIG.tilelayerAttribution,
     maxZoom: 18
   }).addTo($scope.map);
-  $http.get(SERVER_URL + '/v1/routes?with_trips=true')
+  $http.get(_CONFIG.serverUrl + '/v1/routes?with_trips=true')
   .success(function(response) {
     $scope.routesArray = response.data;
     $.each(response.data, function(index, route) {
@@ -91,7 +91,7 @@ angular.module('panatransWebApp')
   });
   
   //get stops
-  $http.get(SERVER_URL + '/v1/stops/')
+  $http.get(_CONFIG.serverUrl + '/v1/stops/')
   .success(function(response) {
     console.log('Success getting stops!!!');
     //console.log(response.data);
@@ -115,7 +115,9 @@ angular.module('panatransWebApp')
     }); //end $http
     
     var onLocationFound = function(e) {
-      if (e.accuracy == null) return;
+      if (e.accuracy === null) {
+        return;
+      }
       var radius = e.accuracy / 2;
       if (userLocationMarker === null) {  // add to map
     	  userLocationMarker = L.marker(e.latlng, {icon: markerIcon.userLocation});
@@ -126,7 +128,7 @@ angular.module('panatransWebApp')
       }
       //update
       userLocationMarker.setLatLng(e.latlng);
-      userLocationMarker.bindPopup("Estás cerca de este punto en un radio de unos " + radius + " metros.");
+      userLocationMarker.bindPopup('Estás cerca de este punto en un radio de unos ' + radius + ' metros.');
       userLocationCircle.setLatLng(e.latlng);
       userLocationCircle.setRadius(radius);
       if ($scope.trackingUser) {
@@ -163,7 +165,7 @@ angular.module('panatransWebApp')
       console.log(e);
       var stopId = e.popup._source._stopId;
       if (stopId === null) { 
-          console.log("stopMarkerClicked: Hey! Hey! stopId es null :-?");
+          console.log('stopMarkerClicked: Hey! Hey! stopId es null :-?');
           return;
       }
       console.log('stopId Clicked: ' + stopId);
@@ -175,7 +177,7 @@ angular.module('panatransWebApp')
       } else { //get the stop data
         markers[stopId].setIcon(markerIcon.orangeSpin);
         $scope.loadingStopDetail = true;
-        $http.get(SERVER_URL + '/v1/stops/' + stopId + '?with_stop_sequences=true' + DELAY)
+        $http.get(_CONFIG.serverUrl + '/v1/stops/' + stopId + '?with_stop_sequences=true' + _CONFIG.delay)
         .success(function(response) {
           $scope.loadingStopDetail = false;
           console.log('Success getting stop info');
@@ -188,7 +190,7 @@ angular.module('panatransWebApp')
     }; // on(popupopen)
     
     
-    var stopMarkerPopupClose = function(e) {
+    var stopMarkerPopupClose = function() {
       console.log('stopMarkerClosed');
       //clear markers color
       if (stopDetailPanelHighlightedStop === null) {
@@ -322,9 +324,9 @@ angular.module('panatransWebApp')
       });
       modalInstance.result.then(function () {
       }, function (reason) {
-        console.log("modal instance dismissed reason : " + reason);
+        console.log('modal instance dismissed reason : ' + reason);
         if (reason === 'changeStopLocation') {
-          console.log("changeStopLocation: " + stopId);
+          console.log('changeStopLocation: ' + stopId);
           setStopMarkerEditMode(markers[stopId]);
         }
         if (reason === 'stopDeleted') {
@@ -337,19 +339,16 @@ angular.module('panatransWebApp')
       });
     };
     
+    
     var setStopMarkerEditMode = function(stopMarker) {
       console.log('setStopMarkerEditMode');
       //center and zoom map to stop
       stopMarker.setIcon(markerIcon.redSpin);
       stopMarker.dragging.disable();
       stopMarker.dragging.enable();
-      
       stopMarker.off('popupopen', stopMarkerPopupOpen);
       stopMarker.off('popupclose', stopMarkerPopupClose);
-      
-      
       $scope.map.setView(stopMarker.getLatLng(), 15);
-      
       var stop = $scope.stops[stopMarker._stopId];    
       var html = '<div><h4>' + stop.name + '</h4><p><strong>Arrástrame</strong> hasta mi localización.<br>Después dale a: </p><button ng-click="saveStopLocation(stop)"class="btn btn-primary">Actualizar</button> o a <a href="" ng-click="cancelStopMarkerEditMode(stopMarker)">cancelar</a></div>';
       var linkFn = $compile(angular.element(html));
@@ -359,7 +358,6 @@ angular.module('panatransWebApp')
       scope.stopMarker = stopMarker;
       var element = linkFn(scope);
       console.log(element);
-          
       stopMarker.bindPopup(element[0]).openPopup();    
       stopMarker.on('dragend', function(e){
         console.log('dragend called!!'); 
@@ -370,8 +368,8 @@ angular.module('panatransWebApp')
         stop.lon = position.lng;
         console.log($scope.newStop);
       });  
-      
     };
+    
     
     $scope.cancelStopMarkerEditMode = function(stopMarker) {
       console.log('cancelStopMarkerEditMode');
@@ -389,14 +387,14 @@ angular.module('panatransWebApp')
     
     $scope.saveStopLocation = function(stop) {
       console.log('saveStopLocation called');
-      $http.put(SERVER_URL + '/v1/stops/' + stop.id, {stop: {lat: stop.lat, lon: stop.lon}})
+      $http.put(_CONFIG.serverUrl + '/v1/stops/' + stop.id, {stop: {lat: stop.lat, lon: stop.lon}})
       .success(function(){
         console.log('new stop location successfully saved');
         //TODO show feedback to user
         //marker to normal
         $scope.cancelStopMarkerEditMode(markers[stop.id]);
       })
-      .error(function(data, status) {
+      .error(function(data) {
         console.log('error updating stop Location');
         console.log(data);
       });
@@ -439,12 +437,12 @@ angular.module('panatransWebApp')
       console.log('saveSaveNewStop');
       console.log(newStop);
       //make the create request
-      $http.post(SERVER_URL + '/v1/stops/', {stop: newStop})
+      $http.post(_CONFIG.serverUrl + '/v1/stops/', {stop: newStop})
       .success(function(response) {
-        console.log("stop saved successfully");
+        console.log('stop saved successfully');
         console.log(response.data);
         $scope.stops[response.data.id] = response.data;
-        $scope.stopDetail = response.data
+        $scope.stopDetail = response.data;
         //add marker to markers
         newStopMarker._stopId = response.data.id; 
         newStopMarker.closePopup();
@@ -460,11 +458,9 @@ angular.module('panatransWebApp')
         console.log('Se ha añadido la parada con éxito');
         
       })
-      .error(function(data, status, headers, config) {
+      .error(function(data) {
         alert(data);
       });
-        
-      
     };
     
     
@@ -495,7 +491,7 @@ angular.module('panatransWebApp')
               draggable: true,
               bounceOnAdd: true, 
               bounceOnAddOptions: {duration: 500, height: 100}, 
-              bounceOnAddCallback: function() {console.log("done");}
+              bounceOnAddCallback: function() {console.log('bouncing done');}
             }).addTo($scope.map); //http://stackoverflow.com/questions/17662551/how-to-use-angular-directives-ng-click-and-ng-class-inside-leaflet-marker-popup    
         var html = '<div><h4>' + newStop.name + '</h4><p><strong>Arrástrame</strong> hasta mi localización.<br>Después dale a: </p><button ng-click="saveNewStop()"class="btn btn-primary">Guardar</button> o <a ng-click="cancelSaveNewStop()">cancelar</a></div>';
         var linkFn = $compile(angular.element(html));

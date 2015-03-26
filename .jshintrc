@@ -20,6 +20,7 @@
   "globals": {
     "angular": false,
     "$": false,
-    "L": false
+    "L": false,
+    "_CONFIG": false
   }
 }

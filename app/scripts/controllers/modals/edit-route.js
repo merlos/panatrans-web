@@ -10,7 +10,7 @@ $scope.unknownStopSequences = {};
 
 
 var updateRoute = function() { 
-  $http.get(SERVER_URL + '/v1/routes/' + $scope.route.id + '?' + DELAY)
+  $http.get(_CONFIG.serverUrl + '/v1/routes/' + $scope.route.id + '?' + _CONFIG.delay)
   .success(function(response) {
     //console.log('success getting route detail');
     $scope.route = response.data;
@@ -141,7 +141,7 @@ $.each(route.trips, function(index, trip){
         console.log('putData');
         //console.log(putData.stop_sequence);
         console.log(stopSequence);
-        $http.put(SERVER_URL + '/v1/stop_sequences/' + stopSequence.id, putData)
+        $http.put(_CONFIG.serverUrl + '/v1/stop_sequences/' + stopSequence.id, putData)
         //download route with the updated data
         .success( function() {
           //console.log('updated stop sequence!');
@@ -162,7 +162,7 @@ $.each(route.trips, function(index, trip){
         console.log('nueva posición: ' + (event.dest.index));
         //Update Sequence
         var putData = {'stop_sequence': {sequence: newSequence} };
-        $http.put(SERVER_URL + '/v1/stop_sequences/' + stopSequence.id, putData)
+        $http.put(_CONFIG.serverUrl + '/v1/stop_sequences/' + stopSequence.id, putData)
         //download route with the updated data
         .success( function() {
           console.log('updated stop sequence!');
@@ -187,7 +187,7 @@ if (route.trips[0].stops) {
 
 $scope.updateRouteName = function(){
   console.log('updateRouteName');
-  $http.put(SERVER_URL + '/v1/routes/' + $scope.route.id, {route: {name: $scope.route.name}})
+  $http.put(_CONFIG.serverUrl + '/v1/routes/' + $scope.route.id, {route: {name: $scope.route.name}})
   .success(function() {
     //TODO display some kind of feedback
     console.log('route successfully updated');
@@ -200,7 +200,7 @@ $scope.updateRouteName = function(){
     
     
 $scope.deleteStopSequence = function (stopSequence) {
-  $http.delete(SERVER_URL + '/v1/stop_sequences/' + stopSequence.id)
+  $http.delete(_CONFIG.serverUrl + '/v1/stop_sequences/' + stopSequence.id)
   .success( function(response) {
     console.log('removed stop sequence success!');
     updateRoute();
@@ -230,7 +230,7 @@ $scope.addStopToTrip = function (tripId) {
   console.log('addStopToTrip postData:');
   console.log(postData);
       
-  $http.post(SERVER_URL + '/v1/stop_sequences/', postData)
+  $http.post(_CONFIG.serverUrl + '/v1/stop_sequences/', postData)
   .success(function(response) {
     updateRoute();
   });

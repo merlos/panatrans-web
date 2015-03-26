@@ -1,12 +1,12 @@
-///
-// GLOBAL VARIABLES
+/* exported EXPORTED_LIB */
+var _CONFIG = {};
 
-var SERVER_URL = 'http://localhost:3000';
+_CONFIG.serverUrl = 'http://localhost:3000';
 //var SERVER_URL = 'http://test-panatrans.herokuapp.com';
 
 // TILE LAYER SERVER && copyright attributions
-var TILELAYER_URL = 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
-var TILELAYER_ATTRIBUTION = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>';
+_CONFIG.tilelayerUrl = 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
+_CONFIG.tilelayerAttribution = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>';
 
 
 // CartoDB basemaps
@@ -24,11 +24,6 @@ var TILELAYER_ATTRIBUTION = '&copy; <a href="http://www.openstreetmap.org/copyri
 // the API supports the option in any call &with_dealay=true. 
 // DELAY string is added to some requests.
 //  Useful to test how the UI works when server is slow
-var DELAY = '';
+_CONFIG.delay = '';
 //var DELAY = '&with_delay=true'; 
 
-
-//CONSTANT
-var UNKNOWN_STOP_SEQUENCE = -1;
-//var LAST_STOP_SEQUENCE = null;
-//var FIRST_STOP_SEQUENCE = 0;
