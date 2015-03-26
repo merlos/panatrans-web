@@ -7,14 +7,13 @@
  * # ApiCtrl
  * Controller of the panatransWebApp to display API docs
  */
-var SERVER_URL = 'http://localhost:3000';
 
 
 angular.module('panatransWebApp')
   .controller('RoutesCtrl', ['$scope', '$http', function ($scope, $http) {
     $scope.routes = {};
     
-    $http.get(SERVER_URL + '/v1/routes/with_trips')
+    $http.get(SERVER_URL + '/v1/routes/?with_trips=true')
     .success(function(response) {
       $scope.routesArray = response.data;
       $.each(response.data, function(index, route) {

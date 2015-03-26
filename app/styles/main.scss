@@ -6,26 +6,30 @@ $icon-font-path: "../bower_components/bootstrap-sass-official/assets/fonts/boots
 $main-color: #F05A28;
 
 html, body {
-  height: 98%;
+  height: 100%;
   overflow: hidden;
 }
 
 .fill {
-  height: 98%;
-  min-height: 98%;
+  height: 100%;
+  min-height: 100%;
+}
+.leaflet-control-attribution {
+  margin-bottom: 42px !important;
 }
 
 #map {
   display: block;
   margin-top: 50px;
+  margin-bottom: 100px;
   width: 100%;
-  height: 98%;
-  min-height: 98%; 
+  height: 100%;
+  min-height: 100%; 
 }
 
 footer {
   position: fixed;
-  z-index: 1000000; 
+  z-index: 1000; 
   bottom: 0; 
   left: 0;
   width: 100%;
@@ -75,8 +79,107 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
   right: 10px;
 }
 
+#stop-detail {
+  z-index: 999;
+  position: fixed;
+  width: 100%;
+  background: #f0f0f0;
+  top: 50px;
+  left: 0px;
+  height: 100%;
+  min-height: 400px;
+  overflow-y: scroll;
+ 
+  #stop-detail-container {
+    opacity: 1.0;
+  }
+ 
+  h1,h2,h3 {
+    opacity: 1.0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .routes-title {
+    text-transform: uppercase;
+   background-color: #DDDDDD;
+   color: #5C5C5C;
+   font-size: 10px; 
+   padding: 5px;
+   margin: 0px;
+  }
+  ul.route-list {
+    margin: 0px;
+    padding: 0px;
+    list-style-type: none;
+    
+    
+  }
+  li.route-list-item {
+   /* min-height: 60px;
+    line-height: 60px;*/
+    padding: 0px;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin: 0px;
+
+    border-bottom: 1px solid grey;
+    
+    h4 {  
+    }    
+  }
+  
+  ul.trip-stops-list {
+    margin:0px; 
+    padding:0px; 
+    list-style-type: none;
+    
+    li {
+       margin:0px; 
+       padding: 0px; 
+       padding-top: 3px; 
+       padding-bottom: 3px; 
+       font-size: 10px;
+       &:hover {
+         font-weight: bold;
+         color: pink;
+       };
+    }
+    
+  }
+  
+  .route-list-item:hover {
+    h4 { 
+      color: red;
+    }
+    cursor: pointer;
+    background-color: white;
+  };
+  
+  h3 {
+    color: $main-color;
+    padding: 5px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
+   
+} //stop-detail
+
+
 @media screen and (min-width: 768px) {
   
+  .leaflet-control-attribution {
+    margin-bottom: 22px !important;
+  }
+  
+  
+  #stop-detail {
+    width: 300px;
+    
+  }
   .navbar-default {
     border-bottom: 1px solid $main-color;
   }
@@ -86,91 +189,5 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
     overflow-y: scroll;
   }
   
-  #stop-detail {
-    position: fixed;
-    background: #f0f0f0;
-    width: 300px;
-    top: 50px;
-    left: 0px;
-    height: 100%;
-    min-height: 400px;
-    overflow-y: scroll;
-   
-    #stop-detail-container {
-      opacity: 1.0;
-    }
-   
-    h1,h2,h3 {
-      opacity: 1.0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .routes-title {
-      text-transform: uppercase;
-     background-color: #DDDDDD;
-     color: #5C5C5C;
-     font-size: 10px; 
-     padding: 5px;
-     margin: 0px;
-    }
-    ul.route-list {
-      margin: 0px;
-      padding: 0px;
-      list-style-type: none;
-      
-      
-    }
-    li.route-list-item {
-     /* min-height: 60px;
-      line-height: 60px;*/
-      padding: 0px;
-      padding-left: 5px;
-      padding-right: 5px;
-      margin: 0px;
-
-      border-bottom: 1px solid grey;
-      
-      h4 {  
-      }    
-    }
-    
-    ul.trip-stops-list {
-      margin:0px; 
-      padding:0px; 
-      list-style-type: none;
-      
-      li {
-         margin:0px; 
-         padding: 0px; 
-         padding-top: 3px; 
-         padding-bottom: 3px; 
-         font-size: 10px;
-         &:hover {
-           font-weight: bold;
-           color: pink;
-         };
-      }
-      
-    }
-    
-    .route-list-item:hover {
-      h4 { 
-        color: red;
-      }
-      cursor: pointer;
-      background-color: white;
-    };
-    
-    h3 {
-      color: $main-color;
-      padding: 5px;
-      padding-top: 10px;
-      padding-bottom: 10px;
-      margin-top: 0px;
-      margin-bottom: 0px;
-    }
-     
-  } //stop-detail
+ 
 }

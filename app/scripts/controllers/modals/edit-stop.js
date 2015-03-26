@@ -3,7 +3,7 @@
 // Modal Controller
 //
 angular.module('panatransWebApp')
-.controller('EditStopRoutesModalInstanceCtrl', function ($scope, $http, $modalInstance, routes, stop) {
+.controller('EditStopModalInstanceCtrl', function ($scope, $http, $modalInstance, routes, stop) {
   $scope.stop = stop;
   $scope.routes = routes;
   console.log(routes);
@@ -68,6 +68,46 @@ angular.module('panatransWebApp')
     });
     //update local model
   };
+  
+  $scope.updateStopName = function() {
+    console.log("updateStop");
+    console.log($scope.stop);
+    $http.put(SERVER_URL + '/v1/stops/' + $scope.stop.id, {stop: { name: $scope.stop.name}})
+    .success(function(response){
+      console.log("Stop successfully updated");
+      //TODO feedback
+    })
+    .error(function(response) {
+      console.log('error adding trip to stop');
+      console.log(response);
+    });
+
+  };
+  
+  $scope.deleteStop = function() {
+    if ($scope.stop.routes.length > 0) {
+      console.log('ERROR: the stop has trips cannot be deleted');
+      alert('No se puede borrar. Tienes que quitar todas las rutas que pasan por la parada antes de eliminarla.')
+      return;
+    }
+    $http.delete(SERVER_URL + '/v1/stops/'+ $scope.stop.id)
+    .success( function() {
+      console.log('parada borrada del servidor con éxito');
+      $modalInstance.dismiss('stopDeleted');
+      
+    })
+    .error(function(data, status) {
+      console.log('Error borrando la parada');
+      console.log(data);
+    });
+  };
+  
+  $scope.changeStopLocation = function() {
+    console.log("changeStopLocation Requested");
+    //dismiss and set as reason: changeStopLocation so main controler with map handles it
+    $modalInstance.dismiss('changeStopLocation');
+  }
+  
   $scope.deleteTrip = function(tripId) {
     $http.delete(SERVER_URL + '/v1/stop_sequences/trip/' + tripId + '/stop/' + $scope.stop.id)
     .success(function(response) {
@@ -77,6 +117,10 @@ angular.module('panatransWebApp')
         $.each(route.trips, function(indexTrip, trip){
           if (trip.id === tripId) { //remove trip
             $scope.stop.routes[indexRoute].trips.splice(indexTrip,1);
+            //delete route from stop if there are no more trisp
+            if ($scope.stop.routes[indexRoute].trips.length === 0) {
+              $scope.stop.routes.splice(indexRoute, 1);
+            }
           }
         }); //each trips
       }); //each routes

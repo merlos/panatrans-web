@@ -9,9 +9,11 @@ var TILELAYER_URL = 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
 var TILELAYER_ATTRIBUTION = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>';
 
 
-
+// CartoDB basemaps
+//http://cartodb.com/basemaps
+//
 //Mapbox
-
+//
 //
 //merlos.li3k1pmo (w/colors)
 //merlos.k99amj6l (b/w)

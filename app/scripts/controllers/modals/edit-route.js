@@ -2,11 +2,13 @@
 // Edit Routes of a Stop Modal Controller
 //
 angular.module('panatransWebApp')
-.controller('EditRouteStopModalInstanceCtrl', function ($scope, $http, $modalInstance, route, stopsArr) {
+.controller('EditRouteModalInstanceCtrl', function ($scope, $http, $modalInstance, route, stopsArr) {
     
 $scope.sortedStopSequences = {};
 $scope.unknownStopSequences = {};
 // updates the route model by getting a fresh version from the server
+
+
 var updateRoute = function() { 
   $http.get(SERVER_URL + '/v1/routes/' + $scope.route.id + '?' + DELAY)
   .success(function(response) {
@@ -182,7 +184,19 @@ if (route.trips[0].stops) {
 }
     
     
-    
+
+$scope.updateRouteName = function(){
+  console.log('updateRouteName');
+  $http.put(SERVER_URL + '/v1/routes/' + $scope.route.id, {route: {name: $scope.route.name}})
+  .success(function() {
+    //TODO display some kind of feedback
+    console.log('route successfully updated');
+  })
+  .error(function(){
+    console.log('error updating rooute');
+  });
+  
+};    
     
     
 $scope.deleteStopSequence = function (stopSequence) {

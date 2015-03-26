@@ -23,12 +23,15 @@ angular.module('panatransWebApp')
   $scope.loadingStopDetail = false;
   $scope.stopDetail = {};
   
+  var userLocationMarker = null;
+  var userLocationCircle = null;
+  
   var newStop = {};
   var newStopMarker = null;
   var stopDetailPanelHighlightedStop = null;
   var markers = {};
   var markerIcon = {
-    default: L.AwesomeMarkers.icon({
+    default: L.AwesomeMarkers.icon({ // bus stop default
       icon: 'bus',
       prefix: 'fa',
       markerColor: 'blue'
@@ -59,6 +62,12 @@ angular.module('panatransWebApp')
       prefix: 'fa',
       markerColor: 'red',
       spin: true
+    }),
+    userLocation: L.AwesomeMarkers.icon({
+      icon: 'user',
+      prefix: 'fa',
+      markerColor: 'green',
+      spin: false
     })
   };
    
@@ -97,11 +106,41 @@ angular.module('panatransWebApp')
         }
       );
       marker.addTo($scope.map).bindPopup( stop.name);
+      marker.on('popupopen', stopMarkerPopupOpen); 
+      marker.on('popupclose', stopMarkerPopupClose); 
       //set an id (https://github.com/Leaflet/Leaflet/issues/1031)
         marker._stopId = stop.id; 
         markers[stop.id] = marker; //add the marker to the list of markers
       });
     }); //end $http
+    
+    var onLocationFound = function(e) {
+      if (e.accuracy == null) return;
+      var radius = e.accuracy / 2;
+      if (userLocationMarker === null) {  // add to map
+    	  userLocationMarker = L.marker(e.latlng, {icon: markerIcon.userLocation});
+        userLocationMarker.addTo($scope.map);
+        $scope.map.panTo(e.latlng);
+    	  userLocationCircle = L.circle(e.latlng, radius);
+        userLocationCircle.addTo($scope.map);
+      }
+      //update
+      userLocationMarker.setLatLng(e.latlng);
+      userLocationMarker.bindPopup("Estás cerca de este punto en un radio de unos " + radius + " metros.");
+      userLocationCircle.setLatLng(e.latlng);
+      userLocationCircle.setRadius(radius);
+      if ($scope.trackingUser) {
+        $scope.map.panTo(e.latlng);
+      }
+    };
+
+    var onLocationError = function(e) {
+    			console.log(e.message);
+    };
+
+    $scope.map.on('locationfound', onLocationFound);
+    $scope.map.on('locationerror', onLocationError);
+    $scope.map.locate({watch: true, setView: false, maxZoom: 15, enableHighAccuracy: true});
     
     
     var stopMarkerPopupOpen = function(e) {
@@ -123,7 +162,11 @@ angular.module('panatransWebApp')
       $scope.showStopDetail = true;  
       console.log(e);
       var stopId = e.popup._source._stopId;
-      if (stopId == null) { return;}
+      if (stopId === null) { 
+          console.log("stopMarkerClicked: Hey! Hey! stopId es null :-?");
+          return;
+      }
+      console.log('stopId Clicked: ' + stopId);
       if ($scope.stops[stopId].routes) { //if we already downloaded the stop detail then routes is defined
         $scope.$apply(function() { //http://stackoverflow.com/questions/20954401/angularjs-not-updating-template-variable-when-scope-changes
           $scope.stopDetail = $scope.stops[stopId]; 
@@ -145,7 +188,7 @@ angular.module('panatransWebApp')
     }; // on(popupopen)
     
     
-    var stopMarkerPopupClosed = function(e) {
+    var stopMarkerPopupClose = function(e) {
       console.log('stopMarkerClosed');
       //clear markers color
       if (stopDetailPanelHighlightedStop === null) {
@@ -155,8 +198,8 @@ angular.module('panatransWebApp')
       }  
     };
     
-    $scope.map.on('popupopen', stopMarkerPopupOpen); 
-    $scope.map.on('popupclose', stopMarkerPopupClosed);
+    //$scope.map.on('popupopen', stopMarkerPopupOpen); 
+    //$scope.map.on('popupclose', stopMarkerPopupClose);
     
     
     $scope.closeStopDetail = function() {
@@ -261,11 +304,11 @@ angular.module('panatransWebApp')
     };
     
     
-    $scope.openEditStopRoutesModal = function(stopId){
+    $scope.openEditStopModal = function(stopId){
       var modalInstance = $modal.open({
-        templateUrl: 'views/modals/edit-stop-routes.html',
+        templateUrl: 'views/modals/edit-stop.html',
         size: 'lg',
-        controller: 'EditStopRoutesModalInstanceCtrl',
+        controller: 'EditStopModalInstanceCtrl',
         backdrop: true,
         stopId: stopId,
         resolve: { //variables passed to modal scope
@@ -278,16 +321,93 @@ angular.module('panatransWebApp')
         }
       });
       modalInstance.result.then(function () {
-      }, function () {
+      }, function (reason) {
+        console.log("modal instance dismissed reason : " + reason);
+        if (reason === 'changeStopLocation') {
+          console.log("changeStopLocation: " + stopId);
+          setStopMarkerEditMode(markers[stopId]);
+        }
+        if (reason === 'stopDeleted') {
+          console.log('deletedStop, eliminating marker and stop');
+          $scope.map.removeLayer(markers[stopId]);
+          delete markers[stopId];
+          delete $scope.stops[stopId];
+          //TODO add feedback to user
+        }
       });
     };
     
+    var setStopMarkerEditMode = function(stopMarker) {
+      console.log('setStopMarkerEditMode');
+      //center and zoom map to stop
+      stopMarker.setIcon(markerIcon.redSpin);
+      stopMarker.dragging.disable();
+      stopMarker.dragging.enable();
+      
+      stopMarker.off('popupopen', stopMarkerPopupOpen);
+      stopMarker.off('popupclose', stopMarkerPopupClose);
+      
+      
+      $scope.map.setView(stopMarker.getLatLng(), 15);
+      
+      var stop = $scope.stops[stopMarker._stopId];    
+      var html = '<div><h4>' + stop.name + '</h4><p><strong>Arrástrame</strong> hasta mi localización.<br>Después dale a: </p><button ng-click="saveStopLocation(stop)"class="btn btn-primary">Actualizar</button> o a <a href="" ng-click="cancelStopMarkerEditMode(stopMarker)">cancelar</a></div>';
+      var linkFn = $compile(angular.element(html));
+      var scope = $scope.$new();
+       //add var to scope
+      scope.stop = stop;
+      scope.stopMarker = stopMarker;
+      var element = linkFn(scope);
+      console.log(element);
+          
+      stopMarker.bindPopup(element[0]).openPopup();    
+      stopMarker.on('dragend', function(e){
+        console.log('dragend called!!'); 
+        var marker = e.target;
+        marker.openPopup();
+        var position = marker.getLatLng();
+        stop.lat = position.lat;
+        stop.lon = position.lng;
+        console.log($scope.newStop);
+      });  
+      
+    };
     
-    $scope.openEditRouteStopsModal = function(routeId){
+    $scope.cancelStopMarkerEditMode = function(stopMarker) {
+      console.log('cancelStopMarkerEditMode');
+      stopMarker.closePopup();
+      stopMarker.dragging.disable();
+      stopMarker.setIcon(markerIcon.red);
+      console.log('setting popup content = ' + $scope.stops[stopMarker._stopId].name);
+      stopMarker.bindPopup($scope.stops[stopMarker._stopId].name);
+      //suscribe again to eventlistener
+      stopMarker.on('popupopen', stopMarkerPopupOpen);
+      stopMarker.on('popupclose', stopMarkerPopupClose); 
+      stopMarker.openPopup();
+    };
+    
+    
+    $scope.saveStopLocation = function(stop) {
+      console.log('saveStopLocation called');
+      $http.put(SERVER_URL + '/v1/stops/' + stop.id, {stop: {lat: stop.lat, lon: stop.lon}})
+      .success(function(){
+        console.log('new stop location successfully saved');
+        //TODO show feedback to user
+        //marker to normal
+        $scope.cancelStopMarkerEditMode(markers[stop.id]);
+      })
+      .error(function(data, status) {
+        console.log('error updating stop Location');
+        console.log(data);
+      });
+    };
+    
+  
+    $scope.openEditRouteModal = function(routeId){
       var modalConfig = {
-        templateUrl: 'views/modals/edit-route-stops.html',
+        templateUrl: 'views/modals/edit-route.html',
         size: 'lg',
-        controller: 'EditRouteStopModalInstanceCtrl',
+        controller: 'EditRouteModalInstanceCtrl',
         backdrop: true,
         routeId: routeId,
         resolve: { //variables passed to modal scope
@@ -363,14 +483,12 @@ angular.module('panatransWebApp')
         }
       };
       var modalInstance = $modal.open(modalConfig);  
-      
       modalInstance.result.then(function (stopModal) {
         newStop = stopModal;
           //add newStopMarker
         var mapCenter = $scope.map.getCenter();
         newStop.lat = mapCenter.lat;
         newStop.lon = mapCenter.lng;
-         
         newStopMarker = L.marker(mapCenter, 
             { 
               icon: markerIcon.redSpin,
@@ -378,17 +496,15 @@ angular.module('panatransWebApp')
               bounceOnAdd: true, 
               bounceOnAddOptions: {duration: 500, height: 100}, 
               bounceOnAddCallback: function() {console.log("done");}
-            }).addTo($scope.map);
-            
+            }).addTo($scope.map); //http://stackoverflow.com/questions/17662551/how-to-use-angular-directives-ng-click-and-ng-class-inside-leaflet-marker-popup    
         var html = '<div><h4>' + newStop.name + '</h4><p><strong>Arrástrame</strong> hasta mi localización.<br>Después dale a: </p><button ng-click="saveNewStop()"class="btn btn-primary">Guardar</button> o <a ng-click="cancelSaveNewStop()">cancelar</a></div>';
         var linkFn = $compile(angular.element(html));
         var scope = $scope.$new();
         var element = linkFn(scope);
-        console.log(element);
-            
+        console.log(element);  
         newStopMarker.bindPopup(element[0]).openPopup();    
         newStopMarker.on('dragend', function(e){
-          console.log('dragend called!!');
+        console.log('dragend called!!');
           
           var marker = e.target;
           marker.openPopup();
