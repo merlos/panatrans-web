@@ -53,7 +53,7 @@ $.each(route.trips, function(index, trip){
   $scope.newStopSequence[trip.id] = {
     stop: null,
     trip: trip,
-    sequence: UNKNOWN_STOP_SEQUENCE
+    sequence: -1
   }; 
       
   //create dragControlListeners for ng-sortable
@@ -214,7 +214,7 @@ $scope.addStopToTrip = function (tripId) {
   var unknownSequence = false;
   console.log('stopSequence:' + $scope.newStopSequence[tripId].sequence);
       
-  if ($scope.newStopSequence[tripId].sequence === UNKNOWN_STOP_SEQUENCE) {
+  if ($scope.newStopSequence[tripId].sequence === -1) {
     unknownSequence = true;
   }
       

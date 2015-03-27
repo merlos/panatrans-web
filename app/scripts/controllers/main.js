@@ -82,7 +82,7 @@ angular.module('panatransWebApp')
     attribution: _CONFIG.tilelayerAttribution,
     maxZoom: 18
   }).addTo($scope.map);
-  $http.get(_CONFIG.serverUrl + '/v1/routes?with_trips=true')
+  $http.get(_CONFIG.serverUrl + '/v1/routes?with_trips=true' + _CONFIG.delay)
   .success(function(response) {
     $scope.routesArray = response.data;
     $.each(response.data, function(index, route) {
@@ -91,7 +91,7 @@ angular.module('panatransWebApp')
   });
   
   //get stops
-  $http.get(_CONFIG.serverUrl + '/v1/stops/')
+  $http.get(_CONFIG.serverUrl + '/v1/stops/?' + _CONFIG.delay)
   .success(function(response) {
     console.log('Success getting stops!!!');
     //console.log(response.data);
