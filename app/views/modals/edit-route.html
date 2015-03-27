@@ -10,7 +10,7 @@
       <div class="row" ng-hide="loading">
         <div class="col-sm-6" ng-repeat="trip in route.trips">
           <h4>{{trip.headsign}}</h4>
-          <p>Parada: <input type="text" ng-model="newStopSequence[trip.id].stop" typeahead-focus-first="true" typeahead-editable="false" typeahead="stop as stop.name for stop in stopsArr | limitTo:8 | filter:{name:$viewValue}" placeholder="Ej: Albrook">
+          <p>Parada: <input type="text" ng-model="newStopSequence[trip.id].stop" typeahead-focus-first="true" typeahead-editable="false" typeahead="stop as stop.name for stop in stopsArr | filter:{name:$viewValue} | limitTo:8" placeholder="Ej: Albrook">
 
             <div class="btn-group">
              

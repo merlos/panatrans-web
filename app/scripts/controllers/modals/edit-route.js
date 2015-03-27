@@ -41,6 +41,7 @@ var updateRoute = function() {
 $scope.loading = true;
 $scope.route = route;
 $scope.stopsArr = stopsArr; //all the stops
+console.log(stopsArr);
 $scope.newStopSequence = {};
 $scope.dragControlListeners = {};
     

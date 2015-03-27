@@ -18,7 +18,8 @@ angular
     'ngTouch',
     'ui.bootstrap',
     'ui.sortable',
-    'angular-toArrayFilter'
+    'angular-toArrayFilter',
+    'ngToast'
   ])
   .config(function ($routeProvider) {
     $routeProvider

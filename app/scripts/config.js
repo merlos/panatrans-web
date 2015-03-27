@@ -24,6 +24,6 @@ _CONFIG.tilelayerAttribution = '&copy; <a href="http://www.openstreetmap.org/cop
 // the API supports the option in any call &with_dealay=true. 
 // DELAY string is added to some requests.
 //  Useful to test how the UI works when server is slow
-//_CONFIG.delay = '';
-_CONFIG.delay = '&with_delay=true'; 
+_CONFIG.delay = '';
+//_CONFIG.delay = '&with_delay=true'; 
 

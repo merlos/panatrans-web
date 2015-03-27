@@ -8,8 +8,18 @@
 * Controller of the panatransWebApp. This controller handles the mapa stuff
 */
 
+/** ng toast config **/
 angular.module('panatransWebApp')
-.controller('MainCtrl', [ '$scope', '$compile', '$http', '$modal', function ($scope, $compile, $http, $modal) {
+  .config(['ngToastProvider', function(ngToast) {
+    ngToast.configure({
+      verticalPosition: 'top',
+      horizontalPosition: 'center',
+      maxNumber: 3
+    });
+  }]);
+
+angular.module('panatransWebApp')
+.controller('MainCtrl', [ '$scope', '$compile', '$http', '$modal',  'ngToast', function ($scope, $compile, $http, $modal, ngToast) {
   
   // it seems that the controller is loaded twice. Doing that makes initialize twice the map, which makes a mess
   if ($scope.map) { 
@@ -332,6 +342,7 @@ angular.module('panatransWebApp')
         if (reason === 'stopDeleted') {
           console.log('deletedStop, eliminating marker and stop');
           $scope.map.removeLayer(markers[stopId]);
+          ngToast.create('Se ha borrado la parada ' + $scope.stops[stopId].name);
           delete markers[stopId];
           delete $scope.stops[stopId];
           //TODO add feedback to user
@@ -448,18 +459,22 @@ angular.module('panatransWebApp')
         newStopMarker.closePopup();
         newStopMarker.setIcon(markerIcon.default);
         newStopMarker.bindPopup(response.data.name);
-        
+        newStopMarker.on('popupopen', stopMarkerPopupOpen);
+        newStopMarker.on('popupclose', stopMarkerPopupClose); 
         //update popup
         markers[response.data.id] = newStopMarker;
+        newStopMarker.openPopup();
         //clear marker and stop for next round
         newStop = {};
         newStopMarker = null;
         //display some feedback to the user
+        ngToast.create('Excelente, ¡parada añadida!');
         console.log('Se ha añadido la parada con éxito');
+        
         
       })
       .error(function(data) {
-        alert(data);
+        console.log(data);
       });
     };
     
