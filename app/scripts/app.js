@@ -27,16 +27,21 @@ angular
         templateUrl: 'views/main.html',
         controller: 'MainCtrl'
       })
-      .when('/routes', {
+      .when('/rutas', {
         templateUrl: 'views/routes.html',
         controller: 'RoutesCtrl'
       })
-      .when('/about', {
+      .when('/colabora', {
+        templateUrl: 'views/contribute.html',
+        controller: 'ContributeCtrl'
+      })
+      
+      .when('/acercade', {
         templateUrl: 'views/about.html',
         controller: 'AboutCtrl'
       })
       
-      .when('/licenses', {
+      .when('/licencias', {
         templateUrl: 'views/licenses.html',
         controller: 'LicensesCtrl'
       })

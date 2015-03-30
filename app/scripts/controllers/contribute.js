@@ -8,7 +8,6 @@
  * Controller of the panatransWebApp
  */
 angular.module('panatransWebApp')
-  .controller('LicensesCtrl', function ($scope) {
-    $scope.title = 'Licenses';
-    window.scrollTo(0, 0)
+  .controller('ContributeCtrl', function ($scope) {
+    $scope.title = 'Colabora';
   });
