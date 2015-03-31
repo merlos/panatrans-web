@@ -10,14 +10,18 @@
 
 
 angular.module('panatransWebApp')
-  .controller('RoutesCtrl', ['$scope', '$http', function ($scope, $http) {
+  .controller('RoutesCtrl', ['$scope', '$http', '$modal', function ($scope, $http, $modal) {
     
     $scope.routes = {};
+    $scope.stopsArr = {};
+    
+    //TODO repeated coded in main.js 
+    //this should be in a service
     $scope.loading = true
     $http.get(_CONFIG.serverUrl + '/v1/routes/?with_trips=true')
     .success(function(response) {
       $scope.loading=false
-      $scope.routesArray = response.data; //TODO repeated coded this should be in a service
+      $scope.routesArray = response.data; 
       $.each(response.data, function(index, route) {
         $scope.routes[route.id] = route;
       });
@@ -46,5 +50,25 @@ angular.module('panatransWebApp')
       //console.log(actual + ' <-> ' + expected);
       return actual.indexOf(expected) > -1;
     };
+    
+    $scope.openEditRouteModal = function(routeId){
+      var modalConfig = {
+        templateUrl: 'views/modals/edit-route.html',
+        size: 'lg',
+        controller: 'EditRouteModalInstanceCtrl',
+        backdrop: true,
+        routeId: routeId,
+        resolve: { //variables passed to modal scope
+          route: function() {
+            return $scope.routes[routeId];
+          },
+          stopsArr: function() {
+            return $scope.stopsArr;
+          }
+        }
+      };
+      $modal.open(modalConfig);  
+    };
+    
     
   }]);

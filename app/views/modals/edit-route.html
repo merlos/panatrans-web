@@ -1,63 +1,124 @@
   
-    <div class="modal-header">
-      <button class="btn btn-default pull-right" ng-click="close()"><i class="fa fa-close"></i></button>
-      <h3 class="modal-title">Ruta: <input type="text" ng-model="route.name" ng-blur="updateRouteName()"></h3>
+<div class="modal-header">
+  <button class="btn btn-default pull-right" ng-click="close()"><i class="fa fa-close"></i></button>
+  <h3 class="modal-title">Ruta: {{route.name}}</h3>
+</div>
+<div class="modal-body modal-view-size">
+      
+  <div class="row" ng-show="loading">
+    <p class="text-center"><i class="fa fa-circle-o-notch fa-spin"></i> Obteniendo datos de ruta...</p>
+  </div>
+      
+      
+  <div ng-hide="loading" class="container-fluid">
+        
+    
+    <div class="form-group">    
+      <!-- route name -->
+      <label for="route-name">Nombre de la ruta:</label>
+      <input id="route-name" name="route-name" class="form-control" type="text" ng-model="route.name" ng-blur="updateRouteName()" placeholder="Albrook - Miraflores" aria-describedby="help-route-name">
+      <small class="help-block" id="help-route-name">Usa guiones como separador. Ej: Albrook - Miraflores
+        <br> En las rutas de un único trayecto y las circulares escribe primero el nombre de la primera parada. Por ejemplo, en la ruta circular "Estación de Marañón - El Chorrillo", como sale y termina en Marañón se pone primero "Estación de Marañón".
+        <br>
+        Mibus no siempre sigue esta convención en su web, pero aquí por claridad intentamos seguirla.
+        <br>
+        ¡Ah! y no te olvides poner las tildes ;-).
+      </small>
     </div>
-    <div class="modal-body modal-view-size">
-      <div class="row" ng-show="loading">
-        <p class="text-center"><i class="fa fa-circle-o-notch fa-spin"></i> Obteniendo datos</p>
+    <!-- route url -->
+    <div class="form-group"> 
+      <label for="route-address">Dirección web:</label>
+      <input id="route-address" class="form-control" name="route-address" type="text" ng-model="route.url" ng-blur="updateRouteUrl()" placeholder="http://www.mibus.com/albrook-miraflores/" aria-describedby="help-route-name">
+      <small class="help-block" id="help-route-name">Es la página de mibus con la ruta. Si existe, la puedes encontrar en <a href="http://www.mibus.com.pa/rutas/" title="rutas">mibus.com.pa</a>
+      </small>
+    </div>
+  
+    <!-- there are two situations: 
+       1) The route does not have any trip. Then display a form to create the trips.
+       2) The route has trips. Then display the form to edit the tripes, ie. add/remove stop_sequences
+    -->        
+    <div ng-show="(route.trips === undefined) || (route.trips.length === 0)"> <!-- 1)  display if route does not have any trip -->
+      <p><strong>¿Qué trayectos tiene la ruta?</strong></p>
+      <div class="radio">  
+        <label>
+          <input type="radio" name="trips" value="one-trip" checked  aria-describedby="help-one-trip">
+          Ruta de un único trayecto
+          <small id="help-one-trip" class="help-block">No hay trayecto de vuelta.</small>
+        </label>
       </div>
-      <div class="row" ng-hide="loading">
-        <div class="col-sm-6" ng-repeat="trip in route.trips">
-          <h4>{{trip.headsign}}</h4>
-          <p>Parada: <input type="text" ng-model="newStopSequence[trip.id].stop" typeahead-focus-first="true" typeahead-editable="false" typeahead="stop as stop.name for stop in stopsArr | filter:{name:$viewValue} | limitTo:8" placeholder="Ej: Albrook">
+          
+      <div class="radio"> 
+        <label>
+          <input type="radio" name="trips" value="one-trip" aria-describedby="help-circular-trip">
+          Ruta de un único trayecto circular
+          <small id="help-circular-trip" class="help-block">Comienza y termina en la misma parada.</small>
+        </label>
+      </div>
+          
+      <div class="radio"> 
+        <label>
+          <input type="radio" name="trips" id="two" value="two-trips">
+          Dos trayectos 
+          <small id="help-circular-trip" class="help-block">Tiene un trayecto de ida y otro de vuelta.</small>
+        </label>
+      </div>
+      
+      <p>
+        <button class="btn btn-primary" ng-click="setTrips()">Continuar</button>
+      </p>
+    </div>
+  
+  <!-- 2) the route has the trips -->      
+  <div class="col-sm-6" ng-repeat="trip in route.trips">
+    <h4>{{trip.headsign}}</h4>
+    <p>Parada: <input type="text" ng-model="newStopSequence[trip.id].stop" typeahead-focus-first="true" typeahead-editable="false" typeahead="stop as stop.name for stop in stopsArr | filter:{name:$viewValue} | limitTo:8" placeholder="Ej: Albrook">
 
-            <div class="btn-group">
+      <div class="btn-group">
              
-              <label class="btn btn-default btn-xs" 
-              ng-model="newStopSequence[trip.id].sequence" 
-              btn-radio="-1"><i class="fa fa-exclamation-triangle" 
-              title="Añadir parada en posición desconocida."></i></label>
+        <label class="btn btn-default btn-xs" 
+        ng-model="newStopSequence[trip.id].sequence" 
+        btn-radio="-1"><i class="fa fa-exclamation-triangle" 
+        title="Añadir parada en posición desconocida."></i></label>
              
-              <label class="btn btn-default btn-xs" 
-              ng-model="newStopSequence[trip.id].sequence" 
-              btn-radio="0" 
-              title="Añadir parada al inicio de la ruta">Primera</label>
+        <label class="btn btn-default btn-xs" 
+        ng-model="newStopSequence[trip.id].sequence" 
+        btn-radio="0" 
+        title="Añadir parada al inicio de la ruta">Primera</label>
              
-              <label class="btn btn-default btn-xs" 
-              ng-model="newStopSequence[trip.id].sequence" 
-              btn-radio="null" 
-              tutle="Añadir al final de la ruta">Fin</label> 
+        <label class="btn btn-default btn-xs" 
+        ng-model="newStopSequence[trip.id].sequence" 
+        btn-radio="null" 
+        tutle="Añadir al final de la ruta">Fin</label> 
              
-            </div>
-            <button ng-click="addStopToTrip(trip.id)" class="btn btn-primary">Añadir</button>
+      </div>
+      <button ng-click="addStopToTrip(trip.id)" class="btn btn-primary">Añadir</button>
        
-          </p>
-          <ul class="as-sortable-unselectable fa-ul" 
-          data-as-sortable="dragControlListeners[trip.id]['unknown']" 
-          data-ng-model="unknownStopSequences[trip.id]">
-           <li  data-ng-repeat="stop_sequence in unknownStopSequences[trip.id]| filter : orderBy : stop_sequence.sequence" ng-if="stop_sequence.sequence === null" class="sortable-li" data-as-sortable-item>
+    </p>
+    <ul class="as-sortable-unselectable fa-ul" 
+    data-as-sortable="dragControlListeners[trip.id]['unknown']" 
+    data-ng-model="unknownStopSequences[trip.id]">
+    <li  data-ng-repeat="stop_sequence in unknownStopSequences[trip.id]| filter : orderBy : stop_sequence.sequence" ng-if="stop_sequence.sequence === null" class="sortable-li" data-as-sortable-item>
                       
-                  <i class="fa-li fa fa-exclamation-triangle" style="line-height: 18px;padding:5px"></i><div data-as-sortable-item-handle title="Arrastra la parada al orden adecuado (secuencia: {{stop_sequence.sequence}})">{{stop_sequence.sequence}} -  {{stop_sequence.stop.name}}
-                <!-- <i ng-if="stop_sequence.sequence === null" class="fa fa-exclamation-triangle" style="color:orange" title="Está en la ruta, pero no sabemos en qué lugar"></i> -->
-                <a href="" ng-click="deleteStopSequence(stop_sequence)" title="Borrar {{stop_sequence.stop.name}} de esta ruta" class="pull-right"><i class="fa fa-trash-o"></i></a>
-              </div>
-            </li>
-          </ul>
-          <hr>
-          <ol class="as-sortable-unselectable" 
-          data-as-sortable="dragControlListeners[trip.id]['sorted']" 
-          data-ng-model="sortedStopSequences[trip.id]" >
-            <li  data-ng-repeat="stop_sequence in sortedStopSequences[trip.id] | filter : orderBy : stop_sequence.sequence" ng-if="stop_sequence.sequence !== null" class="sortable-li" data-as-sortable-item>
-              <div data-as-sortable-item-handle title="Arrastra la parada al orden adecuado (secuencia: {{stop_sequence.sequence}})"> {{stop_sequence.sequence}} {{stop_sequence.stop.name}} 
-                  <a href=""  ng-click="deleteStopSequence(stop_sequence)" title="Borrar {{stop_sequence.stop.name}} de esta ruta" class="pull-right"><i class="fa fa-trash-o"></i></a>
+      <i class="fa-li fa fa-exclamation-triangle" style="line-height: 18px;padding:5px"></i><div data-as-sortable-item-handle title="Arrastra la parada al orden adecuado (secuencia: {{stop_sequence.sequence}})">{{stop_sequence.sequence}} -  {{stop_sequence.stop.name}}
+        <!-- <i ng-if="stop_sequence.sequence === null" class="fa fa-exclamation-triangle" style="color:orange" title="Está en la ruta, pero no sabemos en qué lugar"></i> -->
+        <a href="" ng-click="deleteStopSequence(stop_sequence)" title="Borrar {{stop_sequence.stop.name}} de esta ruta" class="pull-right"><i class="fa fa-trash-o"></i></a>
+      </div>
+    </li>
+  </ul>
+  <hr>
+  <ol class="as-sortable-unselectable" 
+  data-as-sortable="dragControlListeners[trip.id]['sorted']" 
+  data-ng-model="sortedStopSequences[trip.id]" >
+  <li  data-ng-repeat="stop_sequence in sortedStopSequences[trip.id] | filter : orderBy : stop_sequence.sequence" ng-if="stop_sequence.sequence !== null" class="sortable-li" data-as-sortable-item>
+    <div data-as-sortable-item-handle title="Arrastra la parada al orden adecuado (secuencia: {{stop_sequence.sequence}})"> {{stop_sequence.sequence}} {{stop_sequence.stop.name}} 
+      <a href=""  ng-click="deleteStopSequence(stop_sequence)" title="Borrar {{stop_sequence.stop.name}} de esta ruta" class="pull-right"><i class="fa fa-trash-o"></i></a>
               
-            </div>
-            </li>
-          </ol>
+    </div>
+  </li>
+</ol>
           
           
-        </div>
-      </div><!-- row -->
-    </div> <!-- modal-body-->
+</div>
+</div><!-- row -->
+</div> <!-- modal-body-->
       
