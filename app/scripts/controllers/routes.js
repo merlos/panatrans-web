@@ -13,7 +13,8 @@ angular.module('panatransWebApp')
   .controller('RoutesCtrl', ['$scope', '$http', '$modal', function ($scope, $http, $modal) {
     
     $scope.routes = {};
-    $scope.stopsArr = {};
+    $scope.stopsArr = [];
+    $scope.stops = {};
     
     //TODO repeated coded in main.js 
     //this should be in a service
@@ -26,6 +27,17 @@ angular.module('panatransWebApp')
         $scope.routes[route.id] = route;
       });
     });
+    $http.get(_CONFIG.serverUrl + '/v1/stops/?' + _CONFIG.delay)
+    .success(function(response) {
+      console.log('Success getting stops!!!');
+      //console.log(response.data);
+      $scope.stopsArr = response.data;
+      $.each(response.data,function(index, stop) {
+        $scope.stops[stop.id] = stop;
+      });
+    }); //end $http
+    
+    
     
     $scope.ignoreAccentsComparator = function(actual, expected) {  
       var removeAccents = function (value) {

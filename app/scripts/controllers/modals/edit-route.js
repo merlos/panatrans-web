@@ -178,14 +178,15 @@ $.each(route.trips, function(index, trip){
 //console.log($scope.newStopSequence);
 console.log($scope.dragControlListeners);
               
-if (route.trips[0].stops) {
+//the route has trips and one of them has stops defined => we already downloaded the route
+// note: route has no trips => will always update the route.
+if ((route.trips.length > 0) && route.trips[0].stops) {
   $scope.loading = false;
 } else {
-  updateRoute();
+  updateRoute(); //downloads route to sync it with server version.
 }
     
     
-
 $scope.updateRouteName = function(){
   console.log('updateRouteName');
   $http.put(_CONFIG.serverUrl + '/v1/routes/' + $scope.route.id, {route: {name: $scope.route.name}})
@@ -194,7 +195,7 @@ $scope.updateRouteName = function(){
     console.log('route successfully updated');
   })
   .error(function(){
-    console.log('error updating rooute');
+    console.log('error updating route');
   });
   
 };    

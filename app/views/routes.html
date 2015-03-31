@@ -14,12 +14,16 @@
 <ul class="list-unstyled">
 <li ng-repeat="route in routes | toArray | filter : searchText : ignoreAccentsComparator">
     <strong>{{route.name}}</strong> 
-    <br>
     <span class="pull-right">
-      <a ng-click="openEditRouteModal(route.id)" href=""><i class="fa fa-edit"></i></a> |
-      <a href="{{route.url}}" target="_blank"><i class="fa fa-file-pdf-o"></i> pdf</a>
+      <a ng-click="openEditRouteModal(route.id)" href=""><i class="fa fa-edit"></i></a>
+      
     </span>
-   <hr>
+    
+    <br>
+    <span class="pull-left">
+      <a ng-show="{{route.url !== null}}" href="{{route.url}}" target="_blank" class="text-danger"><i class="fa fa-file-pdf-o"></i> pdf</a>
+    </span>
+       <hr>
 </li>
 </ul>
 </div>
