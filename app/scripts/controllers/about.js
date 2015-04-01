@@ -10,4 +10,5 @@
 angular.module('panatransWebApp')
   .controller('AboutCtrl', function ($scope) {
     $scope.title = 'Acerca de';
+    window.scrollTo(0, 0);
   });

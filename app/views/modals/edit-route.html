@@ -3,8 +3,7 @@
   <button class="btn btn-default pull-right" ng-click="close()"><i class="fa fa-close"></i></button>
   <h3 class="modal-title">Ruta: {{route.name}}</h3>
 </div>
-<div class="modal-body modal-view-size">
-      
+<div class="modal-body modal-view-size"> 
   <div ng-show="loading">
     <p class="text-center"><i class="fa fa-circle-o-notch fa-spin"></i> Obteniendo datos de ruta...</p>
   </div>
@@ -16,7 +15,7 @@
     <div class="row form-group">    
       <!-- route name -->
       <div class="col-md-6">
-        <label for="route-name">Nombre de la ruta:</label>
+        <label for="route-name">*Nombre de la ruta:</label>
       
         <input ng-init="routeNameHasFocus=false" id="route-name" name="route-name" class="form-control" type="text" ng-model="route.name" ng-focus="routeNameHasFocus=true" ng-blur="updateRouteName();routeNameHasFocus=false" placeholder="Ejemplo: Albrook - Miraflores" aria-describedby="help-route-name">
       </div>
@@ -44,46 +43,55 @@
   
     <!-- there are two situations: 
       1) The route does not have any trip. Then display a form to create the trips.
-      2) The route has trips. Then display the form to edit the tripes, ie. add/remove stop_sequences
+      2) The route has trips. Then display the form to edit the trips, ie. add/remove stop_sequences
       -->        
       <div ng-show="(route.trips === undefined) || (route.trips.length === 0)"> <!-- 1)  display if route does not have any trip -->
-        <p><strong>¿Qué trayectos tiene la ruta?</strong></p>
-        <div class="radio">  
+        <p ng-show="(route.trips !== undefined)" class="">La ruta todavía no tiene trayectos asignados.</p>
+        <p><strong>* ¿Qué trayectos tiene la ruta?</strong></p>
+        
+        <div class="row">
+          <div class="col-sm-4">
+          <div class="radio">  
           <label>
-            <input type="radio" name="trips" value="one-trip" checked  aria-describedby="help-one-trip">
-            Ruta de un único trayecto
+            <input type="radio" name="trips" value="one"  aria-describedby="help-one-trip">
+            <i class="fa fa-long-arrow-right"></i> Ruta de un único trayecto
             <small id="help-one-trip" class="help-block">No hay trayecto de vuelta.</small>
           </label>
+          </div>
         </div>
-          
-        <div class="radio"> 
-          <label>
-            <input type="radio" name="trips" value="one-trip" aria-describedby="help-circular-trip">
-            Ruta de un único trayecto circular
-            <small id="help-circular-trip" class="help-block">Comienza y termina en la misma parada.</small>
-          </label>
+        <div class="col-sm-4">
+          <div class="radio"> 
+            <label>
+              <input type="radio" name="trips" value="circular" aria-describedby="help-circular-trip">
+              <i class="fa fa-circle-o-notch"></i> Ruta de un único trayecto circular
+              <small id="help-circular-trip" class="help-block">Comienza y termina en la misma parada.</small>
+            </label>
         </div>
-          
+          </div>
+          <div class="col-sm-4">
         <div class="radio"> 
           <label>
             <input type="radio" name="trips" id="two" value="two-trips">
-            Dos trayectos 
+            <i class="fa fa-arrows-h"></i> Ruta con dos trayectos 
             <small id="help-circular-trip" class="help-block">Tiene un trayecto de ida y otro de vuelta.</small>
           </label>
         </div>
-      
-        <p>
-          <button class="btn btn-primary" ng-click="setTrips()">Continuar</button>
-        </p>
       </div>
+      </div><!-- row-->
+      
+         <div class="form-input"> 
+                     <br>
+          <button class="btn btn-primary" ng-click="setTrips()">Añadir</button>
+      </div>
+    </div>
       
       <!-- 2) the route has the trips -->      
-      <hr>
-      <div class="row">
+      <div class="row" ng-show="(route.trips !== undefined) && (route.trips.length > 0)">
+        <hr> 
       <div class="col-md-6" ng-repeat="trip in route.trips" ng-if="route.trips !== undefined">
-      <p><strong>Paradas del trayecto {{trip.headsign}}</strong> <a class="btn btn-xs btn-primary" ng-click="showAddRoute[trip.id]=true", ng-hide="showAddRoute[trip.id]===true">Añadir parada</a></p>
+      <p><strong>Paradas del trayecto {{trip.headsign}}</strong> <a class="btn btn-xs btn-primary" ng-click="showNewStopSequence[trip.id]=true" ng-hide="showNewStopSequence[trip.id] === true">Añadir parada</a></p>
         
-        <form ng-show="showAddRoute[trip.id]===true">
+        <form ng-show="showNewStopSequence[trip.id]===true" style="border: 1px solid #ccc;padding-left: 18px;padding-top: 18px; padding-right: 18px; margin-bottom: 18px">
         <label for="trip-{{trip.id}}">Añadir parada a trayecto: </label>
         <div class="form-group">
         <input type="text" name="trip-{{trip.id}}" class="form-control" ng-model="newStopSequence[trip.id].stop" typeahead-focus-first="true" typeahead-editable="false" typeahead="stop as stop.name for stop in stopsArr | filter:{name:$viewValue} | limitTo:8" placeholder="Ej: Albrook"
@@ -111,6 +119,7 @@
       </div>
       <div class="form-group">
         <button ng-click="addStopToTrip(trip.id)" class="btn btn-primary">Añadir</button>
+        <a href="" ng-click="showNewStopSequence[trip.id] = false">Cancelar</a>
        </div>
       </form>
       
@@ -141,10 +150,10 @@
             
 </div>
 </div> <!-- modal-body-->
-<div class="row form-group clearfix">
+<div class="row form-group clearfix" ng-show="(route.trips !== undefined) && (route.trips.length > 0)">
   <hr>
   <p>
-    <button class="btn btn-danger btn-xs">Borrar trayectos</button>
+    <button class="btn btn-danger btn-xs" >Borrar trayectos</button>
     <br>
     <small>Los trayectos sólo se pueden borrar cuando no tienen paradas.</small>
   </p>

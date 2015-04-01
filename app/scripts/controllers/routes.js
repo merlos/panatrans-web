@@ -18,10 +18,10 @@ angular.module('panatransWebApp')
     
     //TODO repeated coded in main.js 
     //this should be in a service
-    $scope.loading = true
+    $scope.loading = true;
     $http.get(_CONFIG.serverUrl + '/v1/routes/?with_trips=true')
     .success(function(response) {
-      $scope.loading=false
+      $scope.loading=false;
       $scope.routesArray = response.data; 
       $.each(response.data, function(index, route) {
         $scope.routes[route.id] = route;
@@ -52,7 +52,9 @@ angular.module('panatransWebApp')
       };
       
       //console.log("actual: " + actual);
-      if (typeof actual != "string") return false;
+      if (typeof actual !== 'string') {
+        return false;
+      }
       if (!expected) {
         return true;    
       } 

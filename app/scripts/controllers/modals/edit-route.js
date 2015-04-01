@@ -2,18 +2,18 @@
 // Edit Routes of a Stop Modal Controller
 //
 angular.module('panatransWebApp')
-.controller('EditRouteModalInstanceCtrl', function ($scope, $http, $modalInstance, route, stopsArr) {
+.controller('EditRouteModalInstanceCtrl', function ($scope, $http, ngToast, $modalInstance, route, stopsArr) {
     
 $scope.sortedStopSequences = {};
 $scope.unknownStopSequences = {};
 // updates the route model by getting a fresh version from the server
-
 
 var updateRoute = function() { 
   $http.get(_CONFIG.serverUrl + '/v1/routes/' + $scope.route.id + '?' + _CONFIG.delay)
   .success(function(response) {
     //console.log('success getting route detail');
     $scope.route = response.data;
+    serverRoute = angular.copy(response.data);
     $scope.loading = false;
     //console.log($scope.route);
     //for each trip create an array with all sorted sequences (stop_sequence.sequence != null)
@@ -40,11 +40,12 @@ var updateRoute = function() {
         
 $scope.loading = true;
 $scope.route = route;
+var serverRoute = angular.copy(route); //last version of the route that came from server. Useful to check if there is any difference between server version and model version (scope.route)
 $scope.stopsArr = stopsArr; //all the stops
+$scope.showNewAddStopSequence = {}; 
 console.log(stopsArr);
 $scope.newStopSequence = {};
 $scope.dragControlListeners = {};
-    
     
 $.each(route.trips, function(index, trip){
       
@@ -177,11 +178,12 @@ $.each(route.trips, function(index, trip){
 });
 //console.log($scope.newStopSequence);
 console.log($scope.dragControlListeners);
-              
+  
 //the route has trips and one of them has stops defined => we already downloaded the route
 // note: route has no trips => will always update the route.
 if ((route.trips.length > 0) && route.trips[0].stops) {
   $scope.loading = false;
+  
 } else {
   updateRoute(); //downloads route to sync it with server version.
 }
@@ -189,25 +191,63 @@ if ((route.trips.length > 0) && route.trips[0].stops) {
     
 $scope.updateRouteName = function(){
   console.log('updateRouteName');
+  
+  if ($scope.route.name === serverRoute.name) { 
+    return; //only update if model changed
+  }
   $http.put(_CONFIG.serverUrl + '/v1/routes/' + $scope.route.id, {route: {name: $scope.route.name}})
   .success(function() {
     //TODO display some kind of feedback
-    console.log('route successfully updated');
+    ngToast.create("Se ha actualizado el nombre de la ruta");
+    console.log('route name successfully updated');
+  })
+  .error(function(data, status){
+    ngToast.settings.className='danger';  
+    
+    var errors = data.errors.name.join(', ') || '';
+    ngToast.create('Error: ' + errors );
+    ngToast.settings.className='success'; 
+    console.log(data);
+    console.log(status);
+    console.log('Error updating route name');
+  });
+};   
+$scope.updateRouteUrl = function(){
+  console.log('updateRouteUrl');
+  if ($scope.route.url === serverRoute.url) { 
+    return; // only update if model changed
+  }
+  $http.put(_CONFIG.serverUrl + '/v1/routes/' + $scope.route.id, {route: {url: $scope.route.url}})
+  .success(function() {
+    //TODO display some kind of feedback
+    ngToast.create('Se ha actualizado la dirección web');
+    console.log('route name successfully updated');
   })
   .error(function(){
+    ngToast.create('Error: ' + errors );
+    ngToast.settings.className='success'; 
+    console.log(data);
+    console.log(status);
     console.log('error updating route');
   });
   
 };    
+     
     
     
 $scope.deleteStopSequence = function (stopSequence) {
   $http.delete(_CONFIG.serverUrl + '/v1/stop_sequences/' + stopSequence.id)
   .success( function(response) {
+    ngToast.create("Se eliminado la parada del trayecto");
     console.log('removed stop sequence success!');
     updateRoute();
   });
 };
+    
+//creates the trips for the current route
+$scope.addTripsToRoute = function() {
+  
+};    
     
     
 // Add stop to a trip 
@@ -235,6 +275,7 @@ $scope.addStopToTrip = function (tripId) {
   $http.post(_CONFIG.serverUrl + '/v1/stop_sequences/', postData)
   .success(function(response) {
     updateRoute();
+    ngToast.create("Se ha añadido la parada al trayecto.");
   });
 };
         

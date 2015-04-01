@@ -3,7 +3,7 @@
 // Modal Controller
 //
 angular.module('panatransWebApp')
-.controller('EditStopModalInstanceCtrl', function ($scope, $http, $modalInstance, routes, stop) {
+.controller('EditStopModalInstanceCtrl', function ($scope, $http, $modalInstance, ngToast, routes, stop) {
   $scope.stop = stop;
   $scope.routes = routes;
   console.log(routes);
@@ -76,6 +76,7 @@ angular.module('panatransWebApp')
     .success(function(response){
       console.log("Stop successfully updated");
       //TODO feedback
+      ngToast.create("Nombre de la parada actualizado con éxito.")
     })
     .error(function(response) {
       console.log('error adding trip to stop');
@@ -92,6 +93,7 @@ angular.module('panatransWebApp')
     }
     $http.delete(_CONFIG.serverUrl + '/v1/stops/'+ $scope.stop.id)
     .success( function() {
+      ngToast.create('Parada eliminada.')
       console.log('parada borrada del servidor con éxito');
       $modalInstance.dismiss('stopDeleted');
       
@@ -124,6 +126,7 @@ angular.module('panatransWebApp')
           }
         }); //each trips
       }); //each routes
+      ngToast.create('Se ha eliminado la parada del trayecto.')
     })
     .error(function(response) {
       console.log('error removing trip from stop');

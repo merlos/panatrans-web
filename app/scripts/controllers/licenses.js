@@ -10,5 +10,5 @@
 angular.module('panatransWebApp')
   .controller('LicensesCtrl', function ($scope) {
     $scope.title = 'Licenses';
-    window.scrollTo(0, 0)
+    window.scrollTo(0, 0);
   });

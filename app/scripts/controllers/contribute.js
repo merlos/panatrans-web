@@ -10,4 +10,5 @@
 angular.module('panatransWebApp')
   .controller('ContributeCtrl', function ($scope) {
     $scope.title = 'Colabora';
+    window.scrollTo(0, 0);
   });
