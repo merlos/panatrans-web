@@ -80,20 +80,33 @@
           <div class="collapse navbar-collapse" id="js-navbar-collapse">
             
             <ul class="nav navbar-nav">
-              <li><p class="navbar-text"><a href="#/" title="Mapa con las paradas de Metrobus de Panamá">mapa</a> y <a href="#/rutas" title="Lista de rutas de Metrobus Panamá">rutas</a> de Metrobus Panamá hechos por todos</li>
+              <li class="hidden-xs"><p class="navbar-text"><a href="#/" title="Mapa con las paradas de Metrobus de Panamá">mapa</a> y <a href="#/rutas" title="Lista de rutas de Metrobus Panamá">rutas</a> de Metrobus Panamá hechos por todos</li>
 
             </ul>
-            <ul class="nav navbar-nav navbar-right" style="margin-right: 10px">
-                <li><button onclick="window.location.href='#/colabora/'" class="btn btn-success navbar-btn"><i class="fa fa-heart"></i> Colabora</button></li>
+            <ul class="nav navbar-nav navbar-right navbar-link" style="margin-right: 10px; margin-left: 10px">
+              <li class="visible-xs">
+                <a href="#/" class="navbar-link"  title="Lista de rutas de Metrobus Panamá"><i class="fa fa-map-marker"></i> Mapa</a>
+              </li>
+              <li class="visible-xs">
+                <a href="#/rutas" class="navbar-link" title="Lista de rutas de Metrobus Panamá"><i class="fa fa-road"></i> Rutas</a>
+              </li>
+      
+              <li><button onclick="window.location.href='#/colabora/'" class="btn btn-success navbar-btn"><i class="fa fa-heart"></i> Colabora</button></li>
+              <li class="visible-xs"><a href="#/acercade" class="navbar-link"><i class="fa fa-lightbulb-o"></i> Acerca de</a>
+              </li> 
+              <li class="visible-xs"><a href="#/licencias" class="navbar-link"><i class="fa fa-copyright"></i> Licencias de uso</a></li>
+              
+               <li class="divider"></li>
+               
               <li><a target="_blank" href="https://twitter.com/intent/tweet?text=Mapa+con+las+paradas+y+rutas+de+%23metrobus+de+%23Panam&aacute;&amp;via=panatrans&amp;url=http://www.panatrans.org">
                       <i class="fa fa-twitter"></i> twitear
                   </a>
                 </li>
                 <li>
-                  <a  target="_blank" href="http://www.facebook.com/sharer/sharer.php?u=http://www.panatrans.org">
-                          <i class="fa fa-facebook-official"></i> compartir
-                      </a>
+                  <a  target="_blank" href="http://www.facebook.com/sharer/sharer.php?u=http://www.panatrans.org"><i class="fa fa-facebook-official"></i> compartir</a>
                     </li>
+              
+                      
             </ul>
         </div>
       </div>
@@ -101,7 +114,7 @@
    
       <div class="fill" ng-view=""></div>
   
-    <footer>
+    <footer class="hidden-xs">
       
         <p class="text-center">
           Hecho con <span class="glyphicon glyphicon-heart" style="color:red"></span> desde Panamá | 
