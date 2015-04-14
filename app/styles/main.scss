@@ -19,15 +19,13 @@ html, body {
   width: 100%;
   overflow: hidden;
 }
-.leaflet-control-attribution {
-  margin-bottom: 42px !important;
-}
+
 .with-navbar-margin {
   padding-top: 50px;
   padding-bottom: 100px;
 }
 
-#map {
+#map, #route-map {
   display: block;
   margin-top: 50px;
   margin-bottom: 100px;
@@ -54,6 +52,7 @@ footer {
 }
 
 
+
 .with-navbar-margin {
   padding-top: 50px;
 }
@@ -73,6 +72,13 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
   min-height: 30px;
   
 }
+
+.li-highlight-over:hover {
+    cursor: pointer;
+    background: white;
+    color: red;
+}
+
 
 .sortable-li {
   border: 1px solid #ccc; 
@@ -186,6 +192,11 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
 }
 
 @media screen and (min-width: 768px) {
+  
+  .leaflet-control-attribution {
+    margin-bottom: 42px !important;
+  }
+  
   
   #stop-detail {
     top: 50px;

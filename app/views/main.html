@@ -47,9 +47,14 @@
           ng-mouseover="highlightRoute(route);hoverIn()"
           ng-mouseleave="lowlightRoute(route);hoverOut()"
           ng-click="toggleTripDetails()">
-          <a href="" ng-show="hoverEdit" class="pull-right" ng-click="openEditRouteModal(route.id)" title="Editar las paradas de esta ruta"><i class="fa fa-pencil"></i></a>
-          <h4>{{route.name}}</h4> 
-          
+          <div  class="pull-right" ng-show="hoverEdit"> 
+            <a href="{{route.url}}" target="_blank" ng-show="route.url !== null"  title="ver página de mibus.com (abre nueva ventana)"><i class="fa fa-external-link"></i></a> | 
+            <a href="" ng-click="togglePdfLayer(route)" title="mostrar PDF de la ruta sobre el mapa"><i class="fa fa-file-pdf-o"></i></a> |
+             <a href=""  ng-click="openEditRouteModal(route.id)" title="Editar las paradas de esta ruta"><i class="fa fa-pencil"></i></a>
+          </div>
+         <h4>{{route.name}}</h4> 
+         
+                       
           <small ng-repeat="trip in route.trips">
             {{trip.headsign}} 
               <span ng-if="isFirstStopInTrip(stopDetail, trip)" class="label label-info" title="Primera parada de este trayecto">1ª</span>
@@ -77,7 +82,9 @@
           <br style="clear:both">
         </li> <!-- route-list-item -->
       </ul>
-      <br><br><br><br><br><br><!-- TODO remove this dirty fix -->
+      <br><br>
+      <br><br>
+      <br><br><!-- TODO remove this dirty fix -->
     </div> <!-- stop detail container -->
   </div> <!-- stop detail -->
 </div> <!-- main controller -->

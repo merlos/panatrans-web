@@ -20,7 +20,7 @@
   
 <ul class="list-unstyled">
 <li ng-repeat="route in routes | toArray | filter : searchText : ignoreAccentsComparator">
-    <strong>{{route.name}}</strong> 
+    <strong><a href="#/metrobus/{{route.id}}/hola.html">{{route.name}}</a></strong> 
     <span class="pull-right">
       <a ng-click="openEditRouteModal(route.id)" href=""><i class="fa fa-edit"></i></a>
       

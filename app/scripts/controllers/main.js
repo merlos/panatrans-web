@@ -35,8 +35,8 @@ angular.module('panatransWebApp')
   
   //ngToast.create("isMobile: " + _isMobile);
   
-  $scope.routes = {};
-  $scope.stops = {};
+  $scope.routes = {}; // routes by route.id
+  $scope.stops = {}; // stops by stop.id, ex: stops[<id>] == (stop object)
   $scope.stopsArr = {};
   $scope.showStopDetail = false; 
   $scope.loadingStopDetail = false;
@@ -48,7 +48,8 @@ angular.module('panatransWebApp')
   var newStop = {};
   var newStopMarker = null;
   var stopDetailPanelHighlightedStop = null;
-  var markers = {};
+  var markers = {}; // stop markers by stop.id
+  var pdfLayers = {}; // pdf layers by route.id
   var markerIcon = {
     default: L.AwesomeMarkers.icon({ // bus stop default
       icon: 'bus',
@@ -245,6 +246,7 @@ angular.module('panatransWebApp')
           return;
       }
       console.log('stopId Clicked: ' + stopId);
+      $scope.map.panTo(markers[stopId].getLatLng());
       if ($scope.stops[stopId].routes) { //if we already downloaded the stop detail then routes is defined
         $scope.$apply(function() { //http://stackoverflow.com/questions/20954401/angularjs-not-updating-template-variable-when-scope-changes
           $scope.stopDetail = $scope.stops[stopId]; 
@@ -316,6 +318,7 @@ angular.module('panatransWebApp')
       console.log('highlight stop'  + stop.name);
       stopDetailPanelHighlightedStop = stop;
       markers[stop.id].openPopup();
+      $scope.map.panTo(markers[stop.id].getLatLng());
     };
     
     
@@ -416,6 +419,40 @@ angular.module('panatransWebApp')
       });
     };
     
+    $scope.togglePdfLayer = function(route) {
+      //var tilesBaseUrl ='https://www.googledrive.com/host/0B8O0WQ010v0Pfl92WjctUXNpTTZYLUUzMUdReXJrOFJLdDRYWVBobmFNTnBpdEljOE9oNms'
+      var tilesBaseUrl ='https://dl.dropboxusercontent.com/u/22698/metrobus/'
+      $http.get(tilesBaseUrl + route.id + '/kml/tilemapresource.xml')
+      .success(function(response) {
+        console.log('cool! The pdf is geolocated route_id:' + route.id);
+        if (pdfLayers[route.id] === undefined) { 
+            var options = {
+                minZoom: 11,
+                maxZoom: 18,
+                maxNativeZoom: 14, 
+                opacity: 0.8,
+                tms: true
+          };
+          var tilesUrl = tilesBaseUrl + route.id + '/kml/{z}/{x}/{y}.png'
+          console.log('tilesUrl: ' + tilesUrl);
+          pdfLayers[route.id] = L.tileLayer(tilesUrl, options);
+          pdfLayers[route.id].addTo($scope.map);
+          
+          ngToast.create("En unos segundos se mostrará el PDF de la ruta en el mapa...");
+        } else { //layer exists => remove from map
+            $scope.map.removeLayer(pdfLayers[route.id]);
+            delete pdfLayers[route.id];
+            ngToast.create({ className: 'info', contents: "Se ha dejado de mostrar el PDF en el mapa"});
+        }
+      })
+      .error(function(data, status){
+        console.log("Geolocated pdf does not exists");
+        ngToast.create({className: 'danger', contents: 'No hay asociado con esta ruta un PDF Geolocalizado'})
+      });
+      
+    
+      
+    }
     
     var setStopMarkerEditMode = function(stopMarker) {
       console.log('setStopMarkerEditMode');
@@ -425,7 +462,7 @@ angular.module('panatransWebApp')
       stopMarker.dragging.enable();
       stopMarker.off('popupopen', stopMarkerPopupOpen);
       stopMarker.off('popupclose', stopMarkerPopupClose);
-      $scope.map.setView(stopMarker.getLatLng(), 15);
+      $scope.map.setView(stopMarker.getLatLng(), 18);
       var stop = $scope.stops[stopMarker._stopId];    
       var html = '<div><h4>' + stop.name + '</h4><p><strong>Arrástrame</strong> hasta mi localización.<br>Después dale a: </p><button ng-click="saveStopLocation(stop)"class="btn btn-primary">Actualizar</button> o a <a href="" ng-click="cancelStopMarkerEditMode(stopMarker)">cancelar</a></div>';
       var linkFn = $compile(angular.element(html));

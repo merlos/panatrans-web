@@ -3,9 +3,9 @@
 
 //hack. Make navbar toggle when clicked
 $('.navbar .navbar-link').click(function() {
-    var navbar_toggle = $('.navbar-toggle');
-    if (navbar_toggle.is(':visible')) {
-        navbar_toggle.trigger('click');
+    var navbarToggle = $('.navbar-toggle');
+    if (navbarToggle.is(':visible')) {
+        navbarToggle.trigger('click');
     }
 });
 
@@ -42,6 +42,10 @@ angular
       .when('/rutas', {
         templateUrl: 'views/routes.html',
         controller: 'RoutesCtrl'
+      })
+      .when('/metrobus/:routeId/:slug.html', {
+        templateUrl: 'views/routes-show.html',
+        controller: 'RoutesShowCtrl'
       })
       .when('/colabora', {
         templateUrl: 'views/contribute.html',
