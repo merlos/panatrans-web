@@ -34,6 +34,7 @@ module.exports = function(config) {
       'bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.js',
       'bower_components/angular-sanitize/angular-sanitize.js',
       'bower_components/ngtoast/dist/ngToast.js',
+      'bower_components/angular-slugify/angular-slugify.js',
       'bower_components/angular-mocks/angular-mocks.js',
       // endbower
       'app/scripts/**/*.js',

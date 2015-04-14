@@ -31,7 +31,8 @@ angular
     'ui.bootstrap',
     'ui.sortable',
     'angular-toArrayFilter',
-    'ngToast'
+    'ngToast',
+    'slugifier'
   ])
   .config(function ($routeProvider) {
     $routeProvider
