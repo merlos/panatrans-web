@@ -47,10 +47,10 @@ var updateRoute = function() {
   
 // load stopsArr
 //TODO DRY this, it should be a service
-if (stopsArr == null) {
+if (stopsArr == null) { 
   console.log('requesting stops to server...');
  //get stops
-  $http.get(_CONFIG.serverUrl + '/v1/stops/' + $scope.route.id + '?' + _CONFIG.delay)
+  $http.get(_CONFIG.serverUrl + '/v1/stops/' + '?' + _CONFIG.delay)
   .success(function(response) {
     $scope.stopsArr = response.data;
   });
@@ -77,7 +77,7 @@ $.each(route.trips, function(index, trip){
     stop: null,
     trip: trip,
     sequence: null
-  }; 
+}; 
       
   //create dragControlListeners for ng-sortable
   //  - We have a set of trips 
@@ -426,6 +426,7 @@ $scope.tripsHaveStops = function() {
   return haveStops;
 };
     
+
     
 // Add stop to a trip 
 // Position: -1 unk, 0 => beginning, > 1 000 000 => end
