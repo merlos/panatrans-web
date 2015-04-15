@@ -9,8 +9,35 @@
         <p class="text-center"><i class="fa fa-circle-o-notch fa-spin"></i> Obteniendo información de ruta...</p>
       </div>
       <div class="stop-detail-container" ng-hide="loading">
+      
+           
+        <h3 title="{{route.name}}"><i class="fa fa-road"></i> {{route.name}}</h3>
+       <!-- BEGIN actions over route -->
+       <div style="padding-left: 5px; background-color: white; border-bottom: 1px solid #DDD;padding:3px;text-align: right"> 
+         <a href="{{route.url}}" target="_blank" ng-show="route.url !== null"  title="ver página de mibus.com (abre nueva ventana)"><i class="fa fa-external-link"></i></a> | 
+         <a href="" ng-click="togglePdfLayer(route)" title="mostrar PDF de la ruta sobre el mapa"><i class="fa fa-file-pdf-o"></i></a> |
+          <a href=""  ng-click="openEditRouteModal(route.id)" title="Editar las paradas de esta ruta"><i class="fa fa-pencil"></i></a>
+          </div>
+           <!-- actions over route -->
+       
         
-        <h3><i class="fa fa-road"></i> {{route.name}}</h3>
+       </div>
+       <div ng-show="route.trips.length == 0" style="padding-left:5px;">
+
+         <h1>¡Cáspita!</h1>
+         <p>No sabemos qué paradas tiene esta ruta.</p>
+         <p>¡Ayúdanos!</p>
+         <button class="btn btn-default btn-xs" ng-click="openEditRouteModal(route.id)" title="Modificar las Rutas que pasan por esta parada"><i class="fa fa-pencil"></i> Editar ruta</button>
+          <br><br> 
+           <p>También puedes:
+             <ul>
+               <li> <a href="" ng-click="togglePdfLayer(route)"> <i class="fa fa-file-pdf-o"></i> Ver el pdf de mibus superpuesto en el mapa</a> 
+               </li>
+               <li>
+             <a href="{{route.url}}"><i class="fa fa-external-link"></i> ver la página de mibus.com.pa</a>
+           </li>
+         </ul>
+       </div>
         <div ng-repeat="trip in route.trips">
           <h3 class="routes-title"><i class="fa fa-bus"></i> Paradas trayecto {{trip.headsign}}</h3> 
           <ul class="list-unstyled" style="padding-left: 5px" ng-repeat="sequence in trip.stop_sequences">

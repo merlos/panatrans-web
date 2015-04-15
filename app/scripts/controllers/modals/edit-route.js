@@ -11,13 +11,10 @@ $scope.isNewRoute = false;
 $scope.loading = true;
 $scope.route = route;
 var serverRoute = angular.copy(route); //last version of the route that came from server. Useful to check if there is any difference between server version and model version (scope.route)
-$scope.stopsArr = stopsArr; //all the stops
+
 $scope.showNewStopSequence = {}; 
-console.log(stopsArr);
 $scope.newStopSequence = {};
 $scope.dragControlListeners = {};
-
-
 
 var updateRoute = function() { 
   $http.get(_CONFIG.serverUrl + '/v1/routes/' + $scope.route.id + '?' + _CONFIG.delay)
@@ -47,10 +44,24 @@ var updateRoute = function() {
     console.log(response);
   });
 };
+  
+// load stopsArr
+//TODO DRY this, it should be a service
+if (stopsArr == null) {
+  console.log('requesting stops to server...');
+ //get stops
+  $http.get(_CONFIG.serverUrl + '/v1/stops/' + $scope.route.id + '?' + _CONFIG.delay)
+  .success(function(response) {
+    $scope.stopsArr = response.data;
+  });
+} else {
+  $scope.stopsArr = stopsArr; //all the stops
+}
     
 
 //////////// MAIN ////////////////////////
 
+//if  new route
 if (route == null) {
   route = {trips: []};
   $scope.route = route;
@@ -301,13 +312,13 @@ $scope.deleteStopSequence = function (stopSequence) {
 
 var getTripHeadsignFromRouteName = function(routeTripType, routeName) {
 // exceptions of stop names
-  exceptions = /transfer|tranfer|corredor|circular/i;
+  var exceptions = /transfer|tranfer|corredor|circular/i;
   
   var nameArr = routeName.split("-");
   var a = false;
   var c = false;
   angular.forEach(nameArr, function(value, key) { 
-    tripName = nameArr[key].trim();
+    var tripName = nameArr[key].trim();
     if (! tripName.match(exceptions)) { 
       a ? (c = tripName) : (a = tripName);
     }
@@ -406,7 +417,7 @@ $scope.deleteTrips = function() {
 
 // returns true if trips have stops (stop_sequences)
 $scope.tripsHaveStops = function() {
-  haveStops = false;
+  var haveStops = false;
   angular.forEach($scope.route.trips, function(trip) {
     if ((trip.stop_sequences !== undefined) && (trip.stop_sequences.length > 0)) {
       haveStops = true;

@@ -39,7 +39,7 @@
         <li ng-show="!stopDetail.routes.length" style="padding-left: 5px">
           <p>No sabemos qué rutas pasan por esta parada</p>
           <p>¡Ayúdanos!</p>
-          <button class="btn btn-default btn-xs" ng-click="openEditStopModal(stopDetail.id)" title="Modificar las Rutas que pasan por esta parada">Editar parada</a>
+          <button class="btn btn-default btn-xs" ng-click="openEditStopModal(stopDetail.id)" title="Modificar las Rutas que pasan por esta parada"><i class="fa fa-pencil"></i> Editar parada</a>
           </li>
           <li class="route-list-item" 
           ng-repeat="route in stopDetail.routes track by route.id" 

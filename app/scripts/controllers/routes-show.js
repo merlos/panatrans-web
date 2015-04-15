@@ -101,6 +101,52 @@ angular.module('panatransWebApp')
     };
   
     
+    //TODO DRY This is the same function as in main.js 
+    var pdfLayers = {};
+    $scope.togglePdfLayer = function(route) {
+      console.log('togglePDFLayer');
+      //var tilesBaseUrl ='https://www.googledrive.com/host/0B8O0WQ010v0Pfl92WjctUXNpTTZYLUUzMUdReXJrOFJLdDRYWVBobmFNTnBpdEljOE9oNms'
+      var tilesBaseUrl ='https://dl.dropboxusercontent.com/u/22698/metrobus/';
+      $http.get(tilesBaseUrl + route.id + '/kml/tilemapresource.xml')
+      .success(function(response) {
+        console.log(response)
+        var boundsArr = response.match(/(minx|miny|maxx|maxy)=\"([\-\.\d]+)\"/g);
+        console.log(boundsArr);
+        //["minx="9.123"","miny="number""...
+        angular.forEach(boundsArr, function(x,k) {
+          boundsArr[k] = x.match(/([\-\.\d]+)/g)[0];
+        });  
+        $scope.map.fitBounds([[boundsArr[1],boundsArr[0]],[boundsArr[3],boundsArr[2]]]);
+        console.log(boundsArr);
+        console.log('cool! The pdf is geolocated route_id:' + route.id);
+        if (pdfLayers[route.id] === undefined) { 
+            var options = {
+                minZoom: 11,
+                maxZoom: 18,
+                maxNativeZoom: 14, 
+                opacity: 0.8,
+                tms: true
+          };
+          var tilesUrl = tilesBaseUrl + route.id + '/kml/{z}/{x}/{y}.png';
+          console.log('tilesUrl: ' + tilesUrl);
+          pdfLayers[route.id] = L.tileLayer(tilesUrl, options);
+          pdfLayers[route.id].addTo($scope.map);
+      
+          ngToast.create('En unos segundos se mostrará el PDF de la ruta en el mapa...');
+        } else { //layer exists => remove from map
+            $scope.map.removeLayer(pdfLayers[route.id]);
+            delete pdfLayers[route.id];
+            ngToast.create({ className: 'info', contents: 'Se ha dejado de mostrar el PDF en el mapa'});
+        }
+      })
+      .error(function(data, status) {
+        console.log('Geolocated pdf does not exists');
+        console.log(data);
+        console.log(status);
+        ngToast.create({className: 'danger', contents: 'No hay asociado con esta ruta un PDF Geolocalizado'});
+      });
+    };
+    
     
           
     $http.get(_CONFIG.serverUrl + '/v1/routes/' + $routeParams.routeId + '?' + _CONFIG.delay)
@@ -128,5 +174,26 @@ angular.module('panatransWebApp')
       console.log('WTF! Something wrong with the route!');
       console.log(response);
     });
+    
+    
+    $scope.openEditRouteModal = function(routeId){
+      var modalConfig = {
+        templateUrl: 'views/modals/edit-route.html',
+        size: 'lg',
+        controller: 'EditRouteModalInstanceCtrl',
+        backdrop: true,
+        routeId: routeId,
+        resolve: { //variables passed to modal scope
+          route: function() {
+            return $scope.route;
+          },
+          stopsArr: function() {
+            return null;
+          }
+        }
+      };
+      $modal.open(modalConfig);  
+    };
+    
   }]);
   
