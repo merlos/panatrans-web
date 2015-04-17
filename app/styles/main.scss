@@ -9,6 +9,20 @@ html, body {
   height: 100%;
 }
 
+.navbar-brand {  
+  img {
+    width:140px;
+    height: 35px;
+    margin-top: -7px;
+    margin-left: -9px;
+  }
+}
+
+.navbar-default {
+  border-bottom: 1px solid $main-color;
+  box-shadow: 0px -2px 9px 0px rgba(0,0,0,0.28);
+}
+
 .fill {
   height: 100%;
   min-height: 100%;
@@ -94,7 +108,9 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
   right: 10px;
 }
 
+
 #stop-detail {
+  box-shadow: 0px -2px 9px 0px rgba(0,0,0,0.28);
   z-index: 999;
   position: fixed;
   width: 100%;
@@ -217,9 +233,6 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
     margin-bottom: 22px !important;
   }
   
-    .navbar-default {
-    border-bottom: 1px solid $main-color;
-  }
   
   .modal-view-size {
     height: 400px;
