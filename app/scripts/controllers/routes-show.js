@@ -136,14 +136,14 @@ angular.module('panatransWebApp')
         } else { //layer exists => remove from map
             $scope.map.removeLayer(pdfLayers[route.id]);
             delete pdfLayers[route.id];
-            ngToast.create({ className: 'info', contents: 'Se ha dejado de mostrar el PDF en el mapa'});
+            ngToast.create({ className: 'info', content: 'Se ha dejado de mostrar el PDF en el mapa'});
         }
       })
       .error(function(data, status) {
         console.log('Geolocated pdf does not exists');
         console.log(data);
         console.log(status);
-        ngToast.create({className: 'danger', contents: 'No hay asociado con esta ruta un PDF Geolocalizado'});
+        ngToast.create({className: 'danger', content: 'No hay asociado con esta ruta un PDF Geolocalizado'});
       });
     };
     
