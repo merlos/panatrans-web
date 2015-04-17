@@ -18,6 +18,17 @@ Related Projects that may interest you:
 * __[panatrans-api](https://github.com/merlos/panatrans-api)__: API/backend that is used by this webapp.
 
 
+## Download
+
+You need to clone the project and then install the components.
+```
+  git clone https://github.com/merlos/panatrans-web.git
+  cd panatrans-web
+  bower install                               # install bower components
+  npm install                                 # install grunt package dep.
+```
+If bower asks for the angular version, select __1.3.15__
+
 ## Development
 
 To preview the app run:
