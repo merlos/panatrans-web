@@ -46,7 +46,7 @@
             ng-mouseout="lowlightStop(sequence.stop)" 
             class="li-highlight-over">{{sequence.stop.name}}</li>
           </ul>
-          <div ng-show="trip.stop_sequences.length < 8" style="padding:5px; padding-top:18px;padding-bottom:18px;">
+          <div ng-show="trip.stop_sequences.length < 7" style="padding:5px; padding-top:18px;padding-bottom:18px;">
             <p class="small">Este trayecto no parece estar completo. 
               Puedes añadir más paradas <a href="" ng-click="openEditRouteModal(route.id)" title="Modificar las Rutas que pasan por esta parada"><i class="fa fa-pencil"></i> editando la ruta</a>
             </p>
