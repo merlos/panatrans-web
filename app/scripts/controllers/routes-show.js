@@ -148,33 +148,41 @@ angular.module('panatransWebApp')
     };
     
     
-          
-    $http.get(_CONFIG.serverUrl + '/v1/routes/' + $routeParams.routeId + '?' + _CONFIG.delay)
-    .success(function(response) {
-      //console.log('success getting route detail');
-      $scope.route = response.data;
-      $scope.loading = false;
-      console.log($scope.route);
-      /*jshint camelcase: false */
-      angular.forEach($scope.route.trips, function(trip) {
-        angular.forEach(trip.stop_sequences, function(stop_sequence) {
-          var stop = stop_sequence.stop;
-          //add markers to map if not in map
-          if (stops[stop.id] === undefined) {
-            addStopMarkerToMap(stop);
-            stops[stop.id] = stop;
-          }
+    var updateRoute = function() {    
+      $scope.loading = true;
+      //clear markers
+      angular.forEach(markers, function(marker){
+        $scope.map.removeLayer(marker);
+        delete markers[marker.id]; 
+      });       
+      $http.get(_CONFIG.serverUrl + '/v1/routes/' + $routeParams.routeId + '?' + _CONFIG.delay)
+      .success(function(response) {
+        //console.log('success getting route detail');
+        $scope.route = response.data;
+        $scope.loading = false;
+        console.log($scope.route);
+        /*jshint camelcase: false */
+        angular.forEach($scope.route.trips, function(trip) {
+          angular.forEach(trip.stop_sequences, function(stop_sequence) {
+            var stop = stop_sequence.stop;
+            //add markers to map if not in map
+            if (stops[stop.id] === undefined) {
+              addStopMarkerToMap(stop);
+              stops[stop.id] = stop;
+            }
+          });
         });
+        if (markersFeatureGroup) {
+          $scope.map.fitBounds(markersFeatureGroup.getBounds(), {padding: [15,15]});
+        }
+      })
+      .error(function(response){
+        console.log('WTF! Something wrong with the route!');
+        console.log(response);
       });
-      if (markersFeatureGroup) {
-        $scope.map.fitBounds(markersFeatureGroup.getBounds(), {padding: [15,15]});
-      }
-    })
-    .error(function(response){
-      console.log('WTF! Something wrong with the route!');
-      console.log(response);
-    });
-    
+  };
+  
+  updateRoute();
     
     $scope.openEditRouteModal = function(routeId){
       var modalConfig = {
@@ -192,7 +200,11 @@ angular.module('panatransWebApp')
           }
         }
       };
-      $modal.open(modalConfig);  
+      var modalInstance = $modal.open(modalConfig);  
+      modalInstance.result.then(function () {
+        console.log('modal instance closed');  
+        updateRoute();
+        }, function () {});
     };
     
   }]);

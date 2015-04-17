@@ -16,7 +16,7 @@
       <!-- route name -->
       <div class="col-md-6">
         <div class="form-group">
-          <label for="route-name">*Nombre de la ruta:</label>
+          <label for="route-name">Nombre de la ruta:</label>
       
           <input ng-init="routeNameHasFocus=false" id="route-name" name="route-name" class="form-control" type="text" ng-model="route.name" ng-focus="routeNameHasFocus=true" ng-blur="updateRouteName();routeNameHasFocus=false" placeholder="Ejemplo: Albrook - Miraflores" aria-describedby="help-route-name">
         </div>
@@ -26,22 +26,21 @@
         <br>
       </div>
       <div class="col-md-6">
-        <small class="help-block" id="help-route-name" ng-show="routeNameHasFocus">Usa guiones como separador. Ej: Albrook <mark>-</mark> Miraflores
-          <br> En las rutas de un único trayecto y las circulares escribe en primer lugar el nombre de la primera parada. Por ejemplo, en la ruta circular "Estación de Marañón - El Chorrillo", como sale y termina en Marañón se pone primero "Estación de Marañón".
+        <br>
+        <small class="help-block" id="help-route-name">Usa guiones como separador. Ej: Albrook <mark>-</mark> Miraflores
           <br>
-          Mibus no siempre sigue esta convención en su web, pero aquí por claridad intentamos seguirla.
-          <br>
-          ¡Ah! y no te olvides poner las tildes ;-).
+          No te olvides poner las tildes.
         </small>
       </div>
     </div>
     <!-- route url -->
     <div class="row form-group" ng-hide="isNewRoute"> 
       <div class="col-md-6">
-        <label for="route-address">Dirección web:</label>
+        <label for="route-address">Dirección web (opcional):</label>
         <input id="route-address" class="form-control" name="route-address" type="text" ng-model="route.url" ng-blur="updateRouteUrl()" placeholder="Ejemplo: http://www.mibus.com/albrook-miraflores/" aria-describedby="help-route-name">
       </div>
       <div class="col-md-6">
+        <br>
         <small class="help-block" id="help-route-name">Es la página de mibus.com.pa con la ruta. Si existe, la puedes encontrar en <a href="http://www.mibus.com.pa/rutas/" title="página de rutas de mibus">mibus.com.pa</a>
         </small>
       </div>
@@ -51,9 +50,10 @@
       1) The route does not have any trip. Then display a form to create the trips.
       2) The route has trips. Then display the form to edit the trips, ie. add/remove stop_sequences
       -->        
-      <div ng-hide="routeHasTrips() || isNewRoute"> <!-- 1)  display if route does not have any trip -->
+      <div ng-hide="routeHasTrips() || isNewRoute" class="group-border-danger"> <!-- 1)  display if route does not have any trip -->
         <p ng-hide="isNewRoute" class="text-danger"><strong>La ruta todavía no tiene trayectos asignados.</strong></p>
-        <p><strong>* ¿Qué trayectos tiene la ruta?</strong><small> Es importante que este dato sea correcto. Si no lo sabes es posible que lo puedas ver en la web de <a href="http://www.mibus.com.pa/rutas/" title="página de rutas de mibus">mibus.com.pa</a>. Más información sobre <a target="_blank" href="https://github.com/merlos/panatrans-dataset/wiki#rutas-de-un-trayecto-circular-o-dos-trayectos" title="Tipos de rutas según trayectos (abre nueva pestaña)">tipos de rutas en función de los trayectos.</a></p>
+        <p><strong>¿Qué trayectos tiene la ruta?</strong>
+          <br><small> Es importante que este dato sea correcto. Si no lo sabes es posible que lo puedas ver en la web de <a href="http://www.mibus.com.pa/rutas/" title="página de rutas de mibus">mibus.com.pa</a>. Más información sobre <a target="_blank" href="https://github.com/merlos/panatrans-dataset/wiki#rutas-de-un-trayecto-circular-o-dos-trayectos" title="Tipos de rutas según trayectos (abre nueva pestaña)">tipos de rutas en función de los trayectos.</a></p>
         
           <div class="row">
            
@@ -62,26 +62,28 @@
                 <label>
                   <input type="radio" name="trips" ng-model="route.tripsType" value="one"  aria-describedby="help-one-trip">
                   <i class="fa fa-long-arrow-right"></i> Ruta de un único trayecto
-                  <small id="help-one-trip" class="help-block">No hay trayecto de vuelta.</small>
+                  <small id="help-one-trip" class="help-block">Es una ruta circular (empieza y termina en el mismo punto) o no hay trayecto de vuelta (empieza en un punto A y termina en un punto B)</small>
                 </label>
               </div>
             </div>
+             <!-- Disabled circular routes, we can infere it if first and last stop is the same -->
+            <!--  
             <div class="col-sm-4">
-      
-              <div class="radio"> 
+                  <div class="radio"> 
                 <label>
                   <input type="radio" name="trips"  ng-model="route.tripsType" value="circular" aria-describedby="help-circular-trip">
                   <i class="fa fa-circle-o-notch"></i> Ruta de un único trayecto circular
-                  <small id="help-circular-trip" class="help-block">Comienza y termina en la misma parada.</small>
+                  <small id="help-circular-trip" class="help-block">Empieza en un punto A y termina en el mismo punto.</small>
                 </label>
               </div>
             </div>
+            -->
             <div class="col-sm-4">
               <div class="radio"> 
                 <label>
                   <input type="radio" name="trips" ng-model="route.tripsType" id="two" value="two">
                   <i class="fa fa-arrows-h"></i> Ruta con dos trayectos 
-                  <small id="help-circular-trip" class="help-block">Tiene un trayecto de ida y otro de vuelta.</small>
+                  <small id="help-circular-trip" class="help-block">Tiene un trayecto de ida y otro de vuelta. Al finalizar el trayecto de ida, los pasajeros han de bajar del bus.</small>
                 </label>
               </div>
             </div>
@@ -100,9 +102,9 @@
             <p><strong>Paradas del trayecto {{trip.headsign}}</strong> <a class="btn btn-xs btn-primary" ng-click="showNewStopSequence[trip.id]=true" ng-hide="showNewStopSequence[trip.id] === true">Añadir parada</a></p>
         
             <form ng-show="showNewStopSequence[trip.id]===true" style="border: 1px solid #ccc;padding-left: 18px;padding-top: 18px; padding-right: 18px; margin-bottom: 18px">
-              <label for="trip-{{trip.id}}">Añadir parada a trayecto: </label>
+              <label for="trip-{{trip.id}}">Añadir parada a trayecto que finaliza en {{trip.headsign}}: </label>
               <div class="form-group">
-                <input type="text" name="trip-{{trip.id}}" class="form-control" ng-model="newStopSequence[trip.id].stop" typeahead-focus-first="true" typeahead-editable="false" typeahead="stop as stop.name for stop in stopsArr | filter:{name:$viewValue} | limitTo:8" placeholder="Ej: Albrook"
+                <input type="text" name="trip-{{trip.id}}" class="form-control" ng-model="newStopSequence[trip.id].stop" autocomplete="off" typeahead-focus-first="true" typeahead-editable="false" typeahead="stop as stop.name for stop in stopsArr | filter:{name:$viewValue} | limitTo:8" placeholder="Ej: Albrook"
                 aria-describedby="search-addon">
               </div>
               <div class="form-group">
@@ -111,7 +113,7 @@
                   <label class="btn btn-default btn-xs" 
                   ng-model="newStopSequence[trip.id].sequence" 
                   btn-radio="null" 
-                  title="Añadir al final de la ruta">Final del trayecto</label>
+                  title="Añadir al final de la ruta">Final del trayecto (defecto)</label>
                   
                   <label class="btn btn-default btn-xs" 
                   ng-model="newStopSequence[trip.id].sequence" 
@@ -121,7 +123,7 @@
                   <label class="btn btn-default btn-xs" 
                   ng-model="newStopSequence[trip.id].sequence" 
                   btn-radio="-1"><i class="fa fa-exclamation-triangle" 
-                  title="Se marca para después poder ordenarla."></i>Posición desconocida</label>
+                  title="Si no sabes en qué posición está esta parada, Usa esta opción"></i>Posición desconocida</label>
                    
                 </div>
               </div>

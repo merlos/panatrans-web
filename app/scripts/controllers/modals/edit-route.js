@@ -328,13 +328,13 @@ var getTripHeadsignFromRouteName = function(routeTripType, routeName) {
   //      c = 'stop c'
   switch(routeTripType) {
     case 'one': 
-      return [c];
+      return [a];
       break;
     case 'circular':
       return ['circular'];
       break;  
     case 'two':
-      return [c, a];
+      return [a, c];
       break;
     default: 
       return undefined
