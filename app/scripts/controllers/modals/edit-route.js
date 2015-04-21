@@ -2,7 +2,7 @@
 // Edit Routes of a Stop Modal Controller
 //
 angular.module('panatransWebApp')
-.controller('EditRouteModalInstanceCtrl', function ($scope, $http, ngToast, $modalInstance, route, stopsArr) {
+.controller('EditRouteModalInstanceCtrl', function ($scope, $http, ngToast, $modalInstance, route) {
     
 $scope.sortedStopSequences = {};
 $scope.unknownStopSequences = {};
@@ -45,24 +45,19 @@ var updateRoute = function() {
   });
 };
   
-// load stopsArr
-//TODO DRY this, it should be a service
-if (stopsArr == null) { 
-  console.log('requesting stops to server...');
- //get stops
-  $http.get(_CONFIG.serverUrl + '/v1/stops/' + '?' + _CONFIG.delay)
+$http.get(_CONFIG.serverUrl + '/v1/stops/' + '?' + _CONFIG.delay)
   .success(function(response) {
     $scope.stopsArr = response.data;
-  });
-} else {
-  $scope.stopsArr = stopsArr; //all the stops
-}
+  }
+);
     
 
 //////////// MAIN ////////////////////////
 
 //if  new route
-if (route == null) {
+
+console.log(route);
+if (route === null) {
   route = {trips: []};
   $scope.route = route;
   $scope.isNewRoute = true;
@@ -224,7 +219,7 @@ $scope.addNewRoute = function() {
   })
   .error(function(data, status){
     var errors = data.errors.name.join(', ') || '';
-    ngToast.create({className: 'danger', contents: 'Error: ' + errors});
+    ngToast.create({className: 'danger', content: 'Error: ' + errors});
     console.log(data);
     console.log(status);
     console.log('Error creating route');
@@ -242,7 +237,7 @@ $scope.deleteRoute = function() {
   })
   .error(function(data, status){ // TODO test
     var errors = data.errors.name.join(', ') || '';
-    ngToast.create({className: 'danger', contents: 'Error: ' + errors});
+    ngToast.create({className: 'danger', content: 'Error: ' + errors});
     console.log(data);
     console.log(status);
     console.log('Error deleting route');
@@ -273,6 +268,7 @@ $scope.updateRouteName = function(){
     console.log('Error updating route name');
   });
 };   
+
 $scope.updateRouteUrl = function(){
   console.log('updateRouteUrl');
   if ($scope.route.url === serverRoute.url) { 
@@ -427,7 +423,6 @@ $scope.tripsHaveStops = function() {
 };
     
 
-    
 // Add stop to a trip 
 // Position: -1 unk, 0 => beginning, > 1 000 000 => end
 $scope.addStopToTrip = function (tripId) {

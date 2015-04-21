@@ -3,10 +3,8 @@
 // Modal Controller
 //
 angular.module('panatransWebApp')
-.controller('EditStopModalInstanceCtrl', function ($scope, $http, $modalInstance, ngToast, routes, stop) {
+.controller('EditStopModalInstanceCtrl', function ($scope, $http, $modalInstance, ngToast,stop) {
   $scope.stop = stop;
-  $scope.routes = routes;
-  console.log(routes);
   
   $scope.tripNotAlready = function(obj) {
     var ret = true;
@@ -72,7 +70,7 @@ angular.module('panatransWebApp')
   $scope.updateStopName = function() {
     console.log("updateStop");
     console.log($scope.stop);
-    $http.put(_CONFIG.serverUrl + '/v1/stops/' + $scope.stop.id, {stop: { name: $scope.stop.name}})
+    /*$http.put(_CONFIG.serverUrl + '/v1/stops/' + $scope.stop.id, {stop: { name: $scope.stop.name}})
     .success(function(response){
       console.log("Stop successfully updated");
       //TODO feedback
@@ -82,6 +80,7 @@ angular.module('panatransWebApp')
       console.log('error adding trip to stop');
       console.log(response);
     });
+    */
 
   };
   

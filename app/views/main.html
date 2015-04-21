@@ -64,18 +64,18 @@
           <div ng-show="showTripDetails" style="width:50%; float: left; padding-left:5px" ng-repeat="trip in route.trips"> 
             <strong>Trayecto {{trip.headsign}}</strong>
             <ul class="trip-stops-list">
-            <li ng-repeat="stopSequence in trip.stop_sequences" 
+            <li ng-repeat="stopSequence in trip.stopSequences" 
             ng-if="stopSequence.sequence !== null"
-            ng-mouseover="highlightStop(stops[stopSequence.stop_id])"
-            ng-mouseleave="lowlightStop(stops[stopSequence.stop_id])">
-              {{stops[stopSequence.stop_id].name}}
+            ng-mouseover="highlightStop(stops[stopSequence.stopId])"
+            ng-mouseleave="lowlightStop(stops[stopSequence.stopId])">
+              {{stops[stopSequence.stopId].name}}
             </li>
             <!-- only stops with unknown location -->
-            <li ng-repeat="stopSequence in trip.stop_sequences" 
-            ng-mouseover="highlightStop(stops[stopSequence.stop_id])"
-            ng-mouseleave="lowlightStop(stops[stopSequence.stop_id])"
+            <li ng-repeat="stopSequence in trip.stopSequences" 
+            ng-mouseover="highlightStop(stops[stopSequence.stopId])"
+            ng-mouseleave="lowlightStop(stops[stopSequence.stopId])"
             ng-if="stopSequence.sequence === null" title="Parada cuya posición en el trayecto es desconocida">
-             <i class="fa fa-exclamation-triangle"></i> {{stops[stopSequence.stop_id].name}}
+             <i class="fa fa-exclamation-triangle"></i> {{stops[stopSequence.stopId].name}}
             </li>
           </ul> 
           </div><!-- trip in trips  div -->

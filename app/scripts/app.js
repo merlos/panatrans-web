@@ -32,7 +32,8 @@ angular
     'ui.sortable',
     'angular-toArrayFilter',
     'ngToast',
-    'slugifier'
+    'slugifier',
+    'rails'
   ])
   .config(function ($routeProvider) {
     $routeProvider
@@ -66,3 +67,14 @@ angular
         redirectTo: '/'
       });
   });
+  
+/** ng toast config **/
+angular.module('panatransWebApp')
+  .config(['ngToastProvider', function(ngToast) {
+    ngToast.configure({
+      verticalPosition: 'top',
+      horizontalPosition: 'center',
+      maxNumber: 3
+    });
+  }]);
+  
