@@ -41,6 +41,7 @@ function Route($q, $http, railsResourceFactory) {
     return deferred.promise;
   };
     
+    
   return resource;
 } //Route class
 

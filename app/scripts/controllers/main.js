@@ -282,7 +282,23 @@ angular.module('panatransWebApp')
           },
         }
       };
-      $modal.open(modalConfig);  
+      var modalInstance = $modal.open(modalConfig)
+      modalInstance.result.then(
+        function(){ //close
+          console.log('getting updated version of the modal');
+          Stop.find($scope.stopDetail.id, true).then(
+            function(stop) {
+              $scope.stopDetail = stop;
+            },
+            function(error) {
+              console.log('error updating stop');
+            }
+          );
+        }, 
+        function(){ //dismiss 
+          console.log('EditRouteModal dismissed');
+        }
+      );  
     };
     
        

@@ -18,6 +18,7 @@ function Stop($q, $http,  railsSerializer, railsResourceFactory) {
     serializer: railsSerializer(function () {
       this.resource('data', 'Stop'); // when getting stop info is in data
       this.exclude('routes'); //when (put)updating, do not send routes
+      this.resource('routes', 'Route');
     })
   };
   var resource = railsResourceFactory(config);
@@ -52,10 +53,11 @@ function Stop($q, $http,  railsSerializer, railsResourceFactory) {
   };
   
   
-  resource.find = function(stopId) {
+  resource.find = function(stopId, forceRequest) {
+    forceRequest = typeof forceRequest !== 'undefined' ? forceRequest : false;
     var deferred = $q.defer();
     //only download if the stop is not already local cache
-    if (resource.stops[stopId].routes) {
+    if (resource.stops[stopId].routes && !forceRequest) {
        deferred.resolve(resource.stops[stopId]);
     } else {
       console.log('Stops:find: requesting stop detail');
