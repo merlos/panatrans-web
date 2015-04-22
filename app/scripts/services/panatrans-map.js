@@ -7,8 +7,24 @@
 */
 
 angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$http', function($compile, $q, $http) {
+  
+  var maps = {};
+   
   return function(mapId, tileLayerUrl, tileLayerAttribution) {
-
+      
+    //if the map was already initialized return it. See at the end of the function 
+  if (maps[mapId] !== undefined) {
+      if ($('#' + mapId).hasClass('leaflet-container')) { 
+        console.log('PanatransMap: map already initialized');
+        $('#map-container').html('<div class="map" id="map"');
+      } else { 
+        console.log('PanatransMap: map exists but empty. Recreate it');
+        maps[mapId].remove();
+      }
+  };
+    // if not initialize the map again
+    console.log('Init PanatransMap');
+    
     function StopMarker(lat, lng, options) {
       var marker = L.marker(lat,lng, options);
     
@@ -28,6 +44,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
   
       return marker
     };
+       
         
     var map = L.map(mapId, {
       center: [8.9740946, -79.5508536],
@@ -116,7 +133,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       }
     }; 
   
-  
+    
     map.stopMarkerPopupOpen = function(e) {
       console.log('Panatrans stopMarker Popup Open');
       var stop = e.popup._source._stop;
@@ -348,7 +365,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       map.tileLayer.addTo(map);
       map.on('zoomend', map.onZoomEnd);
       map.on('moveend', map.onMoveEnd);
-  
+      maps[mapId] = map;
       return map;
     };
   }]);

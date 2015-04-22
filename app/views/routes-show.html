@@ -1,7 +1,14 @@
-<div class="fill-overflow">
-  <div id="route-map"></div>  
+<div class="fill-overflow" id="map-container">
+  <div class="map" id="route-map"></div>  
 </div>
 <toast></toast>
+   <button class="btn btn-prmiary" ng-click="togglePdfStops(route)"
+   ng-show="pdfLayers[route.id] !== undefined" style="position: absolute; top: 60px; right: 20px">Mostrar/ocultar Paradas</button>
+      
+
+
+
+
   <div id="stop-detail">
     <!--  <a href="" ng-click="closeStopDetail()" class="pull-right" style="padding:5px;color: grey"><i class="fa fa-close"></i></a>
    -->

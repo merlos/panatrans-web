@@ -1,5 +1,5 @@
 <div class="fill-overflow" id="map-container">
-  <div id="map"></div>  
+  <div class="map" id="map"></div> 
 </div>
 <toast></toast>
 <button class="btn btn-xs btn-primary btn-new-stop" ng-click="openNewStopModal()" title="añadir una parada nueva"><i class="fa fa-bus"></i> +</button>
@@ -31,7 +31,7 @@
       <h3 title="{{stopDetail.name}}"><i class="fa fa-bus"></i> {{stopDetail.name | uppercase}}</h3>
       <p class="routes-title">
         <i class="fa fa-road"></i> Rutas de esta parada
-        <a href="" ng-click="openEditStopModal(stopDetail.id)" class="pull-right"> <i class="fa fa-pencil" title="Editar las rutas que pasan por esta parada"></i> Editar</a>
+        <a href="" ng-click="openEditStopModal(stopDetail.id)" class="pull-right"> <i class="fa fa-pencil" title="Editar las rutas que pasan por esta parada"></i> Editar parada</a>
       </p>
     
       <ul class="route-list">
@@ -50,22 +50,26 @@
                   <a href class="dropdown-toggle" dropdown-toggle style="margin-right: 5px;margin-top: 5px">
                     <i class="fa fa-caret-square-o-down"></i>
                   </a>
-                  <ul class="dropdown-menu dropdown-menu-right">
+                  <ul class="dropdown-menu-right dropdown-menu" style="left:auto">
                     <li>
-                      <a href=""  ng-click="openEditRouteModal(route.id)" title="Editar las paradas de esta ruta"><i class="fa fa-pencil"></i> Editar ruta</a>
-                    </li>
-                    <li>
-                     <a href="" ng-click="togglePdfLayer(route)" title="mostrar PDF de la ruta sobre el mapa"><i class="fa fa-file-pdf-o"></i> Mostrar/ocultar PDF</a>
+                      <a href="" ng-click="shareRoute(route)"><i class="fa fa-link"></i> Compartir enlace</a>
                     </li>
                     <li>
                       <a href="{{route.url}}" target="_blank" ng-show="route.url !== null"  title="ver página de mibus.com (abre nueva ventana)"><i class="fa fa-external-link"></i> Ver en mibus.com.pa</a>
                     </li>
-                     
+                    <li role="presentation" class="divider"></li>
+                    <li>
+                      <a href=""  ng-click="openEditRouteModal(route.id)" title="Editar las paradas de esta ruta"><i class="fa fa-pencil"></i> Editar ruta</a>
+                    </li>
+                    <li>
+                      <a href="" ng-click="togglePdfLayer(route)" title="mostrar PDF de la ruta sobre el mapa"><i class="fa fa-file-pdf-o"></i> Mostrar/ocultar PDF</a>
+                    </li>
+
                   </ul>
                 </span>
           </div>
           <div ng-click="toggleTripDetails()" class="clickable-container">
-            <h4>{{route.name}} {{route.trips.length}}</h4> 
+            <h4>{{route.name}}</h4> 
           </div>
           <div ng-show="showTripDetails" class="row" style="width: 98%">
             <div ng-repeat="trip in route.trips"  class="text-center" ng-class="{'col-xs-6': route.trips.length > 1}"> 
@@ -73,8 +77,7 @@
               <ul class="trip-stops-list">
                 <li ng-repeat="stopSequence in trip.stopSequences" 
                 ng-if="stopSequence.sequence !== null"
-                ng-mouseover="highlightStop(stops[stopSequence.stopId])"
-                ng-mouseleave="lowlightStop(stops[stopSequence.stopId])">
+                ng-click="highlightStop(stops[stopSequence.stopId])">
                 <span ng-class="{label:(stopSequence.stopId == stopDetail.id), 'label-warning': (stopSequence.stopId == stopDetail.id)}">{{stops[stopSequence.stopId].name}}</span>
             </li>
             <!-- only stops with unknown location -->

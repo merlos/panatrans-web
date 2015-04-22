@@ -10,14 +10,16 @@
 
 
 angular.module('panatransWebApp')
-  .controller('RoutesShowCtrl', ['$scope', '$http', '$modal', 'ngToast', '$routeParams', function ($scope, $http, $modal, ngToast, $routeParams) {
+  .controller('RoutesShowCtrl', ['$scope', '$http', '$modal', '$compile', '$routeParams', 'ngToast', 'Stop', function ($scope, $http, $modal, $compile,  $routeParams, ngToast, Stop) {
     $scope.route = {};
     console.log($routeParams);
     $scope.loading = true;  
     
     var markers = {};
     var markersFeatureGroup = null;
+    var pdfMarkers = {};
     var stops = {};
+    var routeStops = {};
     
     if ($scope.map) { 
       return;
@@ -103,6 +105,7 @@ angular.module('panatransWebApp')
     
     //TODO DRY This is the same function as in main.js 
     var pdfLayers = {};
+    $scope.pdfLayers = pdfLayers;
     $scope.togglePdfLayer = function(route) {
       console.log('togglePDFLayer');
       //var tilesBaseUrl ='https://www.googledrive.com/host/0B8O0WQ010v0Pfl92WjctUXNpTTZYLUUzMUdReXJrOFJLdDRYWVBobmFNTnBpdEljOE9oNms'
@@ -116,7 +119,8 @@ angular.module('panatransWebApp')
         angular.forEach(boundsArr, function(x,k) {
           boundsArr[k] = x.match(/([\-\.\d]+)/g)[0];
         });  
-        $scope.map.fitBounds([[boundsArr[1],boundsArr[0]],[boundsArr[3],boundsArr[2]]]);
+        var pdfBounds = L.latLngBounds([[boundsArr[1],boundsArr[0]],[boundsArr[3],boundsArr[2]]]);
+        $scope.map.fitBounds(pdfBounds);
         console.log(boundsArr);
         console.log('cool! The pdf is geolocated route_id:' + route.id);
         if (pdfLayers[route.id] === undefined) { 
@@ -130,8 +134,8 @@ angular.module('panatransWebApp')
           var tilesUrl = tilesBaseUrl + route.id + '/kml/{z}/{x}/{y}.png';
           console.log('tilesUrl: ' + tilesUrl);
           pdfLayers[route.id] = L.tileLayer(tilesUrl, options);
+          pdfLayers[route.id].pdfBounds = pdfBounds; //save bounds in layer.
           pdfLayers[route.id].addTo($scope.map);
-      
           ngToast.create('En unos segundos se mostrará el PDF de la ruta en el mapa...');
         } else { //layer exists => remove from map
             $scope.map.removeLayer(pdfLayers[route.id]);
@@ -166,9 +170,9 @@ angular.module('panatransWebApp')
           angular.forEach(trip.stop_sequences, function(stop_sequence) {
             var stop = stop_sequence.stop;
             //add markers to map if not in map
-            if (stops[stop.id] === undefined) {
+            if (routeStops[stop.id] === undefined) {
               addStopMarkerToMap(stop);
-              stops[stop.id] = stop;
+              routeStops[stop.id] = stop;
             }
           });
         });
@@ -182,7 +186,86 @@ angular.module('panatransWebApp')
       });
   };
   
+  //load all stops
+  Stop.all().then(
+    function(data) {
+      stops = data;
+    }, function(error) {
+      ngToast.create({
+        timeout: 8000,
+        className: 'danger', 
+        content: '<strong>Error obteniendo información de paradas.</strong><br> Prueba en un rato. Si nada cambia tuitéanos: @panatrans'}
+      );
+    }
+  );
   updateRoute();
+    
+  
+  $scope.addStopToTrip = function(stop, trip) {
+    console.log('add stop to trip');
+    console.log(stop);
+    console.log(trip);
+    var postData =  {
+      'stop_sequence': {
+        'sequence': null, 
+        'unknown_sequence': false,
+        'stop_id': stop.id,
+        'trip_id': trip.id
+      }
+    };
+    console.log('addStopToTrip postData:');
+    console.log(postData);
+
+    $http.post(_CONFIG.serverUrl + '/v1/stop_sequences/', postData)
+    .success(function(response) {
+      updateRoute();
+      pdfMarkers[stop.id].closePopup();
+      ngToast.create('Se ha añadido la parada al trayecto.');  
+    });
+  }; 
+    
+  var pdfStopsInMap = false;
+  $scope.togglePdfStops = function(route) {
+    console.log('togglePdfStops');
+    if(pdfStopsInMap) {
+      angular.forEach(pdfMarkers, function(marker) {
+        $scope.map.removeLayer(marker);
+      });
+      pdfStopsInMap = false;
+      return;
+    } 
+    //stops not in map
+    angular.forEach(stops, function(stop) {
+      var stopLatLng = L.latLng(parseFloat(stop.lat), parseFloat(stop.lon));
+      if (pdfLayers[route.id].pdfBounds.contains(stopLatLng)) {
+        //add the marker
+        var marker = L.marker([stop.lat, stop.lon], 
+          {
+            icon: markerIcon.default,
+            draggable: false,
+          }
+        );
+        
+        var template =  '<div><p><strong>{{stop.name}}</strong><br>Añadir parada al final del trayecto:</p><ul ng-repeat="trip in route.trips"><li><a href="" ng-click="addStopToTrip(stop, trip)">Con dirección {{trip.headsign}}</a></li></ul></div>';
+        var linkFn = $compile(angular.element(template));
+        var scope = $scope.$new();
+        //add var to scope
+        scope.stop = stop;
+        scope.route = $scope.route;
+        scope.stopMarker = this;
+        var element = linkFn(scope);
+        //console.log(element);
+        marker.bindPopup(element[0]);      
+        marker.on('popupopen', stopMarkerPopupOpen); 
+        marker.on('popupclose', stopMarkerPopupClose); 
+        //set an id (https://github.com/Leaflet/Leaflet/issues/1031)
+        marker._stopId = stop.id; 
+        pdfMarkers[stop.id] = marker; //add the marker to the list of markers
+        pdfStopsInMap = true
+        marker.addTo($scope.map);
+      }
+    })
+  };
     
     $scope.openEditRouteModal = function(routeId){
       var modalConfig = {

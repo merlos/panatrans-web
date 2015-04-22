@@ -15,7 +15,7 @@ function Route($q, $http, railsResourceFactory) {
     url: _CONFIG.serverUrl + '/v1/routes',
     name: 'route'
   });
-  
+  console.log('Init Route');
   resource.routes = {}; 
     
   resource.all = function() {

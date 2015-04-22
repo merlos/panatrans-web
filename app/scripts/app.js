@@ -47,7 +47,7 @@ angular
       })
       .when('/paradas', {
         templateUrl: 'views/stops.html',
-        controller: 'StopsCtrl'
+        controller: 'StopsCtrl',
       })
       .when('/ruta/:routeId/:slug.html', {
         templateUrl: 'views/routes-show.html',

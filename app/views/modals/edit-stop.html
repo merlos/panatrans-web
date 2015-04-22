@@ -54,7 +54,7 @@
     </div>
           
     <ul class="list-unstyled">
-      <li ng-repeat="route in routes | filter : searchFilter"  ng-show="route.trips.length > 0"> 
+      <li ng-repeat="route in routes | toArray | filter : searchFilter"  ng-show="route.trips.length > 0"> 
         <span ng-repeat="trip in route.trips | filter: tripNotAlready">
             <i class="fa fa-plus-circle"></i> <a href="" ng-click="addTrip(trip.id)"> <strong>{{route.name}}</strong> (Trayecto {{trip.headsign}})</a><br></span>
       </li>

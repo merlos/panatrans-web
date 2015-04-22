@@ -16,7 +16,6 @@ angular.module('panatransWebApp')
   if ($scope.map) { 
     return;
   }
-  
   //
   var _isMobile = (function() {
           var check = false;
@@ -72,7 +71,7 @@ angular.module('panatransWebApp')
    
   $scope.map = PanatransMap('map', _CONFIG.tilelayerUrl, _CONFIG.tilelayerAttribution)  
   $scope.map.$scope = $scope;
-    
+  
   //load all stops
   Stop.all().then(
     function(data) {
@@ -88,9 +87,11 @@ angular.module('panatransWebApp')
       console.log('routeParams');
       console.log($routeParams);
       if ($routeParams.stopId !== undefined ) {
-        console.log('Centering Map on Stop: ' + $scope.stops[$routeParams.stopId].name);
-        if ($scope.stops[$routeParams.stopId] !== undefined) {
-          $scope.map.openStopPopup($scope.stops[$routeParams.stopId]);
+        var centerStop = $scope.stops[$routeParams.stopId]
+        console.log('Centering Map on Stop: ' + centerStop.name);
+        if (centerStop !== undefined) {
+          $scope.map.panTo(centerStop);
+          $scope.map.openStopPopup(centerStop);
         }
       }
     }, function(error) {
@@ -132,7 +133,8 @@ angular.module('panatransWebApp')
   $scope.isFirstStopInTrip = Stop.isFirstStopInTrip;
   
   $scope.highlightStop = function(stop) {
-      console.log('highlight stop'  + stop.name);
+    $scope.map.panToStop(stop);
+    $scope.map.openStopPopup(stop);
   };
   
   $scope.lowlightStop = function(stop) {

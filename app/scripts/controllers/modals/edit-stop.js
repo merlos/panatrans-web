@@ -3,8 +3,29 @@
 // Modal Controller
 //
 angular.module('panatransWebApp')
-.controller('EditStopModalInstanceCtrl', function ($scope, $http, $modalInstance, ngToast, stop) {
+.controller('EditStopModalInstanceCtrl', function ($scope, $http, $modalInstance, ngToast, Route, stop) {
   $scope.stop = stop;
+  
+  
+  //load all routes
+  Route.all().then(
+    function(data) {
+      $scope.loading = false;
+      $scope.routes = data;
+    }, 
+    function(error) {
+      $scope.loading = false;
+      console.log('Error loading Routes.all()');
+      ngToast.create({
+        timeout: 8000,
+        className: 'danger', 
+        content: '<strong>Error obteniendo información de rutas</strong>.<br> Prueba en un rato. Si nada cambia tuitéanos: @panatrans'
+        }
+      ); 
+      console.log(error);
+    }
+  );
+  
   
   $scope.tripNotAlready = function(obj) {
     var ret = true;
