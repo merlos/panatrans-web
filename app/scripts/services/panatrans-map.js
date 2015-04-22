@@ -127,7 +127,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
   
     map.onMoveEnd = function() {
       console.log('onMoveEnd');
-      if (this.getZoom() >= 15) { 
+      if (this.getZoom() >= map.minZoomWithMarkers) { 
         this.hideMarkersOutsideBounds();
         this.showMarkersInsideBounds();
       }
@@ -175,6 +175,15 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         return marker;
       };
   
+      //adds the marker of the stop to the map 
+      map.addStopMarker = function(stop) {
+        //remove layer first and then add it again
+        map.hideStopMarker(stop); 
+        map.stopMarkers[stop.id].addTo(map);
+      };
+      map.hideStopMarker = function(stop) {
+        map.removeLayer(map.stopMarkers[stop.id])
+      };
   
       // centers map in stop lat and lon.
       map.panToStop = function(stop) {

@@ -41,22 +41,24 @@ angular.module('panatransWebApp')
   // CONTROLLER METHODS
   
   var stopMarkerPopupOpen = function(e) {
+    console.log('main::stopMarkerPopupOpen');
     //display lateral div & loading
     $scope.showStopDetail = true;  
     $scope.loadingStopDetail = true;
     //center map in stop
     var stop = e.popup._source._stop;
-    $scope.map.panToStop(stop);
-    
-    Stop.find(stop.id).then( 
+    $scope.stopDetail=stop;
+    $scope.map.panToStop($scope.stopDetail);
+    Stop.find($scope.stopDetail.id).then( 
       function(data) { 
+        console.log('Loaded stop...');
         $scope.stopDetail = data;
         $scope.loadingStopDetail = false;
       },
       function(error) {
         $scope.loadingStopDetail = false;
         console.log('error getting stop details');
-        console.log(error)
+        console.log(error);
       }
     );
   }; // on(popupopen)
@@ -75,6 +77,7 @@ angular.module('panatransWebApp')
   //load all stops
   Stop.all().then(
     function(data) {
+      console.log('Stop.all.success');
       $scope.stops = data;
       angular.forEach($scope.stops, function(stop) {
         var marker = $scope.map.createStopMarker(stop);
@@ -84,14 +87,15 @@ angular.module('panatransWebApp')
       $scope.map.showMarkersInsideBounds();
       
       // PROCESS STOP ARGUMENTS
-      console.log('routeParams');
-      console.log($routeParams);
+      //console.log('routeParams');
+      //console.log($routeParams);
       if ($routeParams.stopId !== undefined ) {
         var centerStop = $scope.stops[$routeParams.stopId]
         console.log('Centering Map on Stop: ' + centerStop.name);
         if (centerStop !== undefined) {
-          $scope.map.panTo(centerStop);
-          $scope.map.openStopPopup(centerStop);
+          $scope.map.addStopMarker(centerStop);
+          $scope.map.panToStop(centerStop);
+          $scope.map.openStopPopup(centerStop);  
         }
       }
     }, function(error) {
