@@ -45,10 +45,19 @@ angular
         templateUrl: 'views/routes.html',
         controller: 'RoutesCtrl'
       })
-      .when('/metrobus/:routeId/:slug.html', {
+      .when('/paradas', {
+        templateUrl: 'views/stops.html',
+        controller: 'StopsCtrl'
+      })
+      .when('/ruta/:routeId/:slug.html', {
         templateUrl: 'views/routes-show.html',
         controller: 'RoutesShowCtrl'
       })
+      .when('/parada/:stopId/:slug.html', {
+        templateUrl: 'views/main.html',
+        controller: 'MainCtrl'
+      })
+      
       .when('/colabora', {
         templateUrl: 'views/contribute.html',
         controller: 'ContributeCtrl'

@@ -10,7 +10,7 @@
 
 
 angular.module('panatransWebApp')
-.controller('MainCtrl', [ '$scope', '$compile', '$http', '$modal',  'ngToast','Route', 'Stop', 'PanatransMap', function ($scope, $compile, $http, $modal, ngToast, Route, Stop, PanatransMap) {
+.controller('MainCtrl', [ '$scope', '$compile', '$http', '$modal', '$routeParams', 'ngToast','Route', 'Stop', 'PanatransMap', function ($scope, $compile, $http, $modal, $routeParams, ngToast, Route, Stop, PanatransMap) {
   
   // it seems that the controller is loaded twice. Doing that makes initialize twice the map, which makes a mess
   if ($scope.map) { 
@@ -38,9 +38,41 @@ angular.module('panatransWebApp')
   var stopDetailPanelHighlightedStop = null;
   
   
+  
+  // CONTROLLER METHODS
+  
+  var stopMarkerPopupOpen = function(e) {
+    //display lateral div & loading
+    $scope.showStopDetail = true;  
+    $scope.loadingStopDetail = true;
+    //center map in stop
+    var stop = e.popup._source._stop;
+    $scope.map.panToStop(stop);
+    
+    Stop.find(stop.id).then( 
+      function(data) { 
+        $scope.stopDetail = data;
+        $scope.loadingStopDetail = false;
+      },
+      function(error) {
+        $scope.loadingStopDetail = false;
+        console.log('error getting stop details');
+        console.log(error)
+      }
+    );
+  }; // on(popupopen)
+  
+  
+  var stopMarkerPopupClose = function() {
+    console.log('stopMarkerClosed');
+  };
+  
+  
+  //Initialization process
    
   $scope.map = PanatransMap('map', _CONFIG.tilelayerUrl, _CONFIG.tilelayerAttribution)  
   $scope.map.$scope = $scope;
+    
   //load all stops
   Stop.all().then(
     function(data) {
@@ -51,6 +83,16 @@ angular.module('panatransWebApp')
         marker.on('popupclose',stopMarkerPopupClose);
       });
       $scope.map.showMarkersInsideBounds();
+      
+      // PROCESS STOP ARGUMENTS
+      console.log('routeParams');
+      console.log($routeParams);
+      if ($routeParams.stopId !== undefined ) {
+        console.log('Centering Map on Stop: ' + $scope.stops[$routeParams.stopId].name);
+        if ($scope.stops[$routeParams.stopId] !== undefined) {
+          $scope.map.openStopPopup($scope.stops[$routeParams.stopId]);
+        }
+      }
     }, function(error) {
       ngToast.create({
         timeout: 8000,
@@ -78,33 +120,10 @@ angular.module('panatransWebApp')
       console.log(error);
     }
   );
+  
+ 
     
-  var stopMarkerPopupOpen = function(e) {
-    //display lateral div & loading
-    $scope.showStopDetail = true;  
-    $scope.loadingStopDetail = true;
-    //center map in stop
-    var stop = e.popup._source._stop;
-    $scope.map.panToStop(stop);
-    
-    Stop.find(stop.id).then( 
-      function(data) { 
-        $scope.stopDetail = data;
-        $scope.loadingStopDetail = false;
-      },
-      function(error) {
-        $scope.loadingStopDetail = false;
-        console.log('error getting stop details');
-        console.log(error)
-      }
-    );
-  }; // on(popupopen)
-  
-  
-  var stopMarkerPopupClose = function() {
-    console.log('stopMarkerClosed');
-  };
-  
+ 
   $scope.closeStopDetail = function() {
     $scope.showStopDetail = false;
   };

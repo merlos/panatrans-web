@@ -28,7 +28,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
   
       return marker
     };
-  
+        
     var map = L.map(mapId, {
       center: [8.9740946, -79.5508536],
       zoom: 16,
@@ -164,6 +164,11 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         map.panTo(map.stopMarkers[stop.id].getLatLng());
       };
   
+      map.openStopPopup = function(stop) {
+        console.log('requesting open popup of :' +  stop.name);
+        map.stopMarkers[stop.id].openPopup();
+      };
+      
   
       //removes marker from map and list of markers
       map.removeStopMarker = function(stop) {
@@ -185,8 +190,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         angular.forEach(this.stopMarkers, function(marker) {
           map.removeLayer(marker);
         });
-      }
-  
+      };
   
       //hides markers that are outdide map bounds    
       map.hideMarkersOutsideBounds = function() { 

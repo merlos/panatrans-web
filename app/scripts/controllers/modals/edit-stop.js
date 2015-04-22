@@ -3,7 +3,7 @@
 // Modal Controller
 //
 angular.module('panatransWebApp')
-.controller('EditStopModalInstanceCtrl', function ($scope, $http, $modalInstance, ngToast,stop) {
+.controller('EditStopModalInstanceCtrl', function ($scope, $http, $modalInstance, ngToast, stop) {
   $scope.stop = stop;
   
   $scope.tripNotAlready = function(obj) {
