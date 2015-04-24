@@ -20,10 +20,12 @@ angular.module('panatransWebApp')
     var pdfMarkers = {};
     var stops = {};
     var routeStops = {};
+    var newStop = {};
     
     if ($scope.map) { 
       return;
     }
+    
     //Configure map
     $scope.map = L.map('route-map', {
       center: [8.9740946, -79.5508536],
@@ -47,6 +49,12 @@ angular.module('panatransWebApp')
         icon: 'bus',
         prefix: 'fa',
         markerColor: 'red'
+      }),
+      redSpin: L.AwesomeMarkers.icon({
+        icon: 'bus',
+        prefix: 'fa',
+        markerColor: 'red',
+        spin: true
       }),
     };
     
@@ -85,10 +93,12 @@ angular.module('panatransWebApp')
     var stopMarkerPopupClose = function(e) {
       var stopId = e.popup._source._stopId;
       if (stopId === null) { 
-          console.log('stopMarkerPopupClose: Hey! Hey! stopId es null :-?');
+          console.log('stopMarkerPopupClose: Hey! Hey! It seems that you forgot to set stopId...');
           return;
       }
-      markers[stopId].setIcon(markerIcon.default);
+      if (markers[stopId] !== undefined) { 
+        markers[stopId].setIcon(markerIcon.default);
+      }
     };
     
     $scope.highlightStop = function(stop) {
@@ -224,17 +234,19 @@ angular.module('panatransWebApp')
     });
   }; 
     
-  var pdfStopsInMap = false;
+  $scope.pdfStopsInMap = false;
   $scope.togglePdfStops = function(route) {
     console.log('togglePdfStops');
-    if(pdfStopsInMap) {
+    if($scope.pdfStopsInMap) {
+      ngToast.create({className:'info', content:'Ocultando paradas dentro de PDF...'});
       angular.forEach(pdfMarkers, function(marker) {
         $scope.map.removeLayer(marker);
       });
-      pdfStopsInMap = false;
+      $scope.pdfStopsInMap = false;
       return;
     } 
     //stops not in map
+    ngToast.create({className:'info', content:'Mostrando paradas dentro de PDF...'});
     angular.forEach(stops, function(stop) {
       var stopLatLng = L.latLng(parseFloat(stop.lat), parseFloat(stop.lon));
       if (pdfLayers[route.id].pdfBounds.contains(stopLatLng)) {
@@ -261,7 +273,7 @@ angular.module('panatransWebApp')
         //set an id (https://github.com/Leaflet/Leaflet/issues/1031)
         marker._stopId = stop.id; 
         pdfMarkers[stop.id] = marker; //add the marker to the list of markers
-        pdfStopsInMap = true
+        $scope.pdfStopsInMap = true
         marker.addTo($scope.map);
       }
     })
@@ -289,6 +301,97 @@ angular.module('panatransWebApp')
         updateRoute();
         }, function () {});
     };
+    
+    
+    ////////////////////////// NEW STOP
+    
+    // New Stop
+    
+       
+    $scope.saveNewStop = function() {
+      console.log('saveSaveNewStop');
+      console.log(newStop);
+      //make the create request
+      $http.post(_CONFIG.serverUrl + '/v1/stops/', {stop: newStop})
+      .success(function(response) {
+        console.log('stop saved successfully');
+        console.log(response.data);
+        $scope.stops[response.data.id] = response.data;
+        $scope.stopDetail = response.data;
+        //add marker to markers
+        newStopMarker._stopId = response.data.id; 
+        newStopMarker.closePopup();
+        newStopMarker.setIcon(iconset.default);
+        newStopMarker.bindPopup(response.data.name);
+        newStopMarker.on('popupopen', stopMarkerPopupOpen);
+        newStopMarker.on('popupclose', stopMarkerPopupClose); 
+        //update popup
+        markers[response.data.id] = newStopMarker;
+        newStopMarker.openPopup();
+        //clear marker and stop for next round
+        newStop = {};
+        newStopMarker = null;
+        //display some feedback to the user
+        ngToast.create('Excelente, ¡parada añadida!');
+        console.log('Se ha añadido la parada con éxito');
+        
+        
+      })
+      .error(function(data) {
+        console.log(data);
+      });
+    };
+    
+    
+    $scope.cancelSaveNewStop = function() {
+      console.log('cancelSaveStop');
+    };
+    
+    
+    $scope.openNewStopModal = function(){
+      var modalConfig = {
+        templateUrl: 'views/modals/new-stop.html',
+        //size: 'lg',
+        controller: 'NewStopModalInstanceCtrl',
+        backdrop: 'static',
+        resolve: { //variables passed to modal scope  
+        }
+      };
+      var modalInstance = $modal.open(modalConfig);  
+      modalInstance.result.then(function (stopModal) {
+        newStop = stopModal;
+          //add newStopMarker
+        var mapCenter = $scope.map.getCenter();
+        newStop.lat = mapCenter.lat;
+        newStop.lon = mapCenter.lng;
+        newStopMarker = L.marker(mapCenter, 
+            { 
+              icon: $scope.map.iconset.redSpin,
+              draggable: true,
+              bounceOnAdd: true, 
+              bounceOnAddOptions: {duration: 500, height: 100}, 
+              bounceOnAddCallback: function() {console.log('bouncing done');}
+            }).addTo($scope.map); //http://stackoverflow.com/questions/17662551/how-to-use-angular-directives-ng-click-and-ng-class-inside-leaflet-marker-popup    
+        var html = '<div><h4>' + newStop.name + '</h4><p><strong>Arrástrame</strong> hasta mi localización.<br>Después dale a: </p><button ng-click="saveNewStop()"class="btn btn-primary">Guardar</button> o <a ng-click="cancelSaveNewStop()">cancelar</a></div>';
+        var linkFn = $compile(angular.element(html));
+        var scope = $scope.$new();
+        var element = linkFn(scope);
+        console.log(element);  
+        newStopMarker.bindPopup(element[0]).openPopup();    
+        newStopMarker.on('dragend', function(e){
+        console.log('dragend called!!');
+          var marker = e.target;
+          marker.openPopup();
+          var position = marker.getLatLng();
+          newStop.lat = position.lat;
+          newStop.lon = position.lng;
+          console.log($scope.newStop);
+        });  
+        }, function () {});
+      };
+    
+    
+    
     
   }]);
   

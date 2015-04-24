@@ -32,6 +32,7 @@ angular.module('panatransWebApp')
   $scope.loadingStopDetail = false;
   $scope.stopDetail = {};
   
+  $scope.pdfLayersShown = 0; 
   var newStop = {};
   var newStopMarker = null;
   var stopDetailPanelHighlightedStop = null;
@@ -73,6 +74,7 @@ angular.module('panatransWebApp')
    
   $scope.map = PanatransMap('map', _CONFIG.tilelayerUrl, _CONFIG.tilelayerAttribution)  
   $scope.map.$scope = $scope;
+  $scope.map.requestUserLocation();
   
   //load all stops
   Stop.all().then(
@@ -90,13 +92,14 @@ angular.module('panatransWebApp')
       //console.log('routeParams');
       //console.log($routeParams);
       if ($routeParams.stopId !== undefined ) {
-        var centerStop = $scope.stops[$routeParams.stopId]
-        console.log('Centering Map on Stop: ' + centerStop.name);
-        if (centerStop !== undefined) {
-          $scope.map.addStopMarker(centerStop);
-          $scope.map.panToStop(centerStop);
-          $scope.map.openStopPopup(centerStop);  
-        }
+        var centerStop = $scope.stops[$routeParams.stopId];
+        $scope.map.addStopMarker(centerStop);
+        setInterval(function () {
+          console.log('Centering Map on Stop: ' + centerStop.name);            
+          $scope.map.openStopPopup(centerStop);   
+        }, 400);
+      } else {
+        $scope.map.followUser = true;
       }
     }, function(error) {
       ngToast.create({
@@ -211,12 +214,22 @@ angular.module('panatransWebApp')
       });
     };
     
+  //hides all pdf layers currently active on the map
+  $scope.hideAllPdfLayers = function() {
+    $scope.map.hideAllRoutePdf();
+    $scope.pdfLayersShown = 0;
+    ngToast.create({ className: 'info', content: 'Se ha dejado de mostrar los PDF en el mapa'});
+  };
+  
+  
   $scope.togglePdfLayer = function(route) {
     $scope.map.isRoutePdfAvailable(route).then(
       function() {
         if ($scope.map.toggleRoutePdf(route)) { 
+           $scope.pdfLayersShown++;
           ngToast.create('En unos segundos se mostrará el PDF de la ruta en el mapa...'); 
         } else {
+          $scope.pdfLayersShown--;
           ngToast.create({ className: 'info', content: 'Se ha dejado de mostrar el PDF en el mapa'});
         }
       }, 
@@ -326,7 +339,10 @@ angular.module('panatransWebApp')
       );  
     };
     
-       
+     
+    //
+    // NEW STOP - BUTTON IS HIDDEN RIGHT NOW *** 
+    //  
     $scope.saveNewStop = function() {
       console.log('saveSaveNewStop');
       console.log(newStop);
@@ -408,9 +424,12 @@ angular.module('panatransWebApp')
         });  
         }, function () {});
       };
-    
-    
-    
+
+      //Follow User button
+      $scope.toggleFollowUser = function() {
+        $scope.map.panToUser();
+      }
+  
   }]
 ); // main controller
 

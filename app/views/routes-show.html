@@ -2,9 +2,12 @@
   <div class="map" id="route-map"></div>  
 </div>
 <toast></toast>
-   <button class="btn btn-prmiary" ng-click="togglePdfStops(route)"
-   ng-show="pdfLayers[route.id] !== undefined" style="position: absolute; top: 60px; right: 20px">Mostrar/ocultar Paradas</button>
-      
+<div  class="right-btn-group">
+   <button class="btn btm-sm btn-default"  ng-click="togglePdfStops(route)" ng-show="pdfLayers[route.id] !== undefined" title="Mostrar/ocultar paradas dentro de mapa PDF">
+   <i ng-show="{{pdfStopsInMap}}" class="fa fa-eye-slash"></i><i ng-hide="{{pdfStopsInMap}}" class="fa fa-eye"></i> <i class="fa fa-bus"></i></button>
+   <button class="btn btn-sm btn-primary" ng-show="pdfLayers[route.id] !== undefined" ng-click="openNewStopModal()" title="añadir una parada nueva">+ <i class="fa fa-bus"></i></button>  
+    
+  </div>    
 
 
 

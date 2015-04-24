@@ -6,14 +6,14 @@
 * Requires angular, leaflet, leaflet awesome markers and bouncemaker plugins
 */
 
-angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$http', function($compile, $q, $http) {
+angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$http', 'ngToast', function($compile, $q, $http, ngToast) {
   
   var maps = {};
    
   return function(mapId, tileLayerUrl, tileLayerAttribution) {
       
     //if the map was already initialized return it. See at the end of the function 
-  if (maps[mapId] !== undefined) {
+    if (maps[mapId] !== undefined) {
       if ($('#' + mapId).hasClass('leaflet-container')) { 
         console.log('PanatransMap: map already initialized');
         $('#map-container').html('<div class="map" id="map"');
@@ -21,7 +21,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         console.log('PanatransMap: map exists but empty. Recreate it');
         maps[mapId].remove();
       }
-  };
+    };
     // if not initialize the map again
     console.log('Init PanatransMap');
     
@@ -44,8 +44,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
   
       return marker
     };
-       
-        
+           
     var map = L.map(mapId, {
       center: [8.9740946, -79.5508536],
       zoom: 16,
@@ -126,11 +125,16 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
     };
   
     map.onMoveEnd = function() {
-      console.log('onMoveEnd');
+      if (! map.autoPanToUserRequested) {
+        map.followUser = false;
+      }
+      map.autoPanToUserRequested = false;
+      console.log('onMoveEnd; followUser:' + map.followUser);
       if (this.getZoom() >= map.minZoomWithMarkers) { 
         this.hideMarkersOutsideBounds();
         this.showMarkersInsideBounds();
       }
+  
     }; 
   
     
@@ -140,6 +144,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       map.stopMarkers[stop.id].setIcon(map.selectedMarkerIcon);
       map.panToStop(stop);
     };
+  
   
     map.stopMarkerPopupClose = function(e) {
       console.log('Panatrans stopMarker Popup Close');
@@ -166,14 +171,15 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         draggable: false
       });
       //identify the marker: (https://github.com/Leaflet/Leaflet/issues/1031)
-        marker._stop = stop; 
-        marker.setPopupTemplate(map.$scope, template)
+      marker._stop = stop; 
+      marker.setPopupTemplate(map.$scope, template)
     
-        //marker.on('popupopen', this.stopMarkerPopupOpen); 
-        //marker.on('popupclose', this.stopMarkerPopupClose);
-        this.stopMarkers[stop.id] = marker; //add the marker to the list of markers
-        return marker;
-      };
+      //marker.on('popupopen', this.stopMarkerPopupOpen); 
+      //marker.on('popupclose', this.stopMarkerPopupClose);
+      this.stopMarkers[stop.id] = marker; //add the marker to the list of markers
+      return marker;
+    };
+  
   
       //adds the marker of the stop to the map 
       map.addStopMarker = function(stop) {
@@ -181,14 +187,18 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         map.hideStopMarker(stop); 
         map.stopMarkers[stop.id].addTo(map);
       };
+      
+      
       map.hideStopMarker = function(stop) {
         map.removeLayer(map.stopMarkers[stop.id])
       };
+  
   
       // centers map in stop lat and lon.
       map.panToStop = function(stop) {
         map.panTo(map.stopMarkers[stop.id].getLatLng());
       };
+  
   
       map.openStopPopup = function(stop) {
         console.log('requesting open popup of :' +  stop.name);
@@ -299,6 +309,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         return deferred.promise;
       };
       
+      
       map.showRoutePdf = function(route){
         console.log('showRoutePdf:' + route.id);
         if (map.pdfLayers[route.id]._show === false) { 
@@ -308,13 +319,20 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         }
       };
       
+      
       map.hideRoutePdf = function(route) {
-        console.log('hideRoutePdf:' + route.id);
-        if (map.pdfLayers[route.id]._show === true) { 
-          map.removeLayer(map.pdfLayers[route.id]); 
-          map.pdfLayers[route.id]._show = false;
+        map.hideRoutePdfByRouteId(route.id);
+      };
+      
+      
+      map.hideRoutePdfByRouteId = function(routeId) {
+        console.log('hideRoutePdf:' + routeId);
+        if (map.pdfLayers[routeId]._show === true) { 
+          map.removeLayer(map.pdfLayers[routeId]); 
+          map.pdfLayers[routeId]._show = false;
         }
       };
+      
       
       //returns the current status of the pdf 
       map.toggleRoutePdf = function(route) {
@@ -323,55 +341,94 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         return  map.pdfLayers[route.id]._show
       };
 
+      // hides all pdf routes 
+      map.hideAllRoutePdf = function() {
+        angular.forEach(map.pdfLayers, function(routePdf,key){
+          map.hideRoutePdfByRouteId(key);
+        }); 
+      }
   
+   
+      ///////////////////////////////// User location
+  
+      map.userLocationMarker = null;
+      map.userLocationCircle = null;
+      map.followUser = false;
+      map.autoPanToUserRequested = true;
+      
+      // start requesting the user location
+      map.requestUserLocation = function() {
+        map.locate({watch: true, setView: false, enableHighAccuracy: true});
+      };
+    
+      //activate / desactivates follow User. If activates follow user centers map in user location
+      map.toggleFollowUser = function() {
+        map.followUser ? map.followUser=false : map.followUser=true;
+        console.log('followUser:' + map.followUser);
+        if (map.followUser) {
+          map.panToUser();
+        }
+        return map.followUser;
+      };
+      
+      //centers map in user location
+      map.panToUser = function() {
+        var userLatLng = map.lastUserLatLng();
+        if (userLatLng) {
+          map.panTo(userLatLng);
+          map.autoPanToUserRequested = true;
+        }
+      };
+      
+      //returns last known user LatLng 
+      map.lastUserLatLng= function() {
+        if (map.UserLocationMarker !== null) {
+          return map.userLocationMarker.getLatLng();
+        }
+        return null;
+      };
+      
+      // event handler, updates user location pin & circle radius
+      // centers map in user location if followUser is active
+      map.onLocationFound = function(e) {
+        console.log('followUser: ' + map.followUser)
+        if (e.accuracy === null) {
+          return;
+        }
+        var radius = e.accuracy / 2;
+        if (map.userLocationMarker === null) {  // add to map
+          map.userLocationMarker = L.marker(e.latlng, {icon: map.iconset.userLocation});
+          map.userLocationMarker.addTo(map);
+          map.userLocationCircle = L.circle(e.latlng, radius);
+          map.userLocationCircle.addTo(map);
+          map.userLocationMarker.bindPopup('Estás aquí');
+        }
+        //update
+        map.userLocationMarker.setLatLng(e.latlng);
+        map.userLocationCircle.setLatLng(e.latlng);
+        map.userLocationCircle.setRadius(radius);
+
+        if (map.followUser) {
+          map.panToUser();
+        }
+      };
+
+      //event handler that handles what to do when location is found
+      map.onLocationError = function(e) {
+        console.log(e.message);
+      };
+  
+      /////////////////////// final config
       //tile layer
       map.tileLayer = L.tileLayer( tileLayerUrl, {
         attribution: tileLayerAttribution,
         maxZoom: 20
       });
   
-      ///////////////////////////////// User location
-  
-      map.userLocationMarker = null;
-      map.userLocationCircle = null;
-      map.followUser = false;
-  
-      map.locateUser = function() {
-        map.locate({watch: true, setView: false, enableHighAccuracy: true});
-      };
-    
-      map.onLocationFound = function(e) {
-        if (e.accuracy === null) {
-          return;
-        }
-        var radius = e.accuracy / 2;
-        if (userLocationMarker === null) {  // add to map
-          map.userLocationMarker = L.marker(e.latlng, {icon: map.iconset.userLocation});
-          map.userLocationMarker.addTo(map);
-          userLocationCircle = L.circle(e.latlng, radius);
-          userLocationCircle.addTo(map);
-          userLocationMarker.bindPopup('Estás aquí');
-          map.panTo(e.latlng);
-        }
-        //update
-        userLocationMarker.setLatLng(e.latlng);
-        userLocationCircle.setLatLng(e.latlng);
-        userLocationCircle.setRadius(radius);
-
-        if (map.followUser) {
-          map.panTo(e.latlng);
-        }
-      };
-
-      map.onLocationError = function(e) {
-        console.log(e.message);
-      };
-  
-      /////////////////////// final config
-  
       map.on('locationfound', map.onLocationFound);
       map.on('locationerror', map.onLocationError);
       map.tileLayer.addTo(map);
+      map.requestUserLocation();
       map.on('zoomend', map.onZoomEnd);
       map.on('moveend', map.onMoveEnd);
       maps[mapId] = map;
