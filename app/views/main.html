@@ -7,7 +7,6 @@
   <!--   <button class="btn btn-xs btn-primary" ng-click="openNewStopModal()" title="añadir una parada nueva">+ <i class="fa fa-bus"></i></button>  
     -->
     <button class="btn btn-xs btn-default"  ng-click="toggleFollowUser()" title="Seguir mi posición"><i class="fa fa-location-arrow"></i></button>
-      {{followUser}}
 </div>
  <!-- dropdown menu example -->
   <!--    <div class="btn-group" dropdown is-open="status.isopen" style="position: absolute; top: 60px; right: 20px">
@@ -82,8 +81,12 @@
               <ul class="trip-stops-list">
                 <li ng-repeat="stopSequence in trip.stopSequences" 
                 ng-if="stopSequence.sequence !== null"
-                ng-click="highlightStop(stops[stopSequence.stopId])">
-                <span ng-class="{label:(stopSequence.stopId == stopDetail.id), 'label-warning': (stopSequence.stopId == stopDetail.id)}">{{stops[stopSequence.stopId].name}}</span>
+                ng-click="highlightStop(stops[stopSequence.stopId])"
+                ng-mouseover="this.hoverMouse=true"
+                ng-mouseleave="this.hoverMouse=false">
+                <span ng-class="{label:(stopSequence.stopId == stopDetail.id), 'label-warning': (stopSequence.stopId == stopDetail.id)}">{{stops[stopSequence.stopId].name}}
+                </span>
+                <a href="" class="pull-right" ng-click="goToStop(stops[stopSequence.stopId])" ng-show="this.hoverMouse" title="View more info of the stop">ver <i class="fa fa-road"></i></a>
             </li>
             <!-- only stops with unknown location -->
             <li ng-repeat="stopSequence in trip.stopSequences" 

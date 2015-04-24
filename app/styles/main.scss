@@ -49,6 +49,14 @@ html, body {
   background-color: #ddd;
 }
 
+.map-message {
+  background-color: white;
+  color: black;
+  width: 50%;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
 footer {
   position: fixed;
   z-index: 999; 

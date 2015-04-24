@@ -36,18 +36,21 @@ angular.module('panatransWebApp')
   var newStop = {};
   var newStopMarker = null;
   var stopDetailPanelHighlightedStop = null;
-  
-  
+  var highlightedStop = stop;
   
   // CONTROLLER METHODS
   
-  var stopMarkerPopupOpen = function(e) {
-    console.log('main::stopMarkerPopupOpen');
-    //display lateral div & loading
+  var isHighlightedStop = function(stop) {
+    if ((highlightedStop !== null) && (stop.id === highlightedStop.id)) {
+       return true;
+    }
+    return false;
+  }
+  
+  var setDetailPanelStop= function(stop) {
     $scope.showStopDetail = true;  
     $scope.loadingStopDetail = true;
-    //center map in stop
-    var stop = e.popup._source._stop;
+    
     $scope.stopDetail=stop;
     $scope.map.panToStop($scope.stopDetail);
     Stop.find($scope.stopDetail.id).then( 
@@ -62,11 +65,24 @@ angular.module('panatransWebApp')
         console.log(error);
       }
     );
+  }
+  
+  var stopMarkerPopupOpen = function(e) {
+    console.log('main::stopMarkerPopupOpen');
+    var stop = e.popup._source._stop;
+    if (isHighlightedStop(stop)) {
+       return;
+    }
+    setDetailPanelStop(stop);
   }; // on(popupopen)
   
   
-  var stopMarkerPopupClose = function() {
-    console.log('stopMarkerClosed');
+  var stopMarkerPopupClose = function(e) {
+    var stop = e.popup._source._stop;
+    console.log('stopMarkerPopupClosed: ' + stop.name);
+    if (isHighlightedStop(stop)) {
+      highlightedStop = null;
+    }
   };
   
   
@@ -94,7 +110,7 @@ angular.module('panatransWebApp')
       if ($routeParams.stopId !== undefined ) {
         var centerStop = $scope.stops[$routeParams.stopId];
         $scope.map.addStopMarker(centerStop);
-        setInterval(function () {
+        setTimeout(function () {
           console.log('Centering Map on Stop: ' + centerStop.name);            
           $scope.map.openStopPopup(centerStop);   
         }, 400);
@@ -140,12 +156,22 @@ angular.module('panatransWebApp')
   $scope.isFirstStopInTrip = Stop.isFirstStopInTrip;
   
   $scope.highlightStop = function(stop) {
+    highlightedStop = stop;
     $scope.map.panToStop(stop);
     $scope.map.openStopPopup(stop);
   };
   
+  
   $scope.lowlightStop = function(stop) {
       console.log('loglight stop'  + stop.name);
+  };
+  
+ 
+  $scope.goToStop = function(stop) { 
+    console.log('setting stop detail to: ' + stop.name);
+    highlightedStop = null;
+    setDetailPanelStop(stop);
+    $scope.map.openStopPopup(stop);
   };
   
   // searches for stop_sequences on the route and sets the orange icon

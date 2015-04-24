@@ -108,6 +108,13 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
   
     map.mapHasMarkers = true;
   
+  
+    map.onZoomStart = function() {
+      console.log('onZoomStart');
+      map.autoPan = true; // TODO rename to something like isUserAction
+    };
+  
+    
     map.onZoomEnd = function() {
       console.log('onZoomEnd');
       console.log('zoomLevel: ' + this.getZoom());
@@ -124,12 +131,13 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       }   
     };
   
+  
     map.onMoveEnd = function() {
-      if (! map.autoPanToUserRequested) {
+      if (! map.autoPan) {
         map.followUser = false;
       }
-      map.autoPanToUserRequested = false;
-      console.log('onMoveEnd; followUser:' + map.followUser);
+      console.log('onMoveEnd; followUser:' + map.followUser + ' autoPan:' + map.autoPan);
+      map.autoPan = false;
       if (this.getZoom() >= map.minZoomWithMarkers) { 
         this.hideMarkersOutsideBounds();
         this.showMarkersInsideBounds();
@@ -139,25 +147,25 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
   
     
     map.stopMarkerPopupOpen = function(e) {
-      console.log('Panatrans stopMarker Popup Open');
       var stop = e.popup._source._stop;
-      map.stopMarkers[stop.id].setIcon(map.selectedMarkerIcon);
-      map.panToStop(stop);
+      console.log('panatrans-map: stopMarkerPopupOpen: OPEN ' + stop.name);
+      //map.stopMarkers[stop.id].setIcon(map.selectedMarkerIcon);
+      //map.panToStop(stop);
     };
   
   
     map.stopMarkerPopupClose = function(e) {
-      console.log('Panatrans stopMarker Popup Close');
       var stop = e.popup._source._stop;
-      if (map.stopMarkers[stop.id] === undefined ) {
-        return;
-      }
-      var marker = map.stopMarkers[stop.id];
-      if (map.isStopHighlighted(stop)) {
-        marker.setIcon(map.highlightedIcon);
-      } else { 
-        marker.setIcon(map.defaultMarkerIcon);
-      }
+      console.log('panatrans-map: stopMarkerPopupClose: CLOSE ' + stop.name);
+      //if (map.stopMarkers[stop.id] === undefined ) {
+      //return;
+      //}
+      //var marker = map.stopMarkers[stop.id];
+      //if (map.isStopHighlighted(stop)) {
+      //  marker.setIcon(map.highlightedIcon);
+      //} else { 
+      //  marker.setIcon(map.defaultMarkerIcon);
+      //}
     };
   
 
@@ -174,8 +182,8 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       marker._stop = stop; 
       marker.setPopupTemplate(map.$scope, template)
     
-      //marker.on('popupopen', this.stopMarkerPopupOpen); 
-      //marker.on('popupclose', this.stopMarkerPopupClose);
+      marker.on('popupopen', this.stopMarkerPopupOpen); 
+      marker.on('popupclose', this.stopMarkerPopupClose);
       this.stopMarkers[stop.id] = marker; //add the marker to the list of markers
       return marker;
     };
@@ -196,7 +204,12 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
   
       // centers map in stop lat and lon.
       map.panToStop = function(stop) {
-        map.panTo(map.stopMarkers[stop.id].getLatLng());
+        map.autoPan = false;
+        if(map.getZoom() <= map.minZoomWithMarkers){
+          map.setZoom(map.minZoomWithMarkers);
+        }
+        map.panTo(map.stopMarkers[stop.id].getLatLng(), {animate:true});
+        
       };
   
   
@@ -230,7 +243,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
   
       //hides markers that are outdide map bounds    
       map.hideMarkersOutsideBounds = function() { 
-        console.log('hideMarkerOutsideBounds, started');
+        //console.log('hideMarkerOutsideBounds, started');
         var bounds = this.getBounds().pad(0.2);
         angular.forEach(this.stopMarkers, function(marker) {
           if (! bounds.contains(marker.getLatLng())) {
@@ -238,20 +251,20 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
             map.removeLayer(marker);
           }
         });
-        console.log('hideMarkersOutsideBounds, finished');
+        //console.log('hideMarkersOutsideBounds, finished');
       };
   
   
       //shows markers that are within the map bounds
       map.showMarkersInsideBounds = function() {
-        console.log('showMarkerInsideBounds, started');
+        //console.log('showMarkerInsideBounds, started');
         var bounds = this.getBounds().pad(0.2);
         angular.forEach(this.stopMarkers, function(marker) {
           if (bounds.contains(marker.getLatLng())) {
             map.addLayer(marker);
           }
         });
-        console.log('showMarkerInsideBounds, started');
+        //console.log('showMarkerInsideBounds, started');
       };
   
   
@@ -354,7 +367,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       map.userLocationMarker = null;
       map.userLocationCircle = null;
       map.followUser = false;
-      map.autoPanToUserRequested = true;
+      map.autoPan = true;
       
       // start requesting the user location
       map.requestUserLocation = function() {
@@ -376,13 +389,13 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         var userLatLng = map.lastUserLatLng();
         if (userLatLng) {
           map.panTo(userLatLng);
-          map.autoPanToUserRequested = true;
+          map.autoPan = true;
         }
       };
       
       //returns last known user LatLng 
       map.lastUserLatLng= function() {
-        if (map.UserLocationMarker !== null) {
+        if (map.userLocationMarker !== null) {
           return map.userLocationMarker.getLatLng();
         }
         return null;
@@ -429,6 +442,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       map.on('locationerror', map.onLocationError);
       map.tileLayer.addTo(map);
       map.requestUserLocation();
+      map.on('zoomstart', map.onZoomStart);
       map.on('zoomend', map.onZoomEnd);
       map.on('moveend', map.onMoveEnd);
       maps[mapId] = map;
