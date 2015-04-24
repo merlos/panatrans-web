@@ -21,15 +21,15 @@
 <ul class="list-unstyled">
 <li ng-repeat="route in routes | toArray | filter : searchText : ignoreAccentsComparator">
     <strong><a href="#/ruta/{{route.id}}/{{ route.name |slugify}}.html">{{route.name}}</a></strong> 
-    <span class="pull-right">
+    <!--  <span class="pull-right">
       <a ng-click="openEditRouteModal(route)" href=""><i class="fa fa-edit"></i></a>
-      
-    </span>
-    
+    </span>-->
+    <!--  
     <br>
     <span class="pull-left">
       <a ng-show="{{route.url !== null}}" href="{{route.url}}" target="_blank" class="text-danger"><i class="fa fa-file-pdf-o"></i> pdf</a>
     </span>
+      -->
        <hr>
 </li>
 </ul>

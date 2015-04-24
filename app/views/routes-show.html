@@ -52,7 +52,7 @@
           <h3 class="routes-title"><i class="fa fa-bus"></i> Paradas trayecto {{trip.headsign}}</h3> 
           <ul class="list-unstyled" style="padding-left: 5px" ng-repeat="sequence in trip.stop_sequences">
             <li 
-            ng-mouseover="highlightStop(sequence.stop)"
+            ng-click="highlightStop(sequence.stop)"
             ng-mouseout="lowlightStop(sequence.stop)" 
             class="li-highlight-over">{{sequence.stop.name}}</li>
           </ul>

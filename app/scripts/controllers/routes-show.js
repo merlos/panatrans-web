@@ -21,10 +21,55 @@ angular.module('panatransWebApp')
     var stops = {};
     var routeStops = {};
     var newStop = {};
+    var newStopMarker = {};
     
     if ($scope.map) { 
       return;
     }
+    
+    // TODO do this more DRY. 
+    // this is repeated from map
+    var iconset = {
+      default: L.AwesomeMarkers.icon({ // bus stop default
+        icon: 'bus',
+        prefix: 'fa',
+        markerColor: 'blue'
+      }), 
+      orange: L.AwesomeMarkers.icon({
+        icon: 'bus',
+        prefix: 'fa',
+        markerColor: 'orange'
+      }),
+      orangeSpin: L.AwesomeMarkers.icon({
+        icon: 'bus',
+        prefix: 'fa',
+        markerColor: 'orange',
+        spin: true
+      }),       
+      pink: L.AwesomeMarkers.icon({
+        icon: 'bus',
+        prefix: 'fa',
+        markerColor: 'pink'
+      }), 
+      red: L.AwesomeMarkers.icon({
+        icon: 'bus',
+        prefix: 'fa',
+        markerColor: 'red'
+      }),
+      redSpin: L.AwesomeMarkers.icon({
+        icon: 'bus',
+        prefix: 'fa',
+        markerColor: 'red',
+        spin: true
+      }),
+      userLocation: L.AwesomeMarkers.icon({
+        icon: 'user',
+        prefix: 'fa',
+        markerColor: 'green',
+        spin: false
+      })
+    };
+    
     
     //Configure map
     $scope.map = L.map('route-map', {
@@ -62,7 +107,7 @@ angular.module('panatransWebApp')
     var addStopMarkerToMap = function(stop) {
       var marker = L.marker([stop.lat, stop.lon], 
         {
-          icon: markerIcon.default,
+          icon: iconset.orange,
           draggable: false,
           title: stop.name
         }
@@ -83,11 +128,9 @@ angular.module('panatransWebApp')
     
     var stopMarkerPopupOpen = function(e) {
       var stopId = e.popup._source._stopId;
-      if (stopId === null) { 
-          console.log('stopMarkerClicked: Hey! Hey! stopId es null :-?');
-          return;
+      if (markers[stopId] !== undefined) {
+          markers.setIcon(iconset.red);
       }
-      markers[stopId].setIcon(markerIcon.red);
       
     };
     var stopMarkerPopupClose = function(e) {
@@ -97,7 +140,7 @@ angular.module('panatransWebApp')
           return;
       }
       if (markers[stopId] !== undefined) { 
-        markers[stopId].setIcon(markerIcon.default);
+        markers[stopId].setIcon(iconset.orange);
       }
     };
     
@@ -109,7 +152,7 @@ angular.module('panatransWebApp')
     
     $scope.lowlightStop = function(stop) {
       console.log('loglight stop'  + stop.name);
-      markers[stop.id].closePopup(); 
+      //markers[stop.id].closePopup(); 
     };
   
     
@@ -162,12 +205,13 @@ angular.module('panatransWebApp')
     };
     
     
-    var updateRoute = function() {    
+    var updateRoute = function(fitToMap) {
+      fitToMap = typeof fitToMap !== 'undefined' ? fitToMap : true ;    
       $scope.loading = true;
       //clear markers
       angular.forEach(markers, function(marker){
         $scope.map.removeLayer(marker);
-        delete markers[marker.id]; 
+        delete markers[marker._stopId]; 
       });       
       $http.get(_CONFIG.serverUrl + '/v1/routes/' + $routeParams.routeId + '?' + _CONFIG.delay)
       .success(function(response) {
@@ -179,14 +223,17 @@ angular.module('panatransWebApp')
         angular.forEach($scope.route.trips, function(trip) {
           angular.forEach(trip.stop_sequences, function(stop_sequence) {
             var stop = stop_sequence.stop;
+            console.log('stop in trip: ' + stop.name);
             //add markers to map if not in map
-            if (routeStops[stop.id] === undefined) {
+            console.log(markers[stop.id]);
+            if (markers[stop.id] === undefined) {
+              console.log('adding to map ' + stop.name);
               addStopMarkerToMap(stop);
               routeStops[stop.id] = stop;
             }
           });
         });
-        if (markersFeatureGroup) {
+        if (markersFeatureGroup && fitToMap) {
           $scope.map.fitBounds(markersFeatureGroup.getBounds(), {padding: [15,15]});
         }
       })
@@ -228,13 +275,42 @@ angular.module('panatransWebApp')
 
     $http.post(_CONFIG.serverUrl + '/v1/stop_sequences/', postData)
     .success(function(response) {
-      updateRoute();
+      updateRoute(false);
       pdfMarkers[stop.id].closePopup();
       ngToast.create('Se ha añadido la parada al trayecto.');  
     });
   }; 
     
   $scope.pdfStopsInMap = false;
+  
+  var addPdfStopMarker = function(stop) {
+    //add the marker
+    var marker = L.marker([stop.lat, stop.lon], 
+      {
+        icon: iconset.default,
+        draggable: false,
+      }
+    );
+    
+    var template =  '<div><p><strong>{{stop.name}}</strong></p><ul ng-repeat="trip in route.trips"><li><a href="" ng-click="addStopToTrip(stop, trip)">Añadir en dirección {{trip.headsign}}</a></li></ul></div>';
+    var linkFn = $compile(angular.element(template));
+    var scope = $scope.$new();
+    //add var to scope
+    scope.stop = stop;
+    scope.route = $scope.route;
+    scope.stopMarker = this;
+    var element = linkFn(scope);
+    //console.log(element);
+    marker.bindPopup(element[0]);      
+    marker.on('popupopen', stopMarkerPopupOpen); 
+    marker.on('popupclose', stopMarkerPopupClose); 
+    //set an id (https://github.com/Leaflet/Leaflet/issues/1031)
+    marker._stopId = stop.id; 
+    pdfMarkers[stop.id] = marker; //add the marker to the list of markers
+    $scope.pdfStopsInMap = true
+    marker.addTo($scope.map);
+  };
+  
   $scope.togglePdfStops = function(route) {
     console.log('togglePdfStops');
     if($scope.pdfStopsInMap) {
@@ -251,30 +327,11 @@ angular.module('panatransWebApp')
       var stopLatLng = L.latLng(parseFloat(stop.lat), parseFloat(stop.lon));
       if (pdfLayers[route.id].pdfBounds.contains(stopLatLng)) {
         //add the marker
-        var marker = L.marker([stop.lat, stop.lon], 
-          {
-            icon: markerIcon.default,
-            draggable: false,
-          }
-        );
+        if (markers[stop.id] === undefined) {
+          addPdfStopMarker(stop);
+        }
         
-        var template =  '<div><p><strong>{{stop.name}}</strong><br>Añadir parada al final del trayecto:</p><ul ng-repeat="trip in route.trips"><li><a href="" ng-click="addStopToTrip(stop, trip)">Con dirección {{trip.headsign}}</a></li></ul></div>';
-        var linkFn = $compile(angular.element(template));
-        var scope = $scope.$new();
-        //add var to scope
-        scope.stop = stop;
-        scope.route = $scope.route;
-        scope.stopMarker = this;
-        var element = linkFn(scope);
-        //console.log(element);
-        marker.bindPopup(element[0]);      
-        marker.on('popupopen', stopMarkerPopupOpen); 
-        marker.on('popupclose', stopMarkerPopupClose); 
-        //set an id (https://github.com/Leaflet/Leaflet/issues/1031)
-        marker._stopId = stop.id; 
-        pdfMarkers[stop.id] = marker; //add the marker to the list of markers
-        $scope.pdfStopsInMap = true
-        marker.addTo($scope.map);
+        
       }
     })
   };
@@ -317,20 +374,11 @@ angular.module('panatransWebApp')
         console.log('stop saved successfully');
         console.log(response.data);
         $scope.stops[response.data.id] = response.data;
-        $scope.stopDetail = response.data;
-        //add marker to markers
-        newStopMarker._stopId = response.data.id; 
-        newStopMarker.closePopup();
-        newStopMarker.setIcon(iconset.default);
-        newStopMarker.bindPopup(response.data.name);
-        newStopMarker.on('popupopen', stopMarkerPopupOpen);
-        newStopMarker.on('popupclose', stopMarkerPopupClose); 
-        //update popup
-        markers[response.data.id] = newStopMarker;
-        newStopMarker.openPopup();
-        //clear marker and stop for next round
+        $scope.map.removeLayer(newStopMarker);
         newStop = {};
         newStopMarker = null;
+        addPdfStopMarker(response.data);
+        
         //display some feedback to the user
         ngToast.create('Excelente, ¡parada añadida!');
         console.log('Se ha añadido la parada con éxito');
@@ -366,7 +414,7 @@ angular.module('panatransWebApp')
         newStop.lon = mapCenter.lng;
         newStopMarker = L.marker(mapCenter, 
             { 
-              icon: $scope.map.iconset.redSpin,
+              icon: iconset.redSpin,
               draggable: true,
               bounceOnAdd: true, 
               bounceOnAddOptions: {duration: 500, height: 100}, 
