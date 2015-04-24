@@ -227,13 +227,13 @@ angular.module('panatransWebApp')
         console.log('modal instance dismissed reason : ' + reason);
         if (reason === 'changeStopLocation') {
           console.log('changeStopLocation: ' + stopId);
-          setStopMarkerEditMode(markers[stopId]);
+          setStopMarkerEditMode($scope.map.stopMarkers[stopId]); // TODO do not use directly this
         }
         if (reason === 'stopDeleted') {
           console.log('deletedStop, eliminating marker and stop');
-          $scope.map.removeLayer(markers[stopId]);
+          $scope.map.removeLayer($scope.map.stopMarkers[stopId]);
           ngToast.create('Se ha borrado la parada ' + $scope.stops[stopId].name);
-          delete markers[stopId];
+          delete $scope.map.stopMarkers[stopId];
           delete $scope.stops[stopId];
           //TODO add feedback to user
         }
@@ -271,13 +271,13 @@ angular.module('panatransWebApp')
     var setStopMarkerEditMode = function(stopMarker) {
       console.log('setStopMarkerEditMode');
       //center and zoom map to stop
-      stopMarker.setIcon(iconset.redSpin);
+      stopMarker.setIcon($scope.map.iconset.redSpin);
       stopMarker.dragging.disable();
       stopMarker.dragging.enable();
       stopMarker.off('popupopen', stopMarkerPopupOpen);
       stopMarker.off('popupclose', stopMarkerPopupClose);
       $scope.map.setView(stopMarker.getLatLng(), 18);
-      var stop = $scope.stops[stopMarker._stopId];    
+      var stop = $scope.stops[stopMarker._stop.id];    
       var html = '<div><h4>' + stop.name + '</h4><p><strong>Arrástrame</strong> hasta mi localización.<br>Después dale a: </p><button ng-click="saveStopLocation(stop)"class="btn btn-primary">Actualizar</button> o a <a href="" ng-click="cancelStopMarkerEditMode(stopMarker)">cancelar</a></div>';
       var linkFn = $compile(angular.element(html));
       var scope = $scope.$new();
@@ -303,9 +303,9 @@ angular.module('panatransWebApp')
       console.log('cancelStopMarkerEditMode');
       stopMarker.closePopup();
       stopMarker.dragging.disable();
-      stopMarker.setIcon(iconset.red);
-      console.log('setting popup content = ' + $scope.stops[stopMarker._stopId].name);
-      stopMarker.bindPopup($scope.stops[stopMarker._stopId].name);
+      stopMarker.setIcon($scope.map.iconset.default);
+      console.log('setting popup content = ' + $scope.stops[stopMarker._stop.id].name);
+      stopMarker.bindPopup($scope.stops[stopMarker._stop.id].name);
       //suscribe again to eventlistener
       stopMarker.on('popupopen', stopMarkerPopupOpen);
       stopMarker.on('popupclose', stopMarkerPopupClose); 
@@ -316,7 +316,7 @@ angular.module('panatransWebApp')
     $scope.saveStopLocation = function(stop) {
       console.log('saveStopLocation called');
       stop.update();
-      $scope.cancelStopMarkerEditMode(markers[stop.id]);
+      $scope.cancelStopMarkerEditMode($scope.map.stopMarkers[stop.id]);
       
       /*$http.put(_CONFIG.serverUrl + '/v1/stops/' + stop.id, {stop: {lat: stop.lat, lon: stop.lon}})
       .success(function(){
@@ -382,7 +382,7 @@ angular.module('panatransWebApp')
         //add marker to markers
         newStopMarker._stopId = response.data.id; 
         newStopMarker.closePopup();
-        newStopMarker.setIcon(iconset.default);
+        newStopMarker.setIcon($scope.map.iconset.default);
         newStopMarker.bindPopup(response.data.name);
         newStopMarker.on('popupopen', stopMarkerPopupOpen);
         newStopMarker.on('popupclose', stopMarkerPopupClose); 
@@ -427,7 +427,7 @@ angular.module('panatransWebApp')
         newStop.lon = mapCenter.lng;
         newStopMarker = L.marker(mapCenter, 
             { 
-              icon: iconset.redSpin,
+              icon: $scope.map.iconset.redSpin,
               draggable: true,
               bounceOnAdd: true, 
               bounceOnAddOptions: {duration: 500, height: 100}, 

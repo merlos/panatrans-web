@@ -373,7 +373,7 @@ angular.module('panatransWebApp')
       .success(function(response) {
         console.log('stop saved successfully');
         console.log(response.data);
-        $scope.stops[response.data.id] = response.data;
+        stops[response.data.id] = response.data;
         $scope.map.removeLayer(newStopMarker);
         newStop = {};
         newStopMarker = null;
