@@ -115,17 +115,35 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
     };
   
     
+    map.showZoomMessage = function() {
+      console.log('showing zoom message');
+      if (! $('#map-message').length) {
+        $('body').append('<div id="map-message" class="map-message">Haz zoom para ver las paradas</div>').fadeIn();
+      }
+      $('#map-message').fadeIn();
+    };
+    
+    
+    map.hideZoomMessage = function() {
+      console.log('hiding zoom message');
+      if ($('#map-message').length) {
+        $('#map-message').fadeOut();
+      }
+    };
+    
     map.onZoomEnd = function() {
       console.log('onZoomEnd');
       console.log('zoomLevel: ' + this.getZoom());
       if (this.getZoom() < map.minZoomWithMarkers) {
         //display only important markers -- TODO
         this.hideAllMarkers();
+        this.showZoomMessage();
         map.mapHasMarkers = false;
       } else { // add markers in bounds if there not already added
         if (this.mapHasMarkers) {
           return;
         } 
+        this.hideZoomMessage();
         map.showMarkersInsideBounds();
         this.mapHasMarkers = true;
       }   
