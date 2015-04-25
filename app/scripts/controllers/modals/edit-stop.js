@@ -91,18 +91,15 @@ angular.module('panatransWebApp')
   $scope.updateStopName = function() {
     console.log("updateStop");
     console.log($scope.stop);
-    /*$http.put(_CONFIG.serverUrl + '/v1/stops/' + $scope.stop.id, {stop: { name: $scope.stop.name}})
+    $http.put(_CONFIG.serverUrl + '/v1/stops/' + $scope.stop.id, {stop: { name: $scope.stop.name}})
     .success(function(response){
       console.log("Stop successfully updated");
-      //TODO feedback
       ngToast.create("Nombre de la parada actualizado con éxito.")
     })
     .error(function(response) {
       console.log('error adding trip to stop');
       console.log(response);
     });
-    */
-
   };
   
   $scope.deleteStop = function() {

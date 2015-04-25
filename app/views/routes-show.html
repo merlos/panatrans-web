@@ -49,7 +49,7 @@
          </ul>
        </div>
         <div ng-repeat="trip in route.trips">
-          <h3 class="routes-title"><i class="fa fa-bus"></i> Paradas trayecto {{trip.headsign}}</h3> 
+          <h3 class="routes-title"><i class="fa fa-bus"></i> Paradas dirección {{trip.headsign}}</h3> 
           <ul class="list-unstyled" style="padding-left: 5px" ng-repeat="sequence in trip.stop_sequences">
             <li 
             ng-click="highlightStop(sequence.stop)"

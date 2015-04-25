@@ -379,17 +379,18 @@ angular.module('panatransWebApp')
         console.log(response.data);
         $scope.stops[response.data.id] = response.data;
         $scope.stopDetail = response.data;
-        //add marker to markers
-        newStopMarker._stopId = response.data.id; 
+        ///add marker to markers
+        newStopMarker._stop = response.data; 
         newStopMarker.closePopup();
+        
         newStopMarker.setIcon($scope.map.iconset.default);
         newStopMarker.bindPopup(response.data.name);
         newStopMarker.on('popupopen', stopMarkerPopupOpen);
         newStopMarker.on('popupclose', stopMarkerPopupClose); 
         //update popup
-        markers[response.data.id] = newStopMarker;
+        $scope.map.stopMarkers[response.data.id] = newStopMarker;
         newStopMarker.openPopup();
-        //clear marker and stop for next round
+        //clear marker and stop for next round  
         newStop = {};
         newStopMarker = null;
         //display some feedback to the user
