@@ -2,7 +2,8 @@
 var _CONFIG = {};
 
 _CONFIG.serverUrl = 'http://localhost:3000';
-//var SERVER_URL = 'http://test-panatrans.herokuapp.com';
+//_CONFIG.serverUrl = 'http://test-panatrans.herokuapp.com';
+//var SERVER_URL = ;
 
 // TILE LAYER SERVER && copyright attributions
 _CONFIG.tilelayerUrl = 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';

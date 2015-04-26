@@ -24,7 +24,6 @@ angular.module('panatransWebApp')
       ngToast.create({className: 'danger', contents: 'Error accediendo al servidor. Prueba en un rato. Si el problema persiste contacta por twitter a @panatrans'});
     });
     
-    
     $scope.ignoreAccentsComparator = function(actual, expected) {  
       var removeAccents = function (value) {
         return value
