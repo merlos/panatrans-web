@@ -30,6 +30,8 @@ angular.module('panatransWebApp')
   
   $scope.showStopDetail = false; 
   $scope.loadingStopDetail = false;
+  $scope.loadingRouteDetail = false;
+  
   $scope.stopDetail = {};
   
   $scope.pdfLayersShown = 0; 
@@ -55,7 +57,7 @@ angular.module('panatransWebApp')
     $scope.map.panToStop($scope.stopDetail);
     Stop.find($scope.stopDetail.id).then( 
       function(data) { 
-        console.log('Loaded stop...');
+        console.log('Loaded stop: ' + data.name);
         $scope.stopDetail = data;
         $scope.loadingStopDetail = false;
       },
@@ -102,18 +104,14 @@ angular.module('panatransWebApp')
         marker.on('popupopen', stopMarkerPopupOpen); 
         marker.on('popupclose',stopMarkerPopupClose);
       });
+      //$scope.map.alwaysShowStations(true);
       $scope.map.showMarkersInsideBounds();
       
       // PROCESS STOP ARGUMENTS
       //console.log('routeParams');
       //console.log($routeParams);
       if ($routeParams.stopId !== undefined ) {
-        var centerStop = $scope.stops[$routeParams.stopId];
-        $scope.map.addStopMarker(centerStop);
-        setTimeout(function () {
-          console.log('Centering Map on Stop: ' + centerStop.name);            
-          $scope.map.openStopPopup(centerStop);   
-        }, 400);
+        $scope.map.panToStop($scope.stops[$routeParams.stopId]);
       } else {
         $scope.map.followUser = true;
       }
@@ -146,19 +144,16 @@ angular.module('panatransWebApp')
   );
   
  
-    
- 
   $scope.closeStopDetail = function() {
     $scope.showStopDetail = false;
   };
     
-  $scope.isLastStopInTrip = Stop.isLatStopInTrip;
+  $scope.isLastStopInTrip = Stop.isLastStopInTrip;
   $scope.isFirstStopInTrip = Stop.isFirstStopInTrip;
   
   $scope.highlightStop = function(stop) {
     highlightedStop = stop;
     $scope.map.panToStop(stop);
-    $scope.map.openStopPopup(stop);
   };
   
   
@@ -171,12 +166,13 @@ angular.module('panatransWebApp')
     console.log('setting stop detail to: ' + stop.name);
     highlightedStop = null;
     setDetailPanelStop(stop);
-    $scope.map.openStopPopup(stop);
+    $scope.map.panToStop(stop);
   };
   
   // searches for stop_sequences on the route and sets the orange icon
   //route: has trips and trips have stop_sequences
   $scope.highlightRoute = function(route) {
+
   };
     
   
@@ -195,10 +191,27 @@ angular.module('panatransWebApp')
   };
     
     
-  $scope.toggleTripDetails = function(){
-    console.log('toggle');
+  $scope.toggleTripDetails = function(route) {
+    
+    console.log('toggle Trip details for ' + route.name);
     if ((this.showTripDetails === false) || (this.showTripDetails === undefined)){ 
       this.showTripDetails = true; 
+      $scope.loadingRouteDetail = true;
+      Route.find(route.id).then(
+        function(data) {
+          console.log(data);
+          angular.forEach($scope.stopDetail.routes, function(route, key){
+            if (route.id == data.id) {
+              $scope.stopDetail.routes[key] = data;
+            }
+          });
+          $scope.loadingRouteDetail = false;
+        },
+        function(error) {
+          console.log('error loading trip details')
+          console.log(error);
+        } 
+      );
     } else {
       this.showTripDetails = false;
     }
@@ -407,8 +420,17 @@ angular.module('panatransWebApp')
     
     $scope.cancelSaveNewStop = function() {
       console.log('cancelSaveStop');
+      $scope.map.removeLayer(newStopMarker);
+      //clear marker and stop for next round  
+      newStop = {};
+      newStopMarker = null;
     };
     
+    
+    //TODO move this to a Trip Resource
+    $scope.isCircularTrip = function(trip) {
+      return Stop.isCircularTrip(trip);
+    }
     
     $scope.openNewStopModal = function(){
       var modalConfig = {
@@ -455,6 +477,7 @@ angular.module('panatransWebApp')
       //Follow User button
       $scope.toggleFollowUser = function() {
         $scope.map.panToUser();
+        //$scope.map.toggleFollowUser();
       }
   
   }]

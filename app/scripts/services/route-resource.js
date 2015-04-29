@@ -25,7 +25,7 @@ function Route($q, $http, railsResourceFactory) {
       deferred.resolve(resource.routes);
     } else { 
       console.log('Route:all: requesting routes to server');
-      resource.query({with_trips: true}).then(
+      resource.query({with_trips: false}).then(
         function (results) {
           angular.forEach(results.data, function(route) {
             resource.routes[route.id] = route;
@@ -38,6 +38,27 @@ function Route($q, $http, railsResourceFactory) {
            deferred.reject(error);
         });
     } //else 
+    return deferred.promise;
+  };
+  
+  resource.find = function(routeId, forceRequest) {
+    forceRequest = typeof forceRequest !== 'undefined' ? forceRequest : false;
+    var deferred = $q.defer();
+    //only download if the stop is not already local cache
+    if (resource.routes[routeId].trips && !forceRequest) {
+       deferred.resolve(resource.routes[routeId]);
+    } else {
+      console.log('Routes:find: requesting route detail to server');
+      resource.get(routeId).then(
+        function(response) {
+          resource.routes[routeId] = response.data;
+          deferred.resolve(response.data);
+        },
+        function(error){
+          deferred.reject(error);
+        }
+      );
+    }
     return deferred.promise;
   };
     

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="300px"
+	 height="300px" viewBox="0 0 300 300" enable-background="new 0 0 300 300" xml:space="preserve">
+<g id="Layer_1" display="none">
+	<g display="inline" opacity="0.9">
+		<rect x="141.706" fill="#F15B29" width="16.589" height="300"/>
+		<circle fill="#F15B29" cx="150" cy="150" r="39.1"/>
+	</g>
+</g>
+<g id="Layer_2" display="none">
+	<g display="inline" opacity="0.9">
+		<rect x="141.706" fill="#F15B29" width="16.589" height="181.667"/>
+		<circle fill="#F15B29" cx="150" cy="150" r="59.1"/>
+	</g>
+</g>
+<g id="Layer_3" display="none">
+	<g display="inline" opacity="0.9">
+		<rect x="141.705" y="118.333" fill="#F15B29" width="16.59" height="181.667"/>
+		<circle fill="#F15B29" cx="150" cy="150" r="59.1"/>
+	</g>
+</g>
+<g id="Layer_4">
+	<g opacity="0.9">
+		<rect x="141.705" y="118.333" fill="#F15B29" width="16.59" height="181.667"/>
+		<circle fill="#F15B29" cx="150" cy="150" r="59.1"/>
+	</g>
+	<rect x="143.054" y="119.833" fill="#FFFFFF" width="13.893" height="37.333"/>
+	<polygon fill="#FFFFFF" points="132.433,150 149.999,187.5 167.567,150 	"/>
+</g>
+</svg>

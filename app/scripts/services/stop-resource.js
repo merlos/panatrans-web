@@ -24,12 +24,7 @@ function Stop($q, $http,  railsSerializer, railsResourceFactory) {
   var resource = railsResourceFactory(config);
   
   resource.stops = {};     
-   
-  resource.beforeRequest(function (data) { 
-    console.log('beforeRequest');
-    console.log(data);
-  });
-  
+     
   resource.all = function() {
     var deferred = $q.defer();
     if (Object.hasItems(resource.stops)) {
@@ -61,7 +56,7 @@ function Stop($q, $http,  railsSerializer, railsResourceFactory) {
        deferred.resolve(resource.stops[stopId]);
     } else {
       console.log('Stops:find: requesting stop detail');
-      resource.get(stopId, {with_stop_sequences: true}).then(
+      resource.get(stopId, {with_stop_sequences: false}).then(
         function(response) {
           resource.stops[stopId] = response.data;
           deferred.resolve(response.data);
@@ -104,34 +99,60 @@ function Stop($q, $http,  railsSerializer, railsResourceFactory) {
     });
     return stops;
   }
-    
-  resource.isFirstStopInTrip = function(stop, trip) {
-    var isFirst = false;
-    angular.forEach(trip.stopSequences, function(stopSequence){
-      if ((stopSequence.sequence === 0) && (stopSequence.stopId === stop.id)) {
-        isFirst = true;
-      }
-    });
-    return isFirst;
-  };
   
-  resource.isLastStopInTrip = function(stop, trip) {
+  //TODO: MOVE THIS FUNCTION TO A TRIP RESOURCE
+  
+  resource.isCircularTrip = function(trip) {
+    
+    // TODO this is repeated in isfirsstop and is last stop
+    if(trip._firstStopId === undefined) {
+      angular.forEach(trip.stopSequences, function(stopSequence){
+        if (stopSequence.sequence === 0) {
+          trip._firstStopId = stopSequence.stop.id; 
+        }
+      });
+    }
+    if(trip._lastStopId === undefined) { 
       var largestSequence = -1;
       var stopIdWithLargestSequence = -1;
       angular.forEach(trip.stopSequences, function(stopSequence){
         if (stopSequence.sequence > largestSequence) {
           largestSequence = stopSequence.sequence;
-          stopIdWithLargestSequence = stopSequence.stopId;
+          stopIdWithLargestSequence = stopSequence.stop.id;
         }
       });
-      if (stopIdWithLargestSequence === stop.id) {
-        return true;
-      }
-      return false;
-    };
-    
+    }
+    return trip._firstStopId === trip._lastStopId;
+  };
+  
+  //TODO: MOVE THIS function TO A TRIP RESOURCE  
+  resource.isFirstStopInTrip = function(stop, trip) {
+    if(trip._firstStopId === undefined) {
+      angular.forEach(trip.stopSequences, function(stopSequence){
+        if (stopSequence.sequence === 0) {
+          trip._firstStopId = stopSequence.stop.id; 
+        }
+      });
+    }
+    return trip._firstStopId === stop.id;
+  };
+  
+  //TODO: MOVE THIS function TO A TRIP RESOURCE  
+  resource.isLastStopInTrip = function(stop, trip) {
+    if(trip._lastStopId === undefined) { 
+      var largestSequence = -1;
+      var stopIdWithLargestSequence = -1;
+      angular.forEach(trip.stopSequences, function(stopSequence){
+        if (stopSequence.sequence > largestSequence) {
+          largestSequence = stopSequence.sequence;
+          stopIdWithLargestSequence = stopSequence.stop.id;
+        }
+      });
+      trip._lastStopId = stopIdWithLargestSequence
+    } 
+    return trip._lastStopId === stop.id;
+  };
       
-    
   return resource;
 } //Route class
 

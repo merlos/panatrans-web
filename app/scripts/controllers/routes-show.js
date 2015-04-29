@@ -205,11 +205,11 @@ angular.module('panatransWebApp')
         angular.forEach($scope.route.trips, function(trip) {
           angular.forEach(trip.stop_sequences, function(stop_sequence) {
             var stop = stop_sequence.stop;
-            console.log('stop in trip: ' + stop.name);
+            //console.log('stop in trip: ' + stop.name);
             //add routeMarkers to map if not in map
-            console.log(routeMarkers[stop.id]);
+            //console.log(routeMarkers[stop.id]);
             if (routeMarkers[stop.id] === undefined) {
-              console.log('adding to map ' + stop.name);
+              //console.log('adding to map ' + stop.name);
               addStopMarkerToMap(stop);
               routeStops[stop.id] = stop;
             }
@@ -256,12 +256,12 @@ angular.module('panatransWebApp')
     console.log(postData);
     $http.post(_CONFIG.serverUrl + '/v1/stop_sequences/', postData)
     .success(function(response) {
-      //updateRoute(false);
+      updateRoute(false);
       routeMarkers[stop.id] = pdfMarkers[stop.id];
       pdfMarkers[stop.id].closePopup();
       ngToast.create('Se ha añadido la parada al trayecto.');  
       angular.forEach(routeStops, function(stop){
-        console.log('eliminando route marker', stop.name);
+        //console.log('eliminando route marker', stop.name);
         $scope.map.removeLayer(pdfMarkers[stop.id]);
         addPdfStopMarker(stop, iconset.orange);
       })
@@ -274,6 +274,7 @@ angular.module('panatransWebApp')
   
   
   var addPdfStopMarker = function(stop,icon) {
+    icon = typeof icon !== 'undefined' ? icon : iconset.default;   
     //add the marker
     var marker = L.marker([stop.lat, stop.lon], 
       {

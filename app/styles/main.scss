@@ -140,9 +140,13 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
  
   h1,h2,h3 {
     opacity: 1.0;
-    white-space: nowrap;
+    /*white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: ellipsis;*/
+  }
+  h3 {
+    font-size: 18px;
+    line-height: 36px;
   }
   
   .clickable-container {
@@ -198,15 +202,29 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
     
     li {
        margin:0px; 
-       padding: 0px; 
-       padding-top: 3px; 
-       padding-bottom: 3px; 
-       font-size: 10px;
+       padding-left: 0px; 
+       font-size: 14px;
+       white-space: nowrap;
+       overflow: hidden;
+       text-overflow: ellipsis;
        &:hover {
          font-weight: bold;
-         color: orange;
+         color: $main-color;
          cursor: pointer;
        };
+       img {
+         width: 38px;
+         height: 38px;
+       }
+       a {
+         color: #ddd;
+         &:hover {
+           color: $main-color;
+         };
+       }
+       .label-warning {
+         background-color: $main-color;
+       }
     }
     
   }

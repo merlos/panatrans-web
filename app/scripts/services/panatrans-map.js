@@ -6,11 +6,42 @@
 * Requires angular, leaflet, leaflet awesome markers and bouncemaker plugins
 */
 
-angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$http', 'ngToast', function($compile, $q, $http, ngToast) {
+angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$http', 'ngToast', 'Stop', function($compile, $q, $http, ngToast, Stop) {
   
   var maps = {};
    
   return function(mapId, tileLayerUrl, tileLayerAttribution) {
+     
+   
+    // Stop Marker Class  
+    // Standard Leaflet marker with a few more methods
+    function StopMarker(lat, lng, options) {
+      var marker = L.marker(lat,lng, options);
+    
+      marker._stop = {}; 
+      //sets an angular template it links the stop information
+      marker.setPopupTemplate = function($scope, template) {
+        template = typeof template !== 'undefined' ? template : '<p>{{stop.name}}</p>';
+        var linkFn = $compile(angular.element(template));
+        var scope = $scope.$new();
+        //add var to scope
+        scope.stop = this._stop;
+        scope.stopMarker = this;
+        var element = linkFn(scope);
+        //console.log(element);
+        marker.bindPopup(element[0]);      
+      };
+      marker.isStation = function() {
+        var regex = /estaci[oó]n|albrook/ig
+        return regex.test(marker._stop.name);
+      };
+                  
+      return marker
+    };
+      
+      
+      
+    // MAP REQUIRED INITIALIZATION 
       
     //if the map was already initialized return it. See at the end of the function 
     if (maps[mapId] !== undefined) {
@@ -24,39 +55,13 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
     };
     // if not initialize the map again
     console.log('Init PanatransMap');
-    
-    function StopMarker(lat, lng, options) {
-      var marker = L.marker(lat,lng, options);
-    
-      marker._stop = {};
-      //sets an angular template it links the stop information
-      marker.setPopupTemplate = function($scope, template) {
-        template = typeof template !== 'undefined' ? template : '<p>{{stop.name}}</p>';
-        var linkFn = $compile(angular.element(template));
-        var scope = $scope.$new();
-        //add var to scope
-        scope.stop = this._stop;
-        scope.stopMarker = this;
-        var element = linkFn(scope);
-        //console.log(element);
-        marker.bindPopup(element[0]);      
-      }
-  
-      return marker
-    };
-           
+               
     var map = L.map(mapId, {
       center: [8.9740946, -79.5508536],
       zoom: 16,
       zoomControl: false
     });
       
-    map.$scope = null;
-      
-    //array of stops hightlighted
-    map.highlightedStops = [];
-  
-    map.stopMarkers = {};
     // Types of markers (requires AwesomeMarkers)
     map.iconset = {
       default: L.AwesomeMarkers.icon({ // bus stop default
@@ -99,14 +104,54 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       })
     };
   
+    //////////////////////////////////////////// MAP VARIABLES
+  
+    map.$scope = null;
+    
+    // list of marker objecs. The key is the stop id
+    // ex: map.stopMarkers[key] = <marker for stop.id = key
+    map.stopMarkers = {};
+    
+    //list of the ids of the markers shown (key is the stop id)
+    //ex: map.stopIdsShow[1] = true
+    // dont modify. Handled by showMarkerForStop(), hideMarkerForStop()
+    map.stopIdsShown = {};
+  
+    //object with keys of ids of markers that are not removed on zoom out
+    //ex: map.markersAlwaysShown[1] <-- stopMarker with _stop.id == 1 is always shown
+    map.alwaysShownStopIds = {};
+    
+    //list of ids of station
+    //ex: map.stationIds[key] = true 
+    map.stationIds = {};
+    
+    //Configuration of markers depending on its status
     map.selectedMarkerIcon = map.iconset.red;
     map.highlightedMarkerIcon = map.iconset.orange;
     map.defaultMarkerIcon = map.iconset.default;
+    
+    // If the map is farther than this => the map does not show markers
     map.minZoomWithMarkers = 15;
-  
-    ///////// MAP EVENTS
-  
+    
+    // Does the map have any marker not in exceptions visible?
     map.mapHasMarkers = true;
+    
+    // List of PDF Tile Layers.
+    map.pdfLayers = {};
+    
+    
+    //User location vars
+    map.userLocationMarker = null;  // there is a marker and a circle with the radius
+    map.userLocationCircle = null;
+    
+    //shall the map follow the user
+    map.followUser = false; 
+    
+    //a var to track if the requested pan to stop was programatically requested (ex: following user location)
+    map.autoPan = true;
+    
+    
+    ////////////////////////////////////////////////// MAP EVENT HANDLERS
   
   
     map.onZoomStart = function() {
@@ -114,36 +159,20 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       map.autoPan = true; // TODO rename to something like isUserAction
     };
   
-    
-    map.showZoomMessage = function() {
-      console.log('showing zoom message');
-      if (! $('#map-message').length) {
-        $('body').append('<div id="map-message" class="map-message">Haz zoom para ver las paradas</div>').fadeIn();
-      }
-      $('#map-message').fadeIn();
-    };
-    
-    
-    map.hideZoomMessage = function() {
-      console.log('hiding zoom message');
-      if ($('#map-message').length) {
-        $('#map-message').fadeOut();
-      }
-    };
-    
+
     map.onZoomEnd = function() {
       console.log('onZoomEnd');
       console.log('zoomLevel: ' + this.getZoom());
       if (this.getZoom() < map.minZoomWithMarkers) {
         //display only important markers -- TODO
-        this.hideAllMarkers();
+        this.hideAllMarkersButExceptions();
         this.showZoomMessage();
         map.mapHasMarkers = false;
       } else { // add markers in bounds if there not already added
+        this.hideZoomMessage();
         if (this.mapHasMarkers) {
           return;
         } 
-        this.hideZoomMessage();
         map.showMarkersInsideBounds();
         this.mapHasMarkers = true;
       }   
@@ -152,7 +181,9 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
   
     map.onMoveEnd = function() {
       if (! map.autoPan) {
-        map.followUser = false;
+        map.$scope.$apply(function() { 
+          map.followUser=false;
+        });
       }
       console.log('onMoveEnd; followUser:' + map.followUser + ' autoPan:' + map.autoPan);
       map.autoPan = false;
@@ -175,19 +206,30 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
     map.stopMarkerPopupClose = function(e) {
       var stop = e.popup._source._stop;
       console.log('panatrans-map: stopMarkerPopupClose: CLOSE ' + stop.name);
-      //if (map.stopMarkers[stop.id] === undefined ) {
-      //return;
-      //}
-      //var marker = map.stopMarkers[stop.id];
-      //if (map.isStopHighlighted(stop)) {
-      //  marker.setIcon(map.highlightedIcon);
-      //} else { 
-      //  marker.setIcon(map.defaultMarkerIcon);
-      //}
+     
     };
   
-
-  
+    // If the map is too far away, it hides all markers, avoids performance issues
+    map.showZoomMessage = function() {
+      console.log('showing zoom message');
+      if (! $('#map-message').length) {
+        $('body').append('<div id="map-message" class="map-message">Haz zoom para ver las paradas</div>').fadeIn();
+      }
+      $('#map-message').fadeIn();
+    };
+    
+    
+    map.hideZoomMessage = function() {
+      console.log('hiding zoom message');
+      if ($('#map-message').length) {
+        $('#map-message').fadeOut();
+      }
+    };
+    
+    
+    /////////////////////////////////////////////////////////// MAP METHODS
+    
+      
     //  config a stop marker, but does not add it as map layer
     //  stop = stop object
     //  template optional (angular html template to set as popup)
@@ -196,37 +238,61 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         icon: map.defaultMarkerIcon,
         draggable: false
       });
-      //identify the marker: (https://github.com/Leaflet/Leaflet/issues/1031)
-      marker._stop = stop; 
-      marker.setPopupTemplate(map.$scope, template)
+      //to identify the marker: (https://github.com/Leaflet/Leaflet/issues/1031)
+        marker._stop = stop; 
+        marker.setPopupTemplate(map.$scope, template)
     
-      marker.on('popupopen', this.stopMarkerPopupOpen); 
-      marker.on('popupclose', this.stopMarkerPopupClose);
-      this.stopMarkers[stop.id] = marker; //add the marker to the list of markers
-      return marker;
-    };
-  
-  
-      //adds the marker of the stop to the map 
-      map.addStopMarker = function(stop) {
-        //remove layer first and then add it again
-        map.hideStopMarker(stop); 
-        map.stopMarkers[stop.id].addTo(map);
-      };
-      
-      
-      map.hideStopMarker = function(stop) {
-        map.removeLayer(map.stopMarkers[stop.id])
+        marker.on('popupopen', this.stopMarkerPopupOpen); 
+        marker.on('popupclose', this.stopMarkerPopupClose);
+        this.stopMarkers[stop.id] = marker; //add the marker to the list of markers
+        return marker;
       };
   
-  
+      //array of stops
+      map.setAlwaysShownStops = function(stopsArr) {
+        map.alwaysShownStopIds = {};
+        //convert array into object key
+        angular.foreach(stopArr, function(stop){
+          map.alwayShownStopIds[stop.id] = true;
+        })
+      };
+      
+      map.refreshStationIds = function() {
+        map.stationIds = {};
+        angular.forEach(map.stopMarkers, function(marker, key) { 
+          if (marker.isStation()) { 
+            map.stationIds[marker._stop.id] = true;
+          }
+        });
+      };
+      
+      map.alwaysShowStations = function(value) {
+        if (value) { 
+          map.refreshStationIds();
+          map.addStationsMarkers();
+        } else {
+          map.stationIds = {};
+        }
+      };
+      
+      //ads markers of stations to map
+      map.addStationsMarkers = function() {
+        angular.forEach(map.stationIds, function(value, stopId) {
+          map.showMarkerForStop(map.stopMarkers[stopId]._stop);
+        });
+      }
       // centers map in stop lat and lon.
       map.panToStop = function(stop) {
         map.autoPan = false;
+        // if stop is not displayed because we zoom is to small, then ZOOM IN
         if(map.getZoom() <= map.minZoomWithMarkers){
           map.setZoom(map.minZoomWithMarkers);
         }
         map.panTo(map.stopMarkers[stop.id].getLatLng(), {animate:true});
+        setTimeout(function () {
+          console.log('Centering Map on Stop: ' + stop.name);            
+          map.openStopPopup(stop);   
+        }, 400);
         
       };
   
@@ -236,37 +302,74 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         map.stopMarkers[stop.id].openPopup();
       };
       
-  
+      
+      //adds an EXISTING marker linked to a stop to the map 
+      map.showMarkerForStop = function(stop) {
+        //if the map has the layer => first hide it
+        if (map.hasLayer(map.stopMarkers[stop.id])) {
+          map.hideMarkerForStop(stop);
+        }
+        map.stopMarkers[stop.id].addTo(map);
+        map.stopIdsShown[stop.id] = true;
+      };
+      
+      //Hides from the map the layer (marker) linked ot this stop
+      map.hideMarkerForStop = function(stop) {
+        map.removeLayer(map.stopMarkers[stop.id]);
+        if (map.stopIdsShown[stop.id] !== undefined) {
+          delete map.stopIdsShown[stop.id];
+        }
+      };
+      
+      //exceptions are awaysShownIds and stationIds
+      map.hideMarkerForStopIfIsNotAnException = function(stop) { 
+        if (map.stationIds[stop.id] === undefined) { //is not a station
+          if (map.alwaysShownStopIds[stop.id] === undefined) { //is not a regular exception
+            map.hideMarkerForStop(stop);
+          }
+        }
+      };
+      
+      
       //removes marker from map and list of markers
-      map.removeStopMarker = function(stop) {
-        map.removeLayer(stopMarkers[stop]);
-        delete this.stopMarkers[stop.id]
-      }
+      map.removeMarkerForStop = function(stop) {
+        map.hideMarkerForStop(stop);
+        delete this.stopMarkers[stop.id];
+      };
    
    
       //removes all stop markers.
       map.removeAllStopMarkers = function() {
         angular.forEach(stopMarkers, function(stopMarker) {
-          this.removeStopMarker(StopMarker.stop);
+          this.removeMarkerForStop(StopMarker._stop);
         });
       };
    
-   
+      //hides all markers except thos
+      map.hideAllMarkersButExceptions = function() {
+        angular.forEach(map.stopIdsShown, function(value, stopId) {
+          map.hideMarkerForStopIfIsNotAnException(map.stopMarkers[stopId]._stop);
+        });
+      };
+      
+      
       //hides all markers on map (they are not displayed but still exist) 
       map.hideAllMarkers = function() {
-        angular.forEach(this.stopMarkers, function(marker) {
-          map.removeLayer(marker);
+        angular.forEach(map.stopMarkers, function(marker, key) {
+            map.hideMarkerForStop(marker._stop);
         });
       };
   
       //hides markers that are outdide map bounds    
       map.hideMarkersOutsideBounds = function() { 
-        //console.log('hideMarkerOutsideBounds, started');
+        console.log('hideMarkerOutsideBounds, started');
+        console.log('Exceptions');
+        console.log(map.stationIds);
+        console.log(map.alwaysShownStopIds);
         var bounds = this.getBounds().pad(0.2);
-        angular.forEach(this.stopMarkers, function(marker) {
+        angular.forEach(this.stopMarkers, function(marker, key) {
           if (! bounds.contains(marker.getLatLng())) {
-            //delete markers[key];
-            map.removeLayer(marker);
+              map.hideMarkerForStopIfIsNotAnException(marker._stop);
           }
         });
         //console.log('hideMarkersOutsideBounds, finished');
@@ -279,26 +382,16 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         var bounds = this.getBounds().pad(0.2);
         angular.forEach(this.stopMarkers, function(marker) {
           if (bounds.contains(marker.getLatLng())) {
-            map.addLayer(marker);
+            map.showMarkerForStop(marker._stop);
           }
         });
         //console.log('showMarkerInsideBounds, started');
       };
   
-  
-      // is Stop hightlighted?
-      map.isStopHighlighted = function(stop) {
-        var i;
-        for (i = 0; i < map.highlightedStops.length; i++) {
-          if (map.highlightedStops[i] === stop) {
-            return true;
-          }
-        }
-        return false;
-      };
-  
+
       ////////////////////////////////////////// PDF Layers
-      map.pdfLayers = {};
+      
+      
   
       map.isRoutePdfAvailable = function(route) {
         var deferred = $q.defer();
@@ -368,25 +461,25 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       //returns the current status of the pdf 
       map.toggleRoutePdf = function(route) {
         console.log('toggleRoutePdf:' + route.id);
-        map.pdfLayers[route.id]._show === false ? map.showRoutePdf(route) : map.hideRoutePdf(route); 
+        if (map.pdfLayers[route.id]._show === false) {
+          map.showRoutePdf(route)
+        } else {
+          map.hideRoutePdf(route); 
+        }
         return  map.pdfLayers[route.id]._show
       };
+
 
       // hides all pdf routes 
       map.hideAllRoutePdf = function() {
         angular.forEach(map.pdfLayers, function(routePdf,key){
           map.hideRoutePdfByRouteId(key);
         }); 
-      }
+      };
   
    
       ///////////////////////////////// User location
-  
-      map.userLocationMarker = null;
-      map.userLocationCircle = null;
-      map.followUser = false;
-      map.autoPan = true;
-      
+              
       // start requesting the user location
       map.requestUserLocation = function() {
         map.locate({watch: true, setView: false, enableHighAccuracy: true});
@@ -394,8 +487,8 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
     
       //activate / desactivates follow User. If activates follow user centers map in user location
       map.toggleFollowUser = function() {
-        map.followUser ? map.followUser=false : map.followUser=true;
-        console.log('followUser:' + map.followUser);
+        map.followUser ? map.followUser = false : map.followUser = true;
+        console.log('new followUser:' + map.followUser);
         if (map.followUser) {
           map.panToUser();
         }
@@ -405,9 +498,10 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       //centers map in user location
       map.panToUser = function() {
         var userLatLng = map.lastUserLatLng();
+        console.log('panToUser requested: ' + userLatLng);
         if (userLatLng) {
-          map.panTo(userLatLng);
           map.autoPan = true;
+          map.panTo(userLatLng);
         }
       };
       
@@ -422,7 +516,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       // event handler, updates user location pin & circle radius
       // centers map in user location if followUser is active
       map.onLocationFound = function(e) {
-        console.log('followUser: ' + map.followUser)
+        console.log('new User location. followUser: ' + map.followUser)
         if (e.accuracy === null) {
           return;
         }
@@ -466,4 +560,5 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       maps[mapId] = map;
       return map;
     };
-  }]);
+  }]
+);
