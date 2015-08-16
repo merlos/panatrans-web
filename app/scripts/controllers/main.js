@@ -446,17 +446,22 @@ angular.module('panatransWebApp')
         newStop = stopModal;
           //add newStopMarker
         var mapCenter = $scope.map.getCenter();
-        newStop.lat = mapCenter.lat;
-        newStop.lon = mapCenter.lng;
-        newStopMarker = L.marker(mapCenter, 
+        
+        if (newStop.lat == null) { 
+          newStop.lat = mapCenter.lat;
+        }
+        if (newStop.lon == null) { 
+          newStop.lon = mapCenter.lng;
+        }
+        newStopMarker = L.marker([newStop.lat,newStop.lon], 
             { 
               icon: $scope.map.iconset.redSpin,
               draggable: true,
-              bounceOnAdd: true, 
+              bounceOnAdd: false, 
               bounceOnAddOptions: {duration: 500, height: 100}, 
               bounceOnAddCallback: function() {console.log('bouncing done');}
             }).addTo($scope.map); //http://stackoverflow.com/questions/17662551/how-to-use-angular-directives-ng-click-and-ng-class-inside-leaflet-marker-popup    
-        var html = '<div><h4>' + newStop.name + '</h4><p><strong>Arrástrame</strong> hasta mi localización.<br>Después dale a: </p><button ng-click="saveNewStop()"class="btn btn-primary">Guardar</button> o <a ng-click="cancelSaveNewStop()">cancelar</a></div>';
+        var html = '<div><h4>' + newStop.name +'</h4><p><strong>Arrástrame</strong> hasta mi localización.<br>Después dale a: </p><button ng-click="saveNewStop()"class="btn btn-primary">Guardar</button> o <a ng-click="cancelSaveNewStop()">cancelar</a></div>';
         var linkFn = $compile(angular.element(html));
         var scope = $scope.$new();
         var element = linkFn(scope);

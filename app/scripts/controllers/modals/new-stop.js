@@ -10,6 +10,8 @@ angular.module('panatransWebApp')
     $modalInstance.close($scope.stop);
   };
 
+  //TODO validate if lat and long are valid values 
+  
   $scope.cancel = function () {
     $modalInstance.dismiss('cancel');
   };

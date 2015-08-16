@@ -5,16 +5,21 @@
 </div>
 <form ng-submit="ok()">
   <div class="modal-body">
+    <div class="form-group">
     <label for="name">Nombre de la parada: </label> 
-    <input type="text" name="name" ng-model="stop.name" placeholder="Albrook" autofocus>
+    <input type="text" class="form-control" name="name" ng-model="stop.name" placeholder="Albrook" autofocus>
+  </div>
   
     <p class="small">El nombre de la parada lo puedes obtener de los <a href="http://www.mibus.com.pa/rutas/">PDFs de las rutas de mibus.com.pa</a>. También en algunos buses el nombre de la parada se muestra en una pantalla y lo anuncian por megafonía.
     </p>
-    <div class="form-group">
+    <div class="row">
+      <div class="col-sm-6">
       <label for"lat">Latitud (opcional)</label>
-      <input type="text" name="lat" ng-model="stop.lat" placeholder="8.975640">
+      <input type="number" class="form-control" name="lat" ng-model="stop.lat" min="-90.0" max="90.0" placeholder="8.975640">
+    </div><!-- col -->
+    <div class="col-sm-6">
       <label for"lon">Longitud (opcional)</label>
-      <input type="text" name="lon" ng-model="stop.lon" placeholder="-79.551748">
+      <input type="number" class="form-control" name="lon" ng-model="stop.lon" min="-180.0" max="180.0" placeholder="-79.551748">
     </div>
    </div>
 
