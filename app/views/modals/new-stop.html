@@ -1,24 +1,28 @@
 <div class="modal-header">
-   <button class="btn btn-default pull-right" ng-click="cancel()"><i class="fa fa-close"></i></button>
+  <button class="btn btn-default pull-right" ng-click="cancel()"><i class="fa fa-close"></i></button>
   <h3 class="modal-title">Añadir parada</h3>
   
 </div>
 <form ng-submit="ok()">
-<div class="modal-body">
-  
+  <div class="modal-body">
     <label for="name">Nombre de la parada: </label> 
-    <input type="text" name="name" ng-model="stop.name" placeholder="Ej: Albrook" autofocus>
-  </p>
-  <p>El nombre de la parada lo puedes obtener de los <a href="http://www.mibus.com.pa/rutas/">PDFs de las rutas de mibus.com.pa</a>. También en algunos buses el nombre de la parada se muestra en una pantalla y lo anuncian por megafonía.
-  <p>
- 
-</div>
-
-
-<div class="modal-footer">
-  <a href="" ng-click="cancel()">Cancelar</a>
-  <input type="submit" class="btn btn-primary" ng-click="ok()" 
-  ng-disabled="(stop.name.length === undefined) || (stop.name.length < 1)" value="Continuar">
+    <input type="text" name="name" ng-model="stop.name" placeholder="Albrook" autofocus>
   
-</div>
+    <p class="small">El nombre de la parada lo puedes obtener de los <a href="http://www.mibus.com.pa/rutas/">PDFs de las rutas de mibus.com.pa</a>. También en algunos buses el nombre de la parada se muestra en una pantalla y lo anuncian por megafonía.
+    </p>
+    <div class="form-group">
+      <label for"lat">Latitud (opcional)</label>
+      <input type="text" name="lat" ng-model="stop.lat" placeholder="8.975640">
+      <label for"lon">Longitud (opcional)</label>
+      <input type="text" name="lon" ng-model="stop.lon" placeholder="-79.551748">
+    </div>
+   </div>
+
+
+  <div class="modal-footer">
+    <a href="" ng-click="cancel()">Cancelar</a>
+    <input type="submit" class="btn btn-primary" ng-click="ok()" 
+    ng-disabled="(stop.name.length === undefined) || (stop.name.length < 1)" value="Continuar">
+  
+  </div>
  
