@@ -102,10 +102,40 @@ angular.module('panatransWebApp')
     });
   };
   
+  $scope.updateStopLat = function() {
+    console.log("updateStop Lat");
+    console.log($scope.stop);
+    $http.put(_CONFIG.serverUrl + '/v1/stops/' + $scope.stop.id, {stop: { lat: $scope.stop.lat}})
+    .success(function(response){
+      console.log("Stop LAT successfully updated");
+      ngToast.create("Latitud de la parada actualizada con éxito. Recarga la página.");
+    })
+    .error(function(response) {
+      console.log('error adding trip to stop');
+      console.log(response);
+    });
+  };
+ 
+  $scope.updateStopLon = function() {
+    console.log("updateStop Lon");
+    console.log($scope.stop);
+    $http.put(_CONFIG.serverUrl + '/v1/stops/' + $scope.stop.id, {stop: { lon: $scope.stop.lon}})
+    .success(function(response){
+      console.log("Stop LON successfully updated");
+      ngToast.create("Latitud de la parada actualizada con éxito. Recarga la página.");
+    })
+    .error(function(response) {
+      console.log('error adding trip to stop');
+      console.log(response);
+    });
+  };
+ 
+  
+  
   $scope.deleteStop = function() {
     if ($scope.stop.routes.length > 0) {
       console.log('ERROR: the stop has trips cannot be deleted');
-      alert('No se puede borrar. Tienes que quitar todas las rutas que pasan por la parada antes de eliminarla.')
+      alert('No se puede borrar. Tienes que quitar todas las rutas que pasan por la parada antes de eliminarla.');
       return;
     }
     $http.delete(_CONFIG.serverUrl + '/v1/stops/'+ $scope.stop.id)

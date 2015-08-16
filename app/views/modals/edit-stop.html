@@ -5,23 +5,33 @@
 </div>
 <div class="modal-body modal-view-size">
   <div class="row">
+    
     <div class="col-sm-6">
       <div class="form-group">
-        <label for="name">Nombre: </label>
+        <label for="name">Nombre </label>
         <input class="form-control" type="text" ng-model="stop.name" value="{{stop.name}}" ng-blur="updateStopName()">
       </div>
       <div class="form-group">
-        <label for="change-location">Localización en mapa</label>
-        <br>
-        <button name="change-location" class="btn btn-default" ng-click="changeStopLocation()"><i class="fa fa-map-marker"></i> Cambiar</button>
-          
+        <div class="row">
+          <div class="col-sm-6">
+        <label for="change-location">Latitud</label>
+        <input class="form-control" type="text" ng-model="stop.lat" value="{{stop.lat}}" ng-blur="updateStopLat()">
+        </div>
+        <div class="col-sm-6">
+        <label for="change-location">Longitud</label>
+        <input class="form-control" type="text" ng-model="stop.lon" value="{{stop.lon}}" ng-blur="updateStopLon()">
+        </div>
+      </div><!-- row -->
+      </div><!-- form-group --> 
+      <div class="form-group">
+      <button name="change-location" class="btn btn-default" ng-click="changeStopLocation()"><i class="fa fa-map-marker"></i> Cambiar sobre mapa</button>
+       </div>
         <div class="form-group">
           <hr>
           <button class="btn btn-danger btn-xs" ng-disabled="stop.routes.length != 0" ng-click="deleteStop()">Borrar parada</button>
           <br>
           <small ng-show="stop.routes.length != 0"> Para poder borrar la parada, antes has de eliminar todos sus trayectos y rutas.</small>
         </div>
-      </div>
     </div> <!-- col -->
     <div class="col-sm-6" >
       <h5>Trayectos que pasan por {{stop.name}}</h5>
