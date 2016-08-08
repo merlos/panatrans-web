@@ -16,14 +16,14 @@ function Route($q, $http, railsResourceFactory) {
     name: 'route'
   });
   console.log('Init Route');
-  resource.routes = {}; 
-    
+  resource.routes = {};
+
   resource.all = function() {
     var deferred = $q.defer();
     console.log('routes.length:' + resource.routes.length);
     if (Object.hasItems(resource.routes)) {
       deferred.resolve(resource.routes);
-    } else { 
+    } else {
       console.log('Route:all: requesting routes to server');
       resource.query({with_trips: false}).then(
         function (results) {
@@ -32,19 +32,19 @@ function Route($q, $http, railsResourceFactory) {
           });
           //console.log(resource.routes);
           deferred.resolve(resource.routes);
-        }, 
+        },
         function (error) {
            console.log('Route:all.error');
            deferred.reject(error);
         });
-    } //else 
+    } //else
     return deferred.promise;
   };
-  
+
   resource.find = function(routeId, forceRequest) {
     forceRequest = typeof forceRequest !== 'undefined' ? forceRequest : false;
     var deferred = $q.defer();
-    //only download if the stop is not already local cache
+    //only download if the route is not already local cache
     if (resource.routes[routeId].trips && !forceRequest) {
        deferred.resolve(resource.routes[routeId]);
     } else {
@@ -61,8 +61,8 @@ function Route($q, $http, railsResourceFactory) {
     }
     return deferred.promise;
   };
-    
-    
+
+
   return resource;
 } //Route class
 
