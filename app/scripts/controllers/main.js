@@ -94,6 +94,12 @@ angular.module('panatransWebApp')
   $scope.map.$scope = $scope;
   $scope.map.requestUserLocation();
 
+  var loadingToast = ngToast.create({
+    dismissOnTimeout: false,
+    className: 'info',
+    content: '<strong>Cargando paradas...</strong>'
+    }
+  );
   //load all stops
   Stop.all().then(
     function(data) {
@@ -115,7 +121,9 @@ angular.module('panatransWebApp')
       } else {
         $scope.map.followUser = true;
       }
+      ngToast.dismiss(loadingToast);
     }, function(error) {
+      ngToast.dismiss(loadingToast);
       ngToast.create({
         timeout: 8000,
         className: 'danger',
@@ -200,7 +208,8 @@ angular.module('panatransWebApp')
       Route.find(route.id).then(
         function(data) {
           console.log(data);
-          $scope.map.addTripLine(data.trips[0].shape.points);
+          $scope.map.addTripLine(data.trips[0]);
+          //$scope.map.highlighTripStops();
           angular.forEach($scope.stopDetail.routes, function(route, key){
             if (route.id == data.id) {
               $scope.stopDetail.routes[key] = data;
@@ -215,7 +224,7 @@ angular.module('panatransWebApp')
       );
     } else {
       this.showTripDetails = false;
-      $scope.map.removeTripLine();
+      $scope.map.removeTripLine(route.trips[0]);
     }
     console.log('showTripDetails: ' + this.showTripDetails);
   };

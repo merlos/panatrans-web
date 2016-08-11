@@ -6,7 +6,7 @@
 * Requires angular, leaflet, leaflet awesome markers and bouncemaker plugins
 */
 
-angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$http', 'ngToast', 'Stop', function($compile, $q, $http, ngToast, Stop) {
+angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$http', function($compile, $q, $http) {
 
   var maps = {};
 
@@ -32,37 +32,72 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         marker.bindPopup(element[0]);
       };
       marker.isStation = function() {
-        var regex = /estaci[oó]n|albrook/ig
+        var regex = /estaci[oó]n|albrook/ig;
         return regex.test(marker._stop.name);
       };
 
       return marker;
-    };
+    }
 
+    function TripPolyline(trip, options) {
 
-    var arrowPolyline = L.Polyline.extend({
-      addArrows: function(){
+      var polyline = L.polyline([],options);
+
+      polyline.arrowMarkers = [];
+      polyline.trip = trip;
+
+      polyline.setArrows = function(map){
+        //remove current arrows
+        angular.forEach(this.arrowMarkers, function(marker) {
+          map.removeLayer(marker);
+        });
+        //clear the array
+        this.arrowMarkers = [];
+        //add new arrows
         var points = this.getLatLngs();
         var step = points.length/10;
-        for (var p = 0; p +1  < points.length; p = p+ Math.round(step)){
-
-          var diffLat = points[p+1]["lat"] - points[p]["lat"];
-          var diffLng = points[p+1]["lng"] - points[p]["lng"];
-          var center = [points[p]["lat"] + diffLat/2,points[p]["lng"] + diffLng/2];
-
+        for (var p = 0; p +1  < points.length; p = p+ Math.round(step)) {
+          var diffLat = points[p+1]['lat'] - points[p]['lat'];
+          var diffLng = points[p+1]['lng'] - points[p]['lng'];
+          var center = [points[p]['lat'] + diffLat/2,points[p]['lng'] + diffLng/2];
           var angle = 360 - (Math.atan2(diffLat, diffLng)*57.295779513082);
-
-          var arrowM = new L.marker(center,{
+          var arrowMarker = new L.marker(center,{
             icon: new L.divIcon({
-              className : "arrowIcon",
+              className : 'arrowIcon',
               iconSize: new L.Point(30,30),
               iconAnchor: new L.Point(15,15),
-              html : "<div style=\"opacity:0.5; color: " + map.tripLineColor + ";font-size: 20px; -webkit-transform: rotate("+ angle +"deg)\"><i class=\"fa fa-angle-right\"></i></div>"
+              html : '<div style="opacity:0.5; color: ' + map.tripLineColor + ';font-size: 20px; -webkit-transform: rotate(' + angle + 'deg)"><i class="fa fa-angle-right"></i></div>'
             })
-          }).addTo(map);
+          });
+          //save reference to layer
+          this.arrowMarkers.push(arrowMarker);
+          arrowMarker.addTo(map);
         }
-      }
-    });
+      }; //set arrows
+
+      polyline.removeArrows = function(map) {
+        angular.forEach(this.arrowMarkers, function(arrow) {
+          map.removeLayer(arrow);
+        });
+      };
+
+      //sets Trip line lats and lons
+      //gtfsPoints is an array of shapes.txt.
+      polyline.setTripLine = function(gtfsPoints) {
+        console.log('setTripLine with these points:');
+        console.log(gtfsPoints);
+        var latlngs = [];
+        angular.forEach(gtfsPoints, function(pt) {
+          //console.log(pt);
+          latlngs.push(L.latLng(pt.ptLat,pt.ptLon));
+        });
+        this.setLatLngs(latlngs);
+      }; // setTripLine
+
+      //add the trip line
+      polyline.setTripLine(trip.shape.points);
+      return polyline;
+    }
 
 
     // MAP REQUIRED INITIALIZATION
@@ -76,7 +111,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         console.log('PanatransMap: map exists but empty. Recreate it');
         maps[mapId].remove();
       }
-    };
+    }
     // if not initialize the map again
     console.log('Init PanatransMap');
 
@@ -149,7 +184,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
     //ex: map.stationIds[key] = true
     map.stationIds = {};
 
-    map.tripLine = null;
+    map.tripLines = {};
     map.tripLineColor = 'red';
 
     //Configuration of markers depending on its status
@@ -261,13 +296,13 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
     //  stop = stop object
     //  template optional (angular html template to set as popup)
     map.createStopMarker = function(stop, template) {
-      var marker = StopMarker([stop.lat, stop.lon], {
+      var marker = new StopMarker([stop.lat, stop.lon], {
         icon: map.defaultMarkerIcon,
         draggable: false
       });
       //to identify the marker: (https://github.com/Leaflet/Leaflet/issues/1031)
         marker._stop = stop;
-        marker.setPopupTemplate(map.$scope, template)
+        marker.setPopupTemplate(map.$scope, template);
 
         marker.on('popupopen', this.stopMarkerPopupOpen);
         marker.on('popupclose', this.stopMarkerPopupClose);
@@ -276,17 +311,17 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       };
 
       //array of stops
-      map.setAlwaysShownStops = function(stopsArr) {
+      map.setAlwaysShownStops = function(stopArr) {
         map.alwaysShownStopIds = {};
         //convert array into object key
         angular.foreach(stopArr, function(stop){
           map.alwayShownStopIds[stop.id] = true;
-        })
+        });
       };
 
       map.refreshStationIds = function() {
         map.stationIds = {};
-        angular.forEach(map.stopMarkers, function(marker, key) {
+        angular.forEach(map.stopMarkers, function(marker) {
           if (marker.isStation()) {
             map.stationIds[marker._stop.id] = true;
           }
@@ -307,7 +342,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         angular.forEach(map.stationIds, function(value, stopId) {
           map.showMarkerForStop(map.stopMarkers[stopId]._stop);
         });
-      }
+      };
       // centers map in stop lat and lon.
       map.panToStop = function(stop) {
         map.autoPan = false;
@@ -367,8 +402,8 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
 
       //removes all stop markers.
       map.removeAllStopMarkers = function() {
-        angular.forEach(stopMarkers, function(stopMarker) {
-          this.removeMarkerForStop(StopMarker._stop);
+        angular.forEach(map.stopMarkers, function(stopMarker) {
+          this.removeMarkerForStop(stopMarker._stop);
         });
       };
 
@@ -382,7 +417,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
 
       //hides all markers on map (they are not displayed but still exist)
       map.hideAllMarkers = function() {
-        angular.forEach(map.stopMarkers, function(marker, key) {
+        angular.forEach(map.stopMarkers, function(marker) {
             map.hideMarkerForStop(marker._stop);
         });
       };
@@ -394,7 +429,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         console.log(map.stationIds);
         console.log(map.alwaysShownStopIds);
         var bounds = this.getBounds().pad(0.2);
-        angular.forEach(this.stopMarkers, function(marker, key) {
+        angular.forEach(this.stopMarkers, function(marker) {
           if (! bounds.contains(marker.getLatLng())) {
               map.hideMarkerForStopIfIsNotAnException(marker._stop);
           }
@@ -415,25 +450,16 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         //console.log('showMarkerInsideBounds, started');
       };
 
-      //adds the line of the trip
-      //gtfsPoints is an array of shapes.txt.
-      map.addTripLine = function(gtfsPoints) {
-        console.log('adding tripLine');
-        console.log(gtfsPoints);
-        var latlngs = [];
-        angular.forEach(gtfsPoints, function(pt) {
-          //console.log(pt);
-          latlngs.push(L.latLng(pt.ptLat,pt.ptLon));
-        });
-        map.tripLine = new arrowPolyline(latlngs, {color: map.tripLineColor}).addTo(map);
-        map.tripLine.addArrows();
-      };
-
-      map.removeTripLine = function() {
-        console.log('removing tripLine');
-        map.removeLayer(map.tripLine);
-      };
-
+      map.addTripLine = function(trip) {
+        var tripLine = new TripPolyline(trip, {color: map.tripLineColor});
+        tripLine.addTo(map);
+        map.tripLines[trip.id] = tripLine;
+      }
+      map.removeTripLine = function(trip) {
+        if (map.tripLines[trip.id] != null) {
+          map.removeLayer(map.tripLines[trip.id]);
+        }
+      }
 
       ////////////////////////////////////////// PDF Layers
 
@@ -508,11 +534,11 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       map.toggleRoutePdf = function(route) {
         console.log('toggleRoutePdf:' + route.id);
         if (map.pdfLayers[route.id]._show === false) {
-          map.showRoutePdf(route)
+          map.showRoutePdf(route);
         } else {
           map.hideRoutePdf(route);
         }
-        return  map.pdfLayers[route.id]._show
+        return  map.pdfLayers[route.id]._show;
       };
 
 
@@ -533,7 +559,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
 
       //activate / desactivates follow User. If activates follow user centers map in user location
       map.toggleFollowUser = function() {
-        map.followUser ? map.followUser = false : map.followUser = true;
+        map.followUser = map.followUser ? false : true;
         console.log('new followUser:' + map.followUser);
         if (map.followUser) {
           map.panToUser();
@@ -562,7 +588,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       // event handler, updates user location pin & circle radius
       // centers map in user location if followUser is active
       map.onLocationFound = function(e) {
-        console.log('new User location. followUser: ' + map.followUser)
+        console.log('new User location. followUser: ' + map.followUser);
         if (e.accuracy === null) {
           return;
         }
