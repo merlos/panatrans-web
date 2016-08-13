@@ -9,7 +9,7 @@ html, body {
   height: 100%;
 }
 
-.navbar-brand {  
+.navbar-brand {
   img {
     width:140px;
     height: 35px;
@@ -45,7 +45,7 @@ html, body {
   margin-bottom: 100px;
   width: 100%;
   height: 100%;
-  min-height: 100%; 
+  min-height: 100%;
   background-color: #ddd;
 }
 
@@ -66,15 +66,15 @@ html, body {
 
 footer {
   position: fixed;
-  z-index: 999; 
-  bottom: 0; 
+  z-index: 999;
+  bottom: 0;
   left: 0;
   width: 100%;
   background: white;
   font-size: .9em;
   color: #999;
 
-  p {    
+  p {
     padding: 0px;
     padding-bottom: 5px;
     margin: 0px;
@@ -100,7 +100,7 @@ footer {
 
 ol.as-sortable-unselectable, ul.as-sortable-unselectable {
   min-height: 30px;
-  
+
 }
 
 .li-highlight-over:hover {
@@ -111,9 +111,9 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
 
 
 .sortable-li {
-  border: 1px solid #ccc; 
+  border: 1px solid #ccc;
   border-radius: 3px;
-  line-height: 18px; 
+  line-height: 18px;
   padding: 5px;
   margin: 2px;
 }
@@ -123,6 +123,7 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
   top: 60px;
   right: 10px;
   text-align: right;
+  z-index: 100000
 }
 
 
@@ -136,8 +137,8 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
   top: 60%;
   left: 0px;
   overflow-y: scroll;
- 
- 
+
+
   h1,h2,h3 {
     opacity: 1.0;
     /*white-space: nowrap;
@@ -148,27 +149,27 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
     font-size: 18px;
     line-height: 36px;
   }
-  
+
   .clickable-container {
     width: 90%;
     padding-top: 18px;
     padding-bottom: 18px;
-    
+
     &:hover {
       cursor: pointer;
       color: $main-color;
-      h4 { 
-      
+      h4 {
+
       }
     };
-    
+
   }
-  
+
   .routes-title {
     text-transform: uppercase;
    background-color: #DDDDDD;
    color: #5C5C5C;
-   font-size: 10px; 
+   font-size: 10px;
    padding: 5px;
    margin: 0px;
   }
@@ -176,8 +177,8 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
     margin: 0px;
     padding: 0px;
     list-style-type: none;
-    
-    
+
+
   }
   li.route-list-item {
    /* min-height: 60px;
@@ -186,23 +187,23 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
     padding-right: 5px;
     margin: 0px;
     border-bottom: 1px solid #ddd;
-    
-    h4 {  
+
+    h4 {
       margin:0px;
       padding: 0px;
-    }    
+    }
   }
-  
-   
+
+
   ul.trip-stops-list {
     z-index: 1002;
-    margin:0px; 
-    padding:0px; 
+    margin:0px;
+    padding:0px;
     list-style-type: none;
-    
+
     li {
-       margin:0px; 
-       padding-left: 0px; 
+       margin:0px;
+       padding-left: 0px;
        font-size: 14px;
        white-space: nowrap;
        overflow: hidden;
@@ -226,13 +227,13 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
          background-color: $main-color;
        }
     }
-    
+
   }
-  
+
   .route-list-item:hover {
     background-color: white;
   };
-  
+
   h3 {
     color: $main-color;
     padding: 5px;
@@ -241,7 +242,7 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
     margin-top: 0px;
     margin-bottom: 0px;
   }
-   
+
 } //stop-detail
 
 .alert {
@@ -257,12 +258,12 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
 }
 
 @media screen and (min-width: 768px) {
-  
+
   .leaflet-control-attribution {
     margin-bottom: 42px !important;
   }
-  
-  
+
+
   #stop-detail {
     top: 50px;
     height: 100%;
@@ -270,23 +271,23 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
     min-height: 100px;
     height: 100%;
     overflow-y: scroll;
-    
+
   }
-  
+
   footer {
     position: fixed;
-    z-index: 1000; 
+    z-index: 1000;
   }
-  
+
   .leaflet-control-attribution {
     margin-bottom: 22px !important;
   }
-  
-  
+
+
   .modal-view-size {
     height: 400px;
     overflow-y: scroll;
   }
-  
- 
+
+
 }

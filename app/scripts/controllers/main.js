@@ -34,11 +34,13 @@ angular.module('panatransWebApp')
 
   $scope.stopDetail = {};
 
+
   $scope.pdfLayersShown = 0;
   var newStop = {};
   var newStopMarker = null;
   var stopDetailPanelHighlightedStop = null;
   var highlightedStop = stop;
+  var highlightedTrip = null;
 
   // CONTROLLER METHODS
 
@@ -50,6 +52,7 @@ angular.module('panatransWebApp')
   }
 
   var setDetailPanelStop= function(stop) {
+    console.log('main::setDetailsPanelStop ' + stop.name);
     $scope.showStopDetail = true;
     $scope.loadingStopDetail = true;
 
@@ -75,13 +78,15 @@ angular.module('panatransWebApp')
     if (isHighlightedStop(stop)) {
        return;
     }
-    setDetailPanelStop(stop);
+    if ($scope.highlightedTrip == null) {
+      setDetailPanelStop(stop);
+    }
   }; // on(popupopen)
 
 
   var stopMarkerPopupClose = function(e) {
     var stop = e.popup._source._stop;
-    console.log('stopMarkerPopupClosed: ' + stop.name);
+    console.log('main::stopMarkerPopupClosed: ' + stop.name);
     if (isHighlightedStop(stop)) {
       highlightedStop = null;
     }
@@ -166,27 +171,35 @@ angular.module('panatransWebApp')
 
 
   $scope.lowlightStop = function(stop) {
-      console.log('loglight stop'  + stop.name);
+      console.log('lowlight stop'  + stop.name);
   };
 
 
   $scope.goToStop = function(stop) {
     console.log('setting stop detail to: ' + stop.name);
     highlightedStop = null;
+    $scope.lowlightTrip($scope.highlightedTrip);
     setDetailPanelStop(stop);
     $scope.map.panToStop(stop);
   };
 
   // searches for stop_sequences on the route and sets the orange icon
   //route: has trips and trips have stop_sequences
-  $scope.highlightRoute = function(route) {
-
+  $scope.highlightTrip = function(trip) {
+    console.log('main::highlightTrip' + trip.id);
+    $scope.map.addTripLine(trip);
+    $scope.map.highlightTripStops(trip);
+    $scope.highlightedTrip = trip;
   };
 
 
   // searches for stop_sequences on the route and sets the grey icon
   //route: has trips and trips have stop_sequences
-  $scope.lowlightRoute = function(route) {
+  $scope.lowlightTrip = function(trip) {
+    console.log('main::lowlightTrip' + trip.id);
+    $scope.map.removeTripLine(trip);
+    $scope.map.lowlightTripStops(trip);
+    $scope.highlightTrip = null;
   };
 
 
@@ -208,8 +221,7 @@ angular.module('panatransWebApp')
       Route.find(route.id).then(
         function(data) {
           console.log(data);
-          $scope.map.addTripLine(data.trips[0]);
-          //$scope.map.highlighTripStops();
+          $scope.highlightTrip(data.trips[0]);
           angular.forEach($scope.stopDetail.routes, function(route, key){
             if (route.id == data.id) {
               $scope.stopDetail.routes[key] = data;
@@ -224,7 +236,7 @@ angular.module('panatransWebApp')
       );
     } else {
       this.showTripDetails = false;
-      $scope.map.removeTripLine(route.trips[0]);
+      $scope.lowlightTrip($scope.highlightedTrip);
     }
     console.log('showTripDetails: ' + this.showTripDetails);
   };
