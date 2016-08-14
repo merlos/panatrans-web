@@ -262,7 +262,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
     map.stopMarkerPopupOpen = function(e) {
       var stop = e.popup._source._stop;
       console.log('panatrans-map: stopMarkerPopupOpen: OPEN ' + stop.name);
-      //map.stopMarkers[stop.id].setIcon(map.selectedMarkerIcon);
+      map.stopMarkers[stop.id].setIcon(map.selectedMarkerIcon);
       //map.panToStop(stop);
     };
 
@@ -270,7 +270,11 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
     map.stopMarkerPopupClose = function(e) {
       var stop = e.popup._source._stop;
       console.log('panatrans-map: stopMarkerPopupClose: CLOSE ' + stop.name);
-
+      if (map.highlightedStopIds[stop.id]) {
+        map.stopMarkers[stop.id].setIcon(map.highlightedMarkerIcon);
+      } else {
+        map.stopMarkers[stop.id].setIcon(map.defaultMarkerIcon);
+      }
     };
 
     // If the map is too far away, it hides all markers, avoids performance issues
@@ -296,7 +300,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
 
     //  config a stop marker, but does not add it as map layer
     //  stop = stop object
-    //  template optional (angular html template to set as popup)
+    //  template optional (angular html template to set as
     map.createStopMarker = function(stop, template) {
       var marker = new StopMarker([stop.lat, stop.lon], {
         icon: map.defaultMarkerIcon,
@@ -436,7 +440,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       map.highlightTripStops = function(trip) {
         angular.forEach(trip.stopSequences, function(stopSequence) {
           var stop = stopSequence.stop
-          map.highlightedStopIds[stop.id] = false;
+          map.highlightedStopIds[stop.id] = true;
           map.stopMarkers[stop.id].setIcon(map.highlightedMarkerIcon);
           map.showMarkerForStop(stop);
         });

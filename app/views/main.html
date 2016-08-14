@@ -1,11 +1,11 @@
 <div class="fill-overflow" id="map-container">
-  <div class="map" id="map"></div> 
+  <div class="map" id="map"></div>
 </div>
 <toast></toast>
 <div class="right-btn-group">
-    <button class="btn btn-xs btn-danger" ng-show="pdfLayersShown > 0" ng-click="hideAllPdfLayers()" title="Ocultar PDFs"><i class="fa fa-eye-slash"></i> PDFs</button>
-     <button class="btn btn-xs btn-primary" ng-click="openNewStopModal()" title="añadir una parada nueva">+ <i class="fa fa-bus"></i></button>  
-    <button class="btn btn-xs btn-default"  ng-click="toggleFollowUser()" title="Seguir mi posición"><i class="fa fa-location-arrow"></i></button>
+    <!-- <button class="btn btn-xs btn-danger" ng-show="pdfLayersShown > 0" ng-click="hideAllPdfLayers()" title="Ocultar PDFs"><i class="fa fa-eye-slash"></i> PDFs</button>
+     <button class="btn btn-xs btn-primary" ng-click="openNewStopModal()" title="añadir una parada nueva">+ <i class="fa fa-bus"></i></button> -->
+    <button class="btn btn-xs btn-default"  ng-click="toggleFollowUser()" title="Ir a mi posición"><i class="fa fa-location-arrow"></i></button>
 </div>
  <!-- dropdown menu example -->
   <!--    <div class="btn-group" dropdown is-open="status.isopen" style="position: absolute; top: 60px; right: 20px">
@@ -18,37 +18,37 @@
         <li><a href="" ng-click="openNewRouteModal()"><i class="fa fa-road"></i> Ruta</a></li>
       </ul>
     </div>
---> 
+-->
 
-  
+
 <div ng-controller="MainCtrl">
   <!-- Stop Detail Panel -->
   <div ng-show="showStopDetail" id="stop-detail">
     <a href="" ng-click="closeStopDetail()" class="pull-right" style="padding:5px;color: grey"><i class="fa fa-close"></i></a>
     <div class="loading-stop-detail" ng-show="loadingStopDetail">
-      
-      <h1 class="text-center"><i class="fa fa-bus fa-spin"></i></h1> 
+
+      <h1 class="text-center"><i class="fa fa-bus fa-spin"></i></h1>
       <p class="text-center">Obteniendo información de rutas...</p>
     </div>
     <div class="stop-detail-container" ng-hide="loadingStopDetail">
       <h3 title="{{stopDetail.name}}"><i class="fa fa-bus"></i> {{stopDetail.name | uppercase}}</h3>
       <p class="routes-title">
         <i class="fa fa-road"></i> Rutas de esta parada
-        <a href="" ng-click="openEditStopModal(stopDetail.id)" class="pull-right"> <i class="fa fa-pencil" title="Editar las rutas que pasan por esta parada"></i> Editar parada</a>
+        <!-- <a href="" ng-click="openEditStopModal(stopDetail.id)" class="pull-right"> <i class="fa fa-pencil" title="Editar las rutas que pasan por esta parada"></i> Editar parada</a> -->
       </p>
-    
+
       <ul class="route-list">
         <li ng-show="!stopDetail.routes.length" style="padding-left: 5px">
           <p>No sabemos qué rutas pasan por esta parada</p>
           <p>¡Ayúdanos!</p>
           <button class="btn btn-default btn-xs" ng-click="openEditStopModal(stopDetail.id)" title="Modificar las Rutas que pasan por esta parada"><i class="fa fa-pencil"></i> Editar parada</a>
           </li>
-          <li class="route-list-item" 
-          ng-repeat="route in stopDetail.routes track by route.id" 
+          <li class="route-list-item"
+          ng-repeat="route in stopDetail.routes track by route.id"
           ng-if="route.trips.length > 0"
           ng-mouseover="highlightRoute(route);hoverIn()"
           ng-mouseleave="lowlightRoute(route);hoverOut()">
-          <div  class="pull-right" ng-show="hoverEdit"> 
+          <!-- <div  class="pull-right" ng-show="hoverEdit">
             <span class="dropdown" dropdown on-toggle="toggled(open)">
                   <a href class="dropdown-toggle" dropdown-toggle style="margin-right: 5px;margin-top: 5px">
                     <i class="fa fa-caret-square-o-down"></i>
@@ -70,39 +70,40 @@
 
                   </ul>
                 </span>
-          </div>
+          </div> -->
           <div ng-click="toggleTripDetails(route)" class="clickable-container">
-            <h4>{{route.name}}</h4> 
+            <h4>{{route.name}}</h4>
           </div>
           <div ng-show="showTripDetails">
             <div ng-show="loadingRouteDetail" class="text-center">
-              <h1 class="text-center"><i class="fa fa-bus fa-spin"></i></h1> 
+              <h1 class="text-center"><i class="fa fa-bus fa-spin"></i></h1>
               <p class="text-center">Obteniendo paradas de esta ruta...</p>
             </div>
-            <div ng-hide="loadingRouteDetail" ng-repeat="trip in route.trips" style="padding-left:10px"> 
-              <strong>dirección {{trip.headsign}}</strong> 
+            <div ng-hide="loadingRouteDetail" ng-repeat="trip in route.trips" style="padding-left:10px">
+              <strong>dirección {{trip.headsign}}</strong>
               <ul class="trip-stops-list">
-                <li ng-repeat="stopSequence in trip.stopSequences" 
+                <li ng-repeat="stopSequence in trip.stopSequences"
                 ng-if="stopSequence.sequence !== null"
+                ng-attr-id="{{ 'stop-' + stopSequence.stop.id }}"
                 ng-click="highlightStop(stops[stopSequence.stop.id])"
                 ng-mouseover="this.hoverMouse=true"
                 ng-mouseleave="this.hoverMouse=false">
                 <img ng-show="isFirstStopInTrip(stops[stopSequence.stop.id], trip) && !isCircularTrip(trip)" src="images/route-first.svg"></img>
                 <img ng-show="isLastStopInTrip(stops[stopSequence.stop.id], trip) && !isCircularTrip(trip)" src="images/route-last.svg"></img>
                 <img ng-show="(isLastStopInTrip(stops[stopSequence.stop.id], trip) || isFirstStopInTrip(stops[stopSequence.stop.id],trip)) && isCircularTrip(trip)" src="images/route.svg"></img>
-                <img ng-show="!isLastStopInTrip(stops[stopSequence.stop.id], trip) && !isFirstStopInTrip(stops[stopSequence.stop.id],trip)" src="images/route.svg"></img><span ng-class="{label:(stopSequence.stop.id == stopDetail.id), 'label-warning': (stopSequence.stop.id == stopDetail.id)}">{{stops[stopSequence.stop.id].name}}</span>
+                <img ng-show="!isLastStopInTrip(stops[stopSequence.stop.id], trip) && !isFirstStopInTrip(stops[stopSequence.stop.id],trip)" src="images/route.svg"></img><span ng-class="{label:(stopSequence.stop.id == highlightedStop.id), 'label-warning': (stopSequence.stop.id == highlightedStop.id)}">{{stops[stopSequence.stop.id].name}}</span>
                 <a href="" class="" ng-click="goToStop(stops[stopSequence.stop.id])" ng-show="this.hoverMouse" title="Ver rutas de esta parada"><span class="fa-stack fa-lg">
   <i class="fa fa-circle fa-stack-2x"></i>
   <i class="fa fa-road fa-stack-1x fa-inverse"></i>
 </span></a>
             </li>
             <!-- only stops with unknown location -->
-            <li ng-repeat="stopSequence in trip.stopSequences" 
+            <li ng-repeat="stopSequence in trip.stopSequences"
             ng-click="highlightStop(stops[stopSequence.stop.id])"
             ng-if="stopSequence.sequence === null" title="Parada cuya posición en el trayecto es desconocida">
              <i class="fa fa-exclamation-triangle"></i> {{stops[stopSequence.stop.id].name}}
             </li>
-          </ul> 
+          </ul>
           </div><!-- trip in trips  div -->
         <div>
         </li> <!-- route-list-item -->
@@ -115,20 +116,3 @@
     </div> <!-- stop detail container -->
   </div> <!-- stop detail -->
 </div> <!-- main controller -->
-
-
-
-
-
-
-      
-      
-      
-
-
-
-
-      
-      
-      
-      
