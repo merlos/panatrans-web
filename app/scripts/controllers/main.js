@@ -116,22 +116,24 @@ angular.module('panatransWebApp')
       console.log('Stop.all.success');
       $scope.stops = data;
       angular.forEach($scope.stops, function(stop) {
-        var marker = $scope.map.createStopMarker(stop);
+        var template = '<a href ng-click="goToStop(stop)">{{stop.name}} <i class="fa fa-external-link-square"></i></a>';
+        var marker = $scope.map.createStopMarker(stop, template);
         marker.on('popupopen', stopMarkerPopupOpen);
         marker.on('popupclose',stopMarkerPopupClose);
       });
       //$scope.map.alwaysShowStations(true);
       $scope.map.showMarkersInsideBounds();
-
+      ngToast.dismiss(loadingToast);
       // PROCESS STOP ARGUMENTS
       //console.log('routeParams');
       //console.log($routeParams);
       if ($routeParams.stopId !== undefined ) {
-        $scope.map.panToStop($scope.stops[$routeParams.stopId]);
+        var paramStop = $scope.stops[$routeParams.stopId];
+        $scope.map.showMarkerForStop(paramStop);
+        $scope.highlightStop(paramStop);
       } else {
         $scope.map.followUser = true;
       }
-      ngToast.dismiss(loadingToast);
     }, function(error) {
       ngToast.dismiss(loadingToast);
       ngToast.create({
@@ -177,7 +179,6 @@ angular.module('panatransWebApp')
     $scope.highlightedStop = stop;
     $scope.map.panToStop(stop);
     $scope.map.openStopPopup(stop);
-    var scrolled = 3000;
     $('stop-' + stop.id).animate({
       scrollTop:  scrolled});
   };
@@ -193,7 +194,7 @@ angular.module('panatransWebApp')
     $scope.highlightedStop = null;
     $scope.lowlightTrip($scope.highlightedTrip);
     setDetailPanelStop(stop);
-    $scope.map.panToStop(stop);
+    //$scope.map.panToStop(stop);
   };
 
   // searches for stop_sequences on the route and sets the orange icon

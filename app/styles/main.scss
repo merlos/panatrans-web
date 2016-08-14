@@ -138,6 +138,16 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
   left: 0px;
   overflow-y: scroll;
 
+  .close-link {
+    z-index: 1100;
+    color: #808080;
+    position: fixed;
+    right: 0px;
+    img {
+      width: 30px;
+      height: 30px;
+    }
+  }
 
   h1,h2,h3 {
     opacity: 1.0;
@@ -146,15 +156,20 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
     text-overflow: ellipsis;*/
   }
   h3 {
-    font-size: 18px;
-    line-height: 36px;
+    font-size: 16px;
+    padding:5px;
+    background-color: white;
+    width: 100%;
+    border-bottom: 1px solid #808080;
+    color: $main-color;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    position: fixed;
   }
-
   .clickable-container {
     width: 90%;
     padding-top: 18px;
     padding-bottom: 18px;
-
     &:hover {
       cursor: pointer;
       color: $main-color;
@@ -172,9 +187,11 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
    font-size: 10px;
    padding: 5px;
    margin: 0px;
+   padding-top: 30px;
   }
+
   ul.route-list {
-    margin: 0px;
+    margin:0px;
     padding: 0px;
     list-style-type: none;
 
@@ -234,16 +251,21 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
     background-color: white;
   };
 
-  h3 {
-    color: $main-color;
-    padding: 5px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    margin-top: 0px;
-    margin-bottom: 0px;
-  }
+
 
 } //stop-detail
+
+.search-results-list {
+  list-style-type: none;
+  padding-left: 0px;
+  padding-right: 0px;
+  li {
+    line-height: 36px;
+    list-style-type: none;
+    border-bottom: 1px solid #CCC;
+  }
+
+}
 
 .alert {
   margin-top: 5px;
@@ -271,7 +293,19 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
     min-height: 100px;
     height: 100%;
     overflow-y: scroll;
-
+    .h3 {
+      font-size: 18px;
+      line-height: 36px;
+      padding: 5px;
+    }
+    .close-link {
+      position: fixed;
+      top: 50px;
+      left: 260px;
+    }
+    .routes-title {
+      margin-top: 44px;
+    }
   }
 
   footer {

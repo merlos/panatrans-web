@@ -121,46 +121,57 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       zoomControl: false
     });
 
+    var BusIcon = L.Icon.extend({
+      options: {
+        shadowUrl: 'images/bus-shadow.svg',
+        iconSize:     [23, 49],
+        shadowSize:   [37, 23],
+        iconAnchor:   [13, 47],
+        shadowAnchor: [1, 23],
+        popupAnchor:  [-0, -46]
+      }
+    });
     // Types of markers (requires AwesomeMarkers)
     map.iconset = {
-      default: L.AwesomeMarkers.icon({ // bus stop default
-        icon: 'bus',
-        prefix: 'fa',
-        markerColor: 'blue'
-      }),
+      default: new BusIcon({iconUrl: 'images/bus-default.svg'}),
+      selected: new BusIcon({iconUrl: 'images/bus-selected.svg'}),
+      highlighted: new BusIcon({iconUrl: 'images/bus-highlighted.svg'}),
+      edit: new BusIcon({iconUrl: 'images/bus-edit.svg'}),
+      user: new L.icon({iconUrl: 'images/user.svg',iconSize: [14,39], iconAnchor: [7,39], popupAnchor: [0,-36]}),
+      //kept old icons, there are parts not updated
       orange: L.AwesomeMarkers.icon({
-        icon: 'bus',
-        prefix: 'fa',
-        markerColor: 'orange'
-      }),
-      orangeSpin: L.AwesomeMarkers.icon({
-        icon: 'bus',
-        prefix: 'fa',
-        markerColor: 'orange',
-        spin: true
-      }),
-      pink: L.AwesomeMarkers.icon({
-        icon: 'bus',
-        prefix: 'fa',
-        markerColor: 'pink'
-      }),
-      red: L.AwesomeMarkers.icon({
-        icon: 'bus',
-        prefix: 'fa',
-        markerColor: 'red'
-      }),
-      redSpin: L.AwesomeMarkers.icon({
-        icon: 'bus',
-        prefix: 'fa',
-        markerColor: 'red',
-        spin: true
-      }),
-      userLocation: L.AwesomeMarkers.icon({
-        icon: 'user',
-        prefix: 'fa',
-        markerColor: 'green',
-        spin: false
-      })
+          icon: 'bus',
+          prefix: 'fa',
+          markerColor: 'orange'
+        }),
+        orangeSpin: L.AwesomeMarkers.icon({
+          icon: 'bus',
+          prefix: 'fa',
+          markerColor: 'orange',
+          spin: true
+        }),
+        pink: L.AwesomeMarkers.icon({
+          icon: 'bus',
+          prefix: 'fa',
+          markerColor: 'pink'
+        }),
+        red: L.AwesomeMarkers.icon({
+          icon: 'bus',
+          prefix: 'fa',
+          markerColor: 'red'
+        }),
+        redSpin: L.AwesomeMarkers.icon({
+          icon: 'bus',
+          prefix: 'fa',
+          markerColor: 'red',
+          spin: true
+        }),
+        userLocation: L.AwesomeMarkers.icon({
+          icon: 'user',
+          prefix: 'fa',
+          markerColor: 'green',
+          spin: false
+        })
     };
 
     //////////////////////////////////////////// MAP VARIABLES
@@ -190,8 +201,8 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
     map.tripLineColor = 'red';
 
     //Configuration of markers depending on its status
-    map.selectedMarkerIcon = map.iconset.red;
-    map.highlightedMarkerIcon = map.iconset.orange;
+    map.selectedMarkerIcon = map.iconset.selected;
+    map.highlightedMarkerIcon = map.iconset.highlighted;
     map.defaultMarkerIcon = map.iconset.default;
 
     // If the map is farther than this => the map does not show markers
@@ -589,7 +600,7 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         }
         var radius = e.accuracy / 2;
         if (map.userLocationMarker === null) {  // add to map
-          map.userLocationMarker = L.marker(e.latlng, {icon: map.iconset.userLocation});
+          map.userLocationMarker = L.marker(e.latlng, {icon: map.iconset.user});
           map.userLocationMarker.addTo(map);
           map.userLocationCircle = L.circle(e.latlng, radius);
           map.userLocationCircle.addTo(map);

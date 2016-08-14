@@ -1,34 +1,23 @@
 <toast className="center"></toast>
-<div ng-controller="RoutesCtrl" class="container with-navbar-margin col-sm-8 col-sm-offset-2">
+<div ng-controller="StopsCtrl"
+  class="container with-navbar-margin col-sm-8 col-sm-offset-2">
 
-
-<!--  <button class="btn btn-sm btn-primary pull-right" style="margin-top: 10px" ng-click="openEditRouteModal(null)">Añadir Parada</button>
--->
-
-<h1><i class="fa fa-road"></i>Paradas Metrobus</h1>
-<p> &nbsp;</p>
-
+<label style="padding-top: 10px;" for="">Buscador de paradas<label>
   <div class="input-group" >
-    <span class="input-group-addon" id="sizing-addon1"><i class="fa fa-search"></i></span>
-    <input class="form-control" type="text" ng-model="searchText" placeholder="Ej: Albrook">
+    <span class="input-group-addon" id="sizing-addon1"><i class="fa fa-bus"></i></span>
+    <input class="form-control" type="text" ng-model="searchText" placeholder="Ejemplo: Albrook">
   </div>
-
-<p> &nbsp;</p>
-
   <div ng-show="loading">
     <p class="text-center"><i class="fa fa-circle-o-notch fa-spin"></i> Obteniendo paradas...</p>
   </div>
-  
-<ul class="list-unstyled">
-<li ng-repeat="stop in stops | toArray | filter : searchText : ignoreAccentsComparator">
-    <strong><a href="#/parada/{{stop.id}}/{{ stop.name |slugify}}.html">{{stop.name}}</a></strong> 
-    <span class="pull-right">
-      <a ng-click="openEditStopModal(stop)" href=""><i class="fa fa-edit"></i></a>  
+
+  <ul class="search-results-list">
+    <li ng-repeat="stop in stops | toArray | filter : searchText : ignoreAccentsComparator">
+      <strong><a href="#/parada/{{stop.id}}/{{ stop.name |slugify}}.html">{{stop.name}}</a></strong>
+      <!-- <span class="pull-right">
+      <a ng-click="openEditStopModal(stop)" href=""><i class="fa fa-edit"></i></a>
     </span>
-    
-       <hr>
+  -->
 </li>
 </ul>
 </div>
-
-  
