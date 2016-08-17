@@ -331,18 +331,14 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       // centers map in stop lat and lon.
       map.panToStop = function(stop) {
         map.autoPan = false;
-        // if stop is not displayed because we zoom is to small, then ZOOM IN
-        if(map.getZoom() <= map.minZoomWithMarkers){
-          map.setZoom(map.minZoomWithMarkers);
-        }
         map.panTo(map.stopMarkers[stop.id].getLatLng(), {animate:true});
-        /*setTimeout(function () {
-          console.log('Centering Map on Stop: ' + stop.name);
-          map.openStopPopup(stop);
-        }, 400);*/
-
+        setTimeout(function () {
+          if(map.getZoom() <= map.minZoomWithMarkers){
+            map.setZoom(map.minZoomWithMarkers);
+          }
+        }, 400);
+        // if stop is not displayed because we zoom is to small, then ZOOM IN
       };
-
 
       map.openStopPopup = function(stop) {
         console.log('requesting open popup of :' +  stop.name);
@@ -438,10 +434,15 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
       };
 
       map.addTripLine = function(trip) {
-        var tripLine = new TripPolyline(trip, {color: map.tripLineColor});
+        var tripLine = new TripPolyline(trip, {color: map.tripLineColor, className: 'panatrans-map-trip'});
         tripLine.addTo(map);
         map.tripLines[trip.id] = tripLine;
       }
+      map.zoomToTrip = function(trip) {
+        console.log('panatrans-map::zoomToTrip ' + trip.id );
+        map.fitBounds(map.tripLines[trip.id].getBounds(), {padding: [15,15]});
+      }
+
       map.removeTripLine = function(trip) {
         if (map.tripLines[trip.id] != null) {
           map.removeLayer(map.tripLines[trip.id]);

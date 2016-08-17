@@ -50,24 +50,24 @@ angular
         controller: 'StopsCtrl',
       })
       .when('/ruta/:routeId/:slug.html', {
-        templateUrl: 'views/routes-show.html',
-        controller: 'RoutesShowCtrl'
+        templateUrl: 'views/main.html',
+        controller: 'MainCtrl'
       })
       .when('/parada/:stopId/:slug.html', {
         templateUrl: 'views/main.html',
         controller: 'MainCtrl'
       })
-      
+
       .when('/colabora', {
         templateUrl: 'views/contribute.html',
         controller: 'ContributeCtrl'
       })
-      
+
       .when('/acercade', {
         templateUrl: 'views/about.html',
         controller: 'AboutCtrl'
       })
-      
+
       .when('/licencias', {
         templateUrl: 'views/licenses.html',
         controller: 'LicensesCtrl'
@@ -76,7 +76,7 @@ angular
         redirectTo: '/'
       });
   });
-  
+
 /** ng toast config **/
 angular.module('panatransWebApp')
   .config(['ngToastProvider', function(ngToast) {
@@ -86,4 +86,3 @@ angular.module('panatransWebApp')
       maxNumber: 3
     });
   }]);
-  

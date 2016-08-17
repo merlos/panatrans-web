@@ -147,8 +147,27 @@ angular.module('panatransWebApp')
   //load all routes
   Route.all().then(
     function(data) {
+      console.log('main::Route.all().then');
       $scope.loading = false;
       $scope.routes = data;
+      if ($routeParams.routeId !== undefined ) {
+        var routeId = $routeParams.routeId;
+        var zoomToTrip = true;
+        console.log('main:Route.all() load details ' + routeId + ' ' + $scope.routes[routeId].name);
+        Route.find(routeId).then(
+          function(data) {
+            console.log(data);
+            $scope.highlightTrip(data.trips[0], zoomToTrip);
+          },
+          function(error) {
+            console.log('Route.all().then: error loading route details')
+            console.log(error);
+          }
+        );
+      } else {
+
+      }
+
     },
     function(error) {
       $scope.loading = false;
@@ -179,8 +198,6 @@ angular.module('panatransWebApp')
     $scope.highlightedStop = stop;
     $scope.map.panToStop(stop);
     $scope.map.openStopPopup(stop);
-    $('stop-' + stop.id).animate({
-      scrollTop:  scrolled});
   };
 
 
@@ -199,11 +216,14 @@ angular.module('panatransWebApp')
 
   // searches for stop_sequences on the route and sets the orange icon
   //route: has trips and trips have stop_sequences
-  $scope.highlightTrip = function(trip) {
+  $scope.highlightTrip = function(trip, zoomToTrip) {
+     var zoomToTrip = zoomToTrip || false;//once
     console.log('main::highlightTrip' + trip.id);
     $scope.map.addTripLine(trip);
     $scope.map.highlightTripStops(trip);
+    if (zoomToTrip) $scope.map.zoomToTrip(trip);
     $scope.highlightedTrip = trip;
+
   };
 
 
@@ -229,16 +249,16 @@ angular.module('panatransWebApp')
   };
 
 
-  $scope.toggleTripDetails = function(route) {
-
-    console.log('toggle Trip details for ' + route.name);
+  $scope.toggleTripDetails = function(route, zoomToRoute) {
+    var zoomToRoute = zoomToRoute || false;
+    console.log('toggle Trip details for ' + route.name + ' zoomToRoute: ' + zoomToRoute);
     if ((this.showTripDetails === false) || (this.showTripDetails === undefined)){
       this.showTripDetails = true;
       $scope.loadingRouteDetail = true;
       Route.find(route.id).then(
         function(data) {
           console.log(data);
-          $scope.highlightTrip(data.trips[0]);
+          $scope.highlightTrip(data.trips[0], zoomToRoute);
           angular.forEach($scope.stopDetail.routes, function(route, key){
             if (route.id == data.id) {
               $scope.stopDetail.routes[key] = data;
