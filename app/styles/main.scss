@@ -155,6 +155,7 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
     overflow: hidden;
     text-overflow: ellipsis;*/
   }
+
   h3 {
     font-size: 16px;
     padding:5px;
@@ -294,10 +295,8 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
     height: 100%;
     overflow-y: scroll;
 
-    .h3 {
-      font-size: 18px;
-      line-height: 36px;
-      padding: 5px;
+    h3 {
+      width: 300px;
       left: 0px;
     }
     .close-link {
@@ -327,4 +326,37 @@ ol.as-sortable-unselectable, ul.as-sortable-unselectable {
   }
 
 
+}
+
+
+
+/* Animations */
+
+
+#stop-detail {
+  &.stop-detail-anim {
+    transition: opacity ease 0.5s;
+    &.ng-show {
+      border: 1px solid blue;
+    }
+    &.ng-hide {
+      opacity: 0.0;
+    }
+  }
+}
+
+.leaflet-marker-icon,
+.leaflet-marker-shadow, .panatrans-map-trip {
+  animation: fadein 1s ease;
+
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes fadeout {
+    from { opacity: 1; }
+    to   { opacity: 0; }
 }
