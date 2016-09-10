@@ -437,17 +437,18 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
         var tripLine = new TripPolyline(trip, {color: map.tripLineColor, className: 'panatrans-map-trip'});
         tripLine.addTo(map);
         map.tripLines[trip.id] = tripLine;
-      }
+      };
+
       map.zoomToTrip = function(trip) {
         console.log('panatrans-map::zoomToTrip ' + trip.id );
         map.fitBounds(map.tripLines[trip.id].getBounds(), {padding: [15,15]});
-      }
+      };
 
       map.removeTripLine = function(trip) {
-        if (map.tripLines[trip.id] != null) {
+        if (map.tripLines[trip.id] !== null) {
           map.removeLayer(map.tripLines[trip.id]);
         }
-      }
+      };
 
       map.highlightTripStops = function(trip) {
         angular.forEach(trip.stopSequences, function(stopSequence) {
@@ -456,17 +457,19 @@ angular.module('panatransWebApp').factory('PanatransMap',['$compile', '$q', '$ht
           map.stopMarkers[stop.id].setIcon(map.highlightedMarkerIcon);
           map.showMarkerForStop(stop);
         });
-      }
+      };
 
       map.lowlightTripStops = function(trip) {
         angular.forEach(trip.stopSequences, function(stopSequence) {
           var stopId = stopSequence.stop.id
           delete map.highlightedStopIds[stopId];
-          if (map.stopMarkers[stopId]) {
             map.stopMarkers[stopId].setIcon(map.defaultMarkerIcon);
-          }
         });
-      }
+        //hide markers if far
+        if (this.getZoom() < map.minZoomWithMarkers) {
+          map.hideAllMarkersButExceptions();
+        }
+      };
 
       ////////////////////////////////////////// PDF Layers
 

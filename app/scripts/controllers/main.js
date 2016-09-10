@@ -219,6 +219,8 @@ angular.module('panatransWebApp')
   $scope.highlightTrip = function(trip, zoomToTrip) {
      var zoomToTrip = zoomToTrip || false;//once
     console.log('main::highlightTrip' + trip.id);
+    //first low light current trip
+    $scope.lowlightTrip($scope.highlightedTrip);
     $scope.map.addTripLine(trip);
     $scope.map.highlightTripStops(trip);
     if (zoomToTrip) $scope.map.zoomToTrip(trip);
