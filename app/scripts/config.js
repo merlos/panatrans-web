@@ -1,6 +1,14 @@
 /* exported EXPORTED_LIB */
 var _CONFIG = {};
 
+// Allow static API?
+// panatrans-api can be dumped to files that can be consumed by panatrans-web
+// steps to do that
+// 1) install panatrans-api and load the dataset
+// 2) run "bundle exec rake dataset:json_dump"
+//    This will dump the jsons in ./tmp/v1
+// 3) copy the v1 directory in app/v1
+// set staticApi to true
 _CONFIG.staticApi = true;
 
 if (_CONFIG.staticApi) {
