@@ -1,0 +1,1 @@
+{"status":"success","data":{"id":302,"name":"Corozal-R","lat":"8.984387","lon":"-79.573468","routes":[{"id":10,"url":null,"name":"Albrook-Forestal-Chilibre","trips":[{"id":10,"headsign":"Forestal-Chilibre","direction":null,"route_id":10}]},{"id":338,"url":null,"name":"Albrook-Miraflores","trips":[{"id":338,"headsign":"Albrook-Miraflores","direction":null,"route_id":338}]}]}}

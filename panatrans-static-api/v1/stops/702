@@ -1,0 +1,1 @@
+{"status":"success","data":{"id":702,"name":"Miraflores-I","lat":"9.003537","lon":"-79.589301","routes":[{"id":338,"url":null,"name":"Albrook-Miraflores","trips":[{"id":338,"headsign":"Albrook-Miraflores","direction":null,"route_id":338}]},{"id":9,"url":null,"name":"Chilibre-I-Forestal-Albrook","trips":[{"id":9,"headsign":"Forestal-Albrook","direction":null,"route_id":9}]}]}}
