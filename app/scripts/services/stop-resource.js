@@ -12,6 +12,7 @@ Object.hasItems = function(obj) {
 
 
 function Stop($q, $http,  railsSerializer, railsResourceFactory) {
+
   var config = {
     url: _CONFIG.serverUrl + '/v1/stops',
     name: 'stop' ,
@@ -21,6 +22,11 @@ function Stop($q, $http,  railsSerializer, railsResourceFactory) {
       this.resource('routes', 'Route');
     })
   };
+
+  var resourceForOne = railsResourceFactory(config);
+  if (_CONFIG.staticApi) {
+    config.url = config.url + '.json'; //if we are using a static api we need to add .json to fetch all
+  }
   var resource = railsResourceFactory(config);
 
   resource.stops = {};
@@ -56,7 +62,7 @@ function Stop($q, $http,  railsSerializer, railsResourceFactory) {
        deferred.resolve(resource.stops[stopId]);
     } else {
       console.log('Stops:find: requesting stop detail');
-      resource.get(stopId, {with_stop_sequences: false}).then(
+      resourceForOne.get(stopId, {with_stop_sequences: false}).then(
         function(response) {
           resource.stops[stopId] = response.data;
           deferred.resolve(response.data);

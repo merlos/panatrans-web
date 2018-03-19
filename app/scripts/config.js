@@ -1,7 +1,13 @@
 /* exported EXPORTED_LIB */
 var _CONFIG = {};
 
-_CONFIG.serverUrl = 'http://localhost:3000';
+_CONFIG.staticApi = true;
+
+if (_CONFIG.staticApi) {
+  _CONFIG.serverUrl = 'http://localhost:9000';
+} else {
+  _CONFIG.serverUrl = 'http://localhost:3000';
+}
 //_CONFIG.serverUrl = 'http://test-panatrans.herokuapp.com';
 //var SERVER_URL = ;
 
@@ -22,9 +28,8 @@ _CONFIG.tilelayerAttribution = '&copy; <a href="http://www.openstreetmap.org/cop
 //var TILELATER_ATTRIBUTION = '&copy;<a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>,© <a href="http://mapbox.com">Mapbox</a>'
 
 // To test delays
-// the API supports the option in any call &with_dealay=true. 
+// the API supports the option in any call &with_dealay=true.
 // DELAY string is added to some requests.
 //  Useful to test how the UI works when server is slow
 _CONFIG.delay = '';
-//_CONFIG.delay = '&with_delay=true'; 
-
+//_CONFIG.delay = '&with_delay=true';

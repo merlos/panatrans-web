@@ -11,10 +11,19 @@ Object.hasItems = function(obj) {
 };
 
 function Route($q, $http, railsResourceFactory) {
-  var resource = railsResourceFactory({
+
+  var config = {
     url: _CONFIG.serverUrl + '/v1/routes',
     name: 'route'
-  });
+  }
+
+  var resourceForOne = railsResourceFactory(config); //to request one single item
+  if (_CONFIG.staticApi) {
+    config.url = config.url + '.json'
+  }
+  //if the server is static we will request routes.json and not routes
+  var resource = railsResourceFactory(config);
+
   console.log('Init Route');
   resource.routes = {};
 
@@ -49,7 +58,7 @@ function Route($q, $http, railsResourceFactory) {
        deferred.resolve(resource.routes[routeId]);
     } else {
       console.log('Routes:find: requesting route detail to server');
-      resource.get(routeId).then(
+      resourceForOne.get(routeId).then(
         function(response) {
           resource.routes[routeId] = response.data;
           deferred.resolve(response.data);
